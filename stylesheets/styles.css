@@ -9,24 +9,10 @@ html {
   background: #6c7989 linear-gradient(#6c7989, #434b55) fixed;
 }
 
-@font-face {
-    font-family: "OSbold";
-    src: url("fonts/OpenSans-Bold.ttf") format("truetype");
-/*    src: url("fonts/LinLibertine_aBS.ttf") format("truetype");*/
-/*    src: url("fonts/Minecraftia.ttf") format("truetype");*/
-}
-@font-face {
-    font-family: "OSlight";
-    src: url("fonts/OpenSans-Light.ttf") format("truetype");
-/*    src: url("fonts/LinLibertine_R.ttf") format("truetype");*/
-/*    src: url("fonts/Minecraftia.ttf") format("truetype");*/
-}
-
 body {
   padding: 50px 0;
   margin: 0;
-/*  font: 14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;*/
-  font: 14px/1.5 "OSlight", sans;
+  font: 14px/1.5 Helvetica, Arial, sans-serif;
   color: #555;
   font-weight: 500;
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAeCAYAAABNChwpAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAAAUdEVYdENyZWF0aW9uIFRpbWUAMy82LzEygrTcTAAAAFRJREFUSIljfPDggZRf5RIGGNjUHsNATz6jXmSL1Kb2GLiAX+USBnrymRgGGDCORgFmoNAXjEbBaBSMRsFoFIxGwWgUjEbBaBSMRsFoFIxGwWgUAABYNujumib3wAAAAABJRU5ErkJggg==') fixed;
@@ -82,10 +68,19 @@ header {
   padding: 15px 20px;
   border-bottom: 1px solid #B2D2E1;
 }
+.inset-text {
+    /* Shadows are visible under slightly transparent text color */
+    color: rgba(10,60,150, 0.8);
+    text-shadow: 1px 4px 6px #def, 0 0 0 #000, 1px 4px 6px #def;
+}
+/* Don't show shadows when selecting text */
+::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
+::selection { background: #5af; color: #fff; text-shadow: none; }
+
 header h1 {
   margin: 0;
   padding: 0;
-  font-size: 42px;
+  font-size: 50px;
   line-height: 1.2;
   color: #069;
   text-shadow: rgba(255, 255, 255, 0.9) 0 1px 0;
