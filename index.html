@@ -239,7 +239,7 @@ end
 </tbody>
 </table>
 
-<p><strong>Example</strong>: using LogReg and L1Norm defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
+<p><strong>Example: sparse logistic regression.</strong> Using LogReg and L1Norm defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
 
 <p align="center"><img src="figures/log_reg.png" alt="Sparse logistic regression"></p>
 
@@ -350,6 +350,31 @@ the primal iterates (and the corresponding objective values) given a dual variab
 </tr>
 </tbody>
 </table>
+
+<p><strong>Example: support vector machines.</strong> SVMs can be cast as the following convex optimization problem</p>
+<p align="center"><img src="figures/svm.png"/></p>
+<p>Therefore we have in problem (1)</p>
+<p align="center"><img src="figures/svm_terms.png"/></p>
+<p>Function <em>g</em> is called <em>hinge loss</em>, and the <em>x</em> and <em>z</em> update steps can be formulated as</p>
+<p align="center"><img src="figures/svm_updates.png"/></p>
+<p>The proximal mapping of <em>g</em> can be computed componentwise, its i-th component being</p>
+<p align="center"><img src="figures/hinge_prox.png"/></p>
+<p>Therefore the problem can be solved with <code>miname</code> with</p>
+<pre><code>function [prox, g] = Hinge (x, gam, b)
+    bx = b.*x ; ind = bx &lt; 1;
+    prox( ind,1) = b( ind).*min(bx(ind)+gam, 1);
+    prox(~ind,1) = x(~ind);
+    g = sum(max(0, 1-b.*prox));
+end
+</code></pre>
+
+<pre><code>prob.x1step = @ (w) w/lam ;
+prob.zstep = @ (y, gam) Hinge(y/gam, 1/gam, b);
+prob.A1 = A;
+prob.B = -1;
+prob.c = zeros(m, 1);
+out = miname(prob);
+</code></pre>
 
 <h2>
 <a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
