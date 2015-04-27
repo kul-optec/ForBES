@@ -47,7 +47,7 @@ applied to a Lasso problem with 3K observations and 500K features, for a total o
 <img src="figures/lasso_random_3e3_5e5_lambda_3e-1_noborder.png" width="640" height="404">
 </p>
 
-<h2>
+<h2 class="inset-text">
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>Simply click on one of the links on top of the page, and either clone the GitHub repository or uncompress the
@@ -57,7 +57,7 @@ the directory of ForBES. Compile all the <em>mex</em>-files required by simply h
 <pre><code>&gt; make
 </code></pre>
 
-<h2>
+<h2 class="inset-text">
 <a id="how-to-use-it" class="anchor" href="#how-to-use-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use it</h2>
 
 <p>ForBES consists mainly of two MATLAB routines, <code>minfbe</code> and <code>miname</code>.
@@ -79,7 +79,7 @@ these structures. Output <code>out</code> will contain the results of the optimi
 &gt; help miname
 </code></pre>
 
-<h2>
+<h2 class="inset-text">
 <a id="minfbe-convex-composite-problems" class="anchor" href="#minfbe-convex-composite-problems" aria-hidden="true"><span class="octicon octicon-link"></span></a>minfbe (convex composite problems)</h2>
 
 <p>We consider here problems in the form</p>
@@ -99,12 +99,24 @@ $$ f_1(x) = \tfrac{1}{2}\langle Qx, x\rangle + \langle q, x\rangle $$
 
 <p>The generic nonlinear term $f_2$ is described by an appropriate function returning its value and gradient
 (in this exact order) at any specified point.
-The gradient may be computed only when the corresponding output argument is requested.
-For example, the logistic function</p>
+The gradient may be computed only when the corresponding output argument is requested.</p>
+
+<p>The nonsmooth term $g$ is described by means of its correspondent proximal mapping, given by</p>
+
+$$\begin{align*}
+z &= \mathrm{prox}_{\gamma g}(x) = \mathrm{argmin}_w\left\{ g(w) + \tfrac{1}{2\gamma}\|w-x\|^2\right\} \\
+v &= g(z)
+\end{align*}$$
+
+<p><strong>Example: sparse logistic regression.</strong> Consider the following problem
+
+$$ \mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1 $$
+
+<p>The smooth term in this case is the logistic function</p>
 
 $$ f_2(x) = \sum_{i=1}^m \log(1+\exp(-x_i)) $$
 
-<p>can be defined in MATLAB as follows</p>
+<p>that can be defined in MATLAB (with its gradient) as follows</p>
 
 <pre><code>function [fz, gradfz] = LogReg(z)
     pz = 1./(1+exp(-z));
@@ -115,13 +127,12 @@ $$ f_2(x) = \sum_{i=1}^m \log(1+\exp(-x_i)) $$
 end
 </code></pre>
 
-<p>The nonsmooth term $g(x)$ is defined through its proximal mapping and the value of
-$g$ at the proximal point:</p>
+<p>The proximal mapping of the nonsmooth term $g(x) = r\|x\|_1$ (the $L^1$-norm) is given by the soft-thresholding
+operator, that can be computed componentwise as</p>
 
-$$ z = \mathrm{prox}_{\gamma g}(x) = \mathrm{argmin}_w\left\{ g(w) + \tfrac{1}{2\gamma}\|w-x\|^2\right\} $$
+$$ \left[\mathrm{prox}_{\gamma g}(x)\right]_i = \mathrm{sign}(x_i)\cdot\max\{0, |x_i|-\gamma r\}$$
 
-<p>For example, if $g(x) = r\|x\|_1$ (the $L^1$-norm) then it is described in MATLAB as the following soft-thresholding
-procedure:</p>
+<p>and implemented in MATLAB with the following function</p>
 
 <pre><code>function [z, v] = L1Norm(x, gam, r)
     uz = max(0, abs(x)-gam*r);
@@ -132,7 +143,20 @@ procedure:</p>
 end
 </code></pre>
 
-<p>In the following table we summarize the attributes that may be used to define problem $(1)$. Notice that <strong>most of them are optional</strong>.</p>
+<p>Therefore, to solve the problem we will need to execute</p>
+
+<pre><code>prob.C = diag(sparse(b))*A;
+prob.f2 = @(x) LogReg(x);
+prob.g = @(x, gam) L1Norm(x,gam,reg);
+prob.x0 = zeros(n,1);
+out = minfbe(prob);
+</code></pre>
+
+<p>The <code>out</code> structure will contain the results of the optimization process, including the computed solution
+and some additional information like the progress of the algorithm during the iterations.</p>
+
+<p>In the following table we summarize all the attributes that may be used to define problem $(1)$.
+Notice that <strong>most of them are optional</strong>.</p>
 
 <table>
 <thead>
@@ -189,7 +213,7 @@ end
 <td>function</td>
 <td>no</td>
 <td>the zero function</td>
-<td>A procedure returning the value of $f_2$ (1st output) and $\nabla f_2$ (2nd output) at the specified point. It can optionally return $\nabla^2 f_2$ 3rd ouput.</td>
+<td>A procedure returning the value of $f_2$ (1st output) and $\nabla f_2$ (2nd output) at the specified point. It can optionally return $\nabla^2 f_2$ as 3rd ouput.</td>
 </tr>
 <tr>
 <td><code>prob.useHessian</code></td>
@@ -245,23 +269,7 @@ end
 </tbody>
 </table>
 
-<p><strong>Example: sparse logistic regression.</strong> Using <code>LogReg</code> and <code>L1Norm</code> defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
-
-$$ \mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1 $$
-
-<p>as follows:</p>
-
-<pre><code>prob.C = diag(sparse(b))*A;
-prob.f2 = @(x) LogReg(x);
-prob.g = @(x, gam) L1Norm(x,gam,reg);
-prob.x0 = zeros(n,1);
-out = minfbe(prob);
-</code></pre>
-
-<p>The <code>out</code> structure will contain the results of the optimization process, including the computed solution
-and some additional information like the progress of the algorithm during the iterations.</p>
-
-<h2>
+<h2 class="inset-text">
 <a id="miname-convex-separable-problems" class="anchor" href="#miname-convex-separable-problems" aria-hidden="true"><span class="octicon octicon-link"></span></a>miname (convex separable problems)</h2>
 
 <p>We consider now problems with linear equality constraints, of the following form:</p>
@@ -281,11 +289,43 @@ the primal iterates (and the corresponding objective values) given a dual variab
 
 $$\begin{align*}
 x_1 &= x_1(w) = \mathrm{argmin}_u \left\{f_1(u) - \langle w, u\rangle\right\} \\
-x_2 &= x_2(w) = \mathrm{argmin}_u \left\{f_2(u) - \langle w, u\rangle\right\} \\
-z &= z_\gamma(y) = \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y+Bv\|^2\right\}
+x_2 &= x_2(w) = \mathrm{argmin}_u \left\{f_2(u) - \langle w, u\rangle\right\} && \mathrm{and\ } f_2(x_2)\\
+z &= z_\gamma(y) = \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y+Bv\|^2\right\} && \mathrm{and\ } g(z)
 \end{align*}$$
 
-<p>The following table summarizes the attributes defining problem $(2)$. Again, notice that <strong>many of them are optional</strong>.</p>
+<p><strong>Example: support vector machines.</strong> SVMs can be cast as the following convex optimization problem</p>
+$$ \begin{align*}
+\mathrm{minimize}\ &\frac{\lambda}{2}\|x\|_2^2 + \sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
+\mathrm{subject\ to}\ &Ax = z
+\end{align*}$$
+<p>Therefore we have in problem $(2)$</p>
+$$ x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I$$
+<p>Function $g$ is called <em>hinge loss</em>, and the $x$ and $z$ update steps can be formulated as</p>
+$$\begin{align*}
+x(w) &= \mathrm{argmin}_u \left\{\tfrac{\lambda}{2}\|u\|_2^2 - \langle w, u\rangle\right\} = \lambda^{-1}w \\
+z_{\gamma}(y) &= \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y-v\|_2^2\right\} = \mathrm{prox}_{\gamma^{-1} g}(\gamma^{-1}y)
+\end{align*}$$
+<p>The proximal mapping of $g$ can be computed componentwise, its $i$-th component being</p>
+$$\left[\mathrm{prox}_{\gamma g}(x)\right]_i = \begin{cases}b_i\min\{1, b_ix_i+\gamma\} & \mathrm{if}\ b_ix_i < 1 \\ x_i & \mathrm{otherwise}\end{cases}$$
+<p>Therefore the problem can be solved with <code>miname</code> with</p>
+<pre><code>function [prox, g] = Hinge(x, gam, b)
+    bx = b.*x ; ind = bx &lt; 1;
+    prox( ind,1) = b( ind).*min(bx(ind)+gam, 1);
+    prox(~ind,1) = x(~ind);
+    g = sum(max(0, 1-b.*prox));
+end
+</code></pre>
+
+<pre><code>prob.x1step = @ (w) w/lam ;
+prob.zstep = @ (y, gam) Hinge(y/gam, 1/gam, b);
+prob.A1 = A;
+prob.B = -1;
+prob.c = zeros(m, 1);
+out = miname(prob);
+</code></pre>
+
+<p>The following table summarizes all the attributes that can be used to define problem $(2)$.
+Again, notice that <strong>many of them are optional</strong>.</p>
 
 <table>
 <thead>
@@ -364,38 +404,7 @@ z &= z_\gamma(y) = \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1
 </tbody>
 </table>
 
-<p><strong>Example: support vector machines.</strong> SVMs can be cast as the following convex optimization problem</p>
-$$ \begin{align*}
-\mathrm{minimize}\ &\frac{\lambda}{2}\|x\|_2^2 + \sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
-\mathrm{subject\ to}\ &Ax = z
-\end{align*}$$
-<p>Therefore we have in problem $(2)$</p>
-$$ x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I$$
-<p>Function $g$ is called <em>hinge loss</em>, and the $x$ and $z$ update steps can be formulated as</p>
-$$\begin{align*}
-x(w) &= \mathrm{argmin}_u \left\{\tfrac{\lambda}{2}\|u\|_2^2 - \langle w, u\rangle\right\} = \lambda^{-1}w \\
-z_{\gamma}(y) &= \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y-v\|_2^2\right\} = \mathrm{prox}_{\gamma^{-1} g}(\gamma^{-1}y)
-\end{align*}$$
-<p>The proximal mapping of $g$ can be computed componentwise, its $i$-th component being</p>
-$$\left[\mathrm{prox}_{\gamma g}(x)\right]_i = \begin{cases}b_i\min\{1, b_ix_i+\gamma\} & \mathrm{if}\ b_ix_i < 1 \\ x_i & \mathrm{otherwise}\end{cases}$$
-<p>Therefore the problem can be solved with <code>miname</code> with</p>
-<pre><code>function [prox, g] = Hinge(x, gam, b)
-    bx = b.*x ; ind = bx &lt; 1;
-    prox( ind,1) = b( ind).*min(bx(ind)+gam, 1);
-    prox(~ind,1) = x(~ind);
-    g = sum(max(0, 1-b.*prox));
-end
-</code></pre>
-
-<pre><code>prob.x1step = @ (w) w/lam ;
-prob.zstep = @ (y, gam) Hinge(y/gam, 1/gam, b);
-prob.A1 = A;
-prob.B = -1;
-prob.c = zeros(m, 1);
-out = miname(prob);
-</code></pre>
-
-<h2>
+<h2 class="inset-text">
 <a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
 
 <p>Optional settings may be enabled by specifying the correspondent fields in the <code>opt</code> structure passed
@@ -445,7 +454,7 @@ as second argument to <code>minfbe</code> and <code>miname</code>.</p>
 </tbody>
 </table>
 
-<h2>
+<h2 class="inset-text">
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
 
 <p>ForBES is developed by Lorenzo Stella [<code>lorenzo.stella-at-imtlucca.it</code>] and Panos Patrinos [<code>panagiotis.patrinos-at-imtlucca.it</code>]. Any feedback, bug report or suggestion for future improvements is more than welcome. We recommend using the <a href="https://github.com/lostella/ForBES/issues">issue tracker</a> on GitHub to report bugs.</p>
