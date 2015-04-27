@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>ForBES by lostella</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>ForBES</h1>
+        <h2>Generic and efficient MATLAB solver for nonsmooth convex optimization problems</h2>
+        <a href="https://github.com/lostella/ForBES" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><strong>ForBES</strong> (standing for <strong>For</strong>ward-<strong>B</strong>ackward <strong>E</strong>nvelope <strong>S</strong>olver) is a MATLAB solver for
+nonsmooth convex optimization problems.</p>
+
+<p>It is generic in the sense that the user can customize the problem to solve in an easy and flexible way.
+It is efficient since it features very efficient algorithms, suited for large scale applications.</p>
+
+<p>Here is a performance comparison between ForBES, the fast forward-backward splitting method (also
+known as fast proximal gradient method) and ADMM (alternating direction method of multipliers),
+applied to a Lasso problem with 3K observations and 500K features, for a total of 7.5M nonzero coefficients.</p>
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/lasso_random_3e3_5e5_lambda_3e-1_transparent.png" width="640" height="404">
+</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Simply clone the git repository, or click on this <a href="https://github.com/lostella/ForBES/archive/master.zip">link</a>
+to download it as a zip archive and decompress the archive. Then move with the MATLAB command line to
+the directory of ForBES. Compile all the <em>mex</em>-files required by simply hitting</p>
+
+<pre><code>&gt; make
+</code></pre>
+
+<h2>
+<a id="how-to-use-it" class="anchor" href="#how-to-use-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use it</h2>
+
+<p>ForBES consists mainly of two MATLAB routines, <code>minfbe</code> and <code>miname</code>.
+In order to use them one must provide a description of the problem in a MATLAB
+structure and (optionally) a set of options:</p>
+
+<pre><code>out = minfbe(prob, opt);
+out = miname(prob, opt);
+</code></pre>
+
+<p>Structure <code>prob</code> contains attributes describing the details of the problem, such as objective
+terms and constraints, while <code>opt</code> describes, e.g., details on the algorithm to use, termination
+criteria, the level of verbosity, and so on. In the following we describe more in detail how to define
+these structures. Output <code>out</code> will contain the results of the optimization process.</p>
+
+<p>Examples on how to use <code>minfbe</code> and <code>miname</code> can be found in the <a href="https://github.com/lostella/ForBES/tree/master/tests">tests folder</a>. Furthermore, you can access the help file of the solvers directly from MATLAB with</p>
+
+<pre><code>&gt; help minfbe
+&gt; help miname
+</code></pre>
+
+<h2>
+<a id="minfbe-convex-composite-problems" class="anchor" href="#minfbe-convex-composite-problems" aria-hidden="true"><span class="octicon octicon-link"></span></a>minfbe (convex composite problems)</h2>
+
+<p>We consider here problems in the form</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/minfbe_problem.png" alt="Convex composite problem"></p>
+
+<p>where <em>f1</em> is convex quadratic, <em>l</em> is a linear term and <em>f2</em> is any convex, twice continuously
+differentiable function with Lipschitz continuous gradient. Any of these terms may be omitted in the
+problem definition, in which case it is assumed to be identically zero.
+Function <em>g</em> is a general proper, closed, convex function (possibly nonsmooth).
+This form of includes many practical problems arising in several fields such as optimal
+control, data analysis, machine learning, image and signal processing to name a few.</p>
+
+<p>Since <em>f1</em> is quadratic, it is entirely specified by its Hessian and linear parts:</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/quad_fun.png" alt="Quadratic function"></p>
+
+<p>The generic nonlinear term <em>f2</em> is described by an appropriate function returning its value and gradient
+(in this exact order) at any specified point.
+The gradient may be computed only when the corresponding output argument is requested.
+For example, the logistic function</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/log_loss.png" alt="Logistic function"></p>
+
+<p>can be defined in MATLAB as follows</p>
+
+<pre><code>function [fz, gradfz] = LogReg(z)
+    pz = 1./(1+exp(-z));
+    fz = -sum(log(pz));
+    if nargout &gt;= 2
+        gradfz = (pz-1);
+    end
+end
+</code></pre>
+
+<p>The nonsmooth term <em>g(x)</em> is defined through its proximal mapping and the value of
+<em>g</em> at the proximal point:</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/prox_definition.png"></p>
+
+<p>For example, if <em>g(x) = r||x||_1</em> (the L1-norm) then it is described in MATLAB as the following soft-thresholding
+procedure:</p>
+
+<pre><code>function [z, v] = L1Norm(x, gam, r)
+    uz = max(0, abs(x)-gam*r);
+    if nargout &gt;= 2
+        v = r*sum(uz);
+    end
+    z = sign(x).*uz;
+end
+</code></pre>
+
+<p>In the following table we summarize the attributes that may be used to define problem (1). Notice that <strong>most of them are optional</strong>.</p>
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Mandatory?</th>
+<th>Default</th>
+<th>What is it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prob.x0</code></td>
+<td>vector</td>
+<td>yes</td>
+<td>-</td>
+<td>The starting point for the algorithm.</td>
+</tr>
+<tr>
+<td>
+<code>prob.Q</code> <br> <code>prob.q</code>
+</td>
+<td>matrix (or function) and vector</td>
+<td>no</td>
+<td>Q = 0 <br> q = 0</td>
+<td>The Hessian and linear parts of the quadratic term <em>f1</em>.</td>
+</tr>
+<tr>
+<td>
+<code>prob.A</code> <br> <code>prob.b</code>
+</td>
+<td>matrix (or function) and vector</td>
+<td>no</td>
+<td>A = Id <br> b = 0</td>
+<td>The affine mapping with which <em>f1</em> is composed.</td>
+</tr>
+<tr>
+<td><code>prob.AT</code></td>
+<td>function</td>
+<td>yes, if A is defined as a function</td>
+<td>-</td>
+<td>The function computing the adjoint of A.</td>
+</tr>
+<tr>
+<td><code>prob.lin</code></td>
+<td>vector</td>
+<td>no</td>
+<td>0</td>
+<td>The linear term <em>l</em> in the objective.</td>
+</tr>
+<tr>
+<td><code>prob.f2</code></td>
+<td>function</td>
+<td>no</td>
+<td>the zero function</td>
+<td>A procedure returning the value of <em>f2</em> (1st output) and its gradient (2nd output) at the specified point. It can optionally return also the Hessian as 3d ouput.</td>
+</tr>
+<tr>
+<td><code>prob.useHessian</code></td>
+<td>boolean, integer</td>
+<td>no</td>
+<td>0</td>
+<td>A flag indicating whether f2 returns also the Hessian of <em>f2</em>.</td>
+</tr>
+<tr>
+<td>
+<code>prob.C</code> <br> <code>prob.d</code>
+</td>
+<td>matrix or function, vector</td>
+<td>no</td>
+<td>C = Id <br> d = 0</td>
+<td>The affine mapping with which <em>f2</em> is composed.</td>
+</tr>
+<tr>
+<td><code>prob.CT</code></td>
+<td>function</td>
+<td>yes, if C is defined as a function</td>
+<td>-</td>
+<td>The function computing the adjoint of C.</td>
+</tr>
+<tr>
+<td><code>prob.Lf1</code></td>
+<td>real</td>
+<td>no</td>
+<td>computed numerically</td>
+<td>The 2-norm of matrix A'QA.</td>
+</tr>
+<tr>
+<td><code>prob.Lf2</code></td>
+<td>real</td>
+<td>no</td>
+<td>computed numerically</td>
+<td>The Lipschitz constant of the gradient of <em>f2</em>.</td>
+</tr>
+<tr>
+<td><code>prob.normC</code></td>
+<td>real</td>
+<td>no</td>
+<td>computed numerically</td>
+<td>The 2-norm of matrix C.</td>
+</tr>
+<tr>
+<td><code>prob.g</code></td>
+<td>function</td>
+<td>yes</td>
+<td>-</td>
+<td>A procedure that given <em>x</em> and <em>gamma</em> (in this order) computes the proximal point of <em>x</em> (1st output) with respect to <em>g</em> and stepsize <em>gamma</em>, and the value of <em>g</em> at the proximal point (2nd output)</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Example</strong>: using LogReg and L1Norm defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/log_reg.png" alt="Sparse logistic regression"></p>
+
+<p>as follows:</p>
+
+<pre><code>prob.C = diag(sparse(b))*A;
+prob.f2 = @(x) LogReg(x);
+prob.g = @(x, gam) L1Norm(x,gam,reg);
+prob.x0 = zeros(n,1);
+out = minfbe(prob);
+</code></pre>
+
+<p>The <code>out</code> structure will contain the results of the optimization process, including the computed solution
+and some additional information like the progress of the algorithm during the iterations.</p>
+
+<h2>
+<a id="miname-convex-separable-problems" class="anchor" href="#miname-convex-separable-problems" aria-hidden="true"><span class="octicon octicon-link"></span></a>miname (convex separable problems)</h2>
+
+<p>We consider now problems with linear equality constraints, of the following form:</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/miname_problem.png" alt="Equality constrained convex problem"></p>
+
+<p>with <em>f1</em> (if present) is strongly convex and quadratic on its domain, <em>f2</em> (if present) is strongly
+convex and twice continuously differentiable in the interior of its domain, while <em>g</em> is proper, closed
+and convex. Linear operators <em>A1, A2, B</em> need to be specified only if the corresponding term in the 
+objective is present, and they are of appropriate dimension along with vector <em>c</em> in the constraints.</p>
+
+<p>The problem is described by specifying the constraint and providing appropriate procedures for computing
+the primal iterates (and the corresponding objective values) given a dual variable. Specifically:</p>
+
+<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/miname_primal_updates.png"></p>
+
+<p>The following table summarizes the attributes defining problem (2). Again, notice that <strong>many of them are optional</strong>.</p>
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Mandatory?</th>
+<th>Default</th>
+<th>What is it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prob.x1step</code></td>
+<td>function</td>
+<td>no</td>
+<td>-</td>
+<td>Procedure minimizing <em>f1(w)- y'w</em> with respect to <em>w</em>, given <em>y</em> (since <em>f1</em> is quadratic, this procedure computes an affine mapping).</td>
+</tr>
+<tr>
+<td><code>prob.A1</code></td>
+<td>matrix or function</td>
+<td>yes, if <code>prob.x1step</code> is defined</td>
+<td>-</td>
+<td>Matrix <em>A1</em> in the constraint.</td>
+</tr>
+<tr>
+<td><code>prob.A1T</code></td>
+<td>function</td>
+<td>yes, if <code>prob.A1</code> is defined as a function</td>
+<td>-</td>
+<td>Procedure computing the adjoint of <em>A1</em>.</td>
+</tr>
+<tr>
+<td><code>prob.x2step</code></td>
+<td>function</td>
+<td>no</td>
+<td>-</td>
+<td>Procedure minimizing <em>f2(w)- y'w</em> with respect to <em>w</em>, given <em>y</em>.</td>
+</tr>
+<tr>
+<td><code>prob.A2</code></td>
+<td>matrix or function</td>
+<td>yes, if <code>prob.x2step</code> is defined</td>
+<td>-</td>
+<td>Matrix <em>A2</em> in the constraint.</td>
+</tr>
+<tr>
+<td><code>prob.A2T</code></td>
+<td>function</td>
+<td>yes, if <code>prob.A2</code> is defined as a function</td>
+<td>-</td>
+<td>Procedure computing the adjoint of <em>A2</em>.</td>
+</tr>
+<tr>
+<td><code>prob.zsetp</code></td>
+<td>function</td>
+<td>yes</td>
+<td>-</td>
+<td>Procedure minimizing the augmented Lagrangian with respect to <em>z</em> and computing <em>g(z)</em>.</td>
+</tr>
+<tr>
+<td><code>prob.B</code></td>
+<td>matrix</td>
+<td>yes</td>
+<td>-</td>
+<td>Matrix <em>B</em> in the constraint.</td>
+</tr>
+<tr>
+<td><code>prob.c</code></td>
+<td>vector</td>
+<td>yes</td>
+<td>-</td>
+<td>The right hand side of the constraint.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
+
+<p>Optional settings may be enabled by specifying the correspondent fields in the <code>opt</code> structure passed
+as second argument to <code>minfbe</code> and <code>miname</code>.</p>
+
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Default</th>
+<th>What is it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opt.tolOpt</code></td>
+<td>scalar</td>
+<td>1e-5</td>
+<td>Tolerance on the optimality condition.</td>
+</tr>
+<tr>
+<td><code>opt.maxit</code></td>
+<td>integer</td>
+<td>100<em>n</em>
+</td>
+<td>Maximum number of iterations.</td>
+</tr>
+<tr>
+<td><code>opt.method</code></td>
+<td>string</td>
+<td>'lbfgs'</td>
+<td>Algorithm to use for computing descent steps. Can select between: <br> 'sd' (steepest descent) <br> 'lbfgs' (limited memory BFGS) <br>  'cg-desc', 'cg-prp', 'cg-dyhs' (various nonlinear CG algorithms) <br> 'bb' (Barzilai-Borwein).</td>
+</tr>
+<tr>
+<td><code>opt.variant</code></td>
+<td>string</td>
+<td>'global'</td>
+<td>'basic': Use the basic algorithm<br> 'global': Use the <strong>global</strong> variant<br> 'fast': Use the <strong>fast</strong> variant</td>
+</tr>
+<tr>
+<td><code>opt.linesearch</code></td>
+<td>string</td>
+<td>method dependant</td>
+<td>Line search strategy to use. Can select between: <br> 'armijo' (default for 'sd') <br> 'nonmonotone-armijo' (default for 'bb') <br> 'hager-zhang' (default for the rest) <br> 'lemarechal' <br> 'fletcher'</td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
+
+<p>ForBES is developed by Lorenzo Stella [<code>lorenzo.stella-at-imtlucca.it</code>] and Panos Patrinos [<code>panagiotis.patrinos-at-imtlucca.it</code>]. Any feedback, bug report or suggestion for future improvements is more than welcome. We recommend using the <a href="https://github.com/lostella/ForBES/issues">issue tracker</a> to report bugs.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/lostella/ForBES/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/lostella/ForBES/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/lostella/ForBES"></a> is maintained by <a href="https://github.com/lostella">lostella</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
