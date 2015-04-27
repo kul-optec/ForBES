@@ -84,25 +84,25 @@ these structures. Output <code>out</code> will contain the results of the optimi
 
 <p>We consider here problems in the form</p>
 
-<p align="center"><img src="figures/minfbe_problem.png" alt="Convex composite problem"></p>
+$$ \mathrm{minimize}\ f_1(Ax-b) + \langle\ell, x\rangle + f_2(Cx-d) + g(x) \tag{1}$$
 
-<p>where $f_1$ is convex quadratic, <em>l</em> is a linear term and <em>f2</em> is any convex, twice continuously
+<p>where $f_1$ is convex quadratic, $\ell$ is a linear term and $f_2$ is any convex, twice continuously
 differentiable function with Lipschitz continuous gradient. Any of these terms may be omitted in the
 problem definition, in which case it is assumed to be identically zero.
-Function <em>g</em> is a general proper, closed, convex function (possibly nonsmooth).
+Function $g$ is a general proper, closed, convex function (possibly nonsmooth).
 This form of includes many practical problems arising in several fields such as optimal
 control, data analysis, machine learning, image and signal processing to name a few.</p>
 
-<p>Since <em>f1</em> is quadratic, it is entirely specified by its Hessian and linear parts:</p>
+<p>Since $f_1$ is quadratic, it is entirely specified by its Hessian and linear parts:</p>
 
-<p align="center"><img src="figures/quad_fun.png" alt="Quadratic function"></p>
+$$ f_1(x) = \tfrac{1}{2}\langle Qx, x\rangle + \langle q, x\rangle $$
 
-<p>The generic nonlinear term <em>f2</em> is described by an appropriate function returning its value and gradient
+<p>The generic nonlinear term $f_2$ is described by an appropriate function returning its value and gradient
 (in this exact order) at any specified point.
 The gradient may be computed only when the corresponding output argument is requested.
 For example, the logistic function</p>
 
-<p align="center"><img src="figures/log_loss.png" alt="Logistic function"></p>
+$$ f_2(x) = \sum_{i=1}^m \log(1+\exp(-x_i)) $$
 
 <p>can be defined in MATLAB as follows</p>
 
@@ -115,12 +115,12 @@ For example, the logistic function</p>
 end
 </code></pre>
 
-<p>The nonsmooth term <em>g(x)</em> is defined through its proximal mapping and the value of
-<em>g</em> at the proximal point:</p>
+<p>The nonsmooth term $g(x)$ is defined through its proximal mapping and the value of
+$g$ at the proximal point:</p>
 
-<p align="center"><img src="figures/prox_definition.png"></p>
+$$ z = \mathrm{prox}_{\gamma g}(x) = \mathrm{argmin}_w\left\{ g(w) + \tfrac{1}{2\gamma}\|w-x\|^2\right\} $$
 
-<p>For example, if <em>g(x) = r||x||_1</em> (the L1-norm) then it is described in MATLAB as the following soft-thresholding
+<p>For example, if $g(x) = r\|x\|_1$ (the $L^1$-norm) then it is described in MATLAB as the following soft-thresholding
 procedure:</p>
 
 <pre><code>function [z, v] = L1Norm(x, gam, r)
@@ -132,7 +132,7 @@ procedure:</p>
 end
 </code></pre>
 
-<p>In the following table we summarize the attributes that may be used to define problem (1). Notice that <strong>most of them are optional</strong>.</p>
+<p>In the following table we summarize the attributes that may be used to define problem $(1)$. Notice that <strong>most of them are optional</strong>.</p>
 
 <table>
 <thead>
@@ -158,8 +158,8 @@ end
 </td>
 <td>matrix (or function) and vector</td>
 <td>no</td>
-<td>Q = 0 <br> q = 0</td>
-<td>The Hessian and linear parts of the quadratic term <em>f1</em>.</td>
+<td>$Q = 0$ <br> $q = 0$</td>
+<td>The Hessian and linear parts of the quadratic term $f_1$.</td>
 </tr>
 <tr>
 <td>
@@ -167,36 +167,36 @@ end
 </td>
 <td>matrix (or function) and vector</td>
 <td>no</td>
-<td>A = Id <br> b = 0</td>
-<td>The affine mapping with which <em>f1</em> is composed.</td>
+<td>$A = I$ <br> $b = 0$</td>
+<td>The affine mapping with which $f_1$ is composed.</td>
 </tr>
 <tr>
 <td><code>prob.AT</code></td>
 <td>function</td>
-<td>yes, if A is defined as a function</td>
+<td>yes, if $A$ is defined as a function</td>
 <td>-</td>
-<td>The function computing the adjoint of A.</td>
+<td>The function computing the adjoint of $A$.</td>
 </tr>
 <tr>
 <td><code>prob.lin</code></td>
 <td>vector</td>
 <td>no</td>
 <td>0</td>
-<td>The linear term <em>l</em> in the objective.</td>
+<td>The linear term $\ell$ in the objective.</td>
 </tr>
 <tr>
 <td><code>prob.f2</code></td>
 <td>function</td>
 <td>no</td>
 <td>the zero function</td>
-<td>A procedure returning the value of <em>f2</em> (1st output) and its gradient (2nd output) at the specified point. It can optionally return also the Hessian as 3d ouput.</td>
+<td>A procedure returning the value of $f_2$ (1st output) and $\nabla f_2$ (2nd output) at the specified point. It can optionally return $\nabla^2 f_2$ 3rd ouput.</td>
 </tr>
 <tr>
 <td><code>prob.useHessian</code></td>
 <td>boolean, integer</td>
 <td>no</td>
 <td>0</td>
-<td>A flag indicating whether f2 returns also the Hessian of <em>f2</em>.</td>
+<td>A flag indicating whether `prob.f2` returns also $\nabla^2 f_2$.</td>
 </tr>
 <tr>
 <td>
@@ -204,50 +204,50 @@ end
 </td>
 <td>matrix or function, vector</td>
 <td>no</td>
-<td>C = Id <br> d = 0</td>
-<td>The affine mapping with which <em>f2</em> is composed.</td>
+<td>$C = I$ <br> $d = 0$</td>
+<td>The affine mapping with which $f_2$ is composed.</td>
 </tr>
 <tr>
 <td><code>prob.CT</code></td>
 <td>function</td>
-<td>yes, if C is defined as a function</td>
+<td>yes, if $C$ is defined as a function</td>
 <td>-</td>
-<td>The function computing the adjoint of C.</td>
+<td>The function computing the adjoint of $C$.</td>
 </tr>
 <tr>
 <td><code>prob.Lf1</code></td>
 <td>real</td>
 <td>no</td>
 <td>computed numerically</td>
-<td>The 2-norm of matrix A'QA.</td>
+<td>The 2-norm of matrix $A^TQA$.</td>
 </tr>
 <tr>
 <td><code>prob.Lf2</code></td>
 <td>real</td>
 <td>no</td>
 <td>computed numerically</td>
-<td>The Lipschitz constant of the gradient of <em>f2</em>.</td>
+<td>The Lipschitz constant of $\nabla f_2$.</td>
 </tr>
 <tr>
 <td><code>prob.normC</code></td>
 <td>real</td>
 <td>no</td>
 <td>computed numerically</td>
-<td>The 2-norm of matrix C.</td>
+<td>The 2-norm of matrix $C$.</td>
 </tr>
 <tr>
 <td><code>prob.g</code></td>
 <td>function</td>
 <td>yes</td>
 <td>-</td>
-<td>A procedure that given <em>x</em> and <em>gamma</em> (in this order) computes the proximal point of <em>x</em> (1st output) with respect to <em>g</em> and stepsize <em>gamma</em>, and the value of <em>g</em> at the proximal point (2nd output)</td>
+<td>A procedure that given $x$ and $\gamma$ (in this order) computes the $\mathrm{prox}_{\gamma g}(x)$ (1st output) and $g(\mathrm{prox}_{\gamma g}(x))$ (2nd output).</td>
 </tr>
 </tbody>
 </table>
 
-<p><strong>Example: sparse logistic regression.</strong> Using LogReg and L1Norm defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
+<p><strong>Example: sparse logistic regression.</strong> Using <code>LogReg</code> and <code>L1Norm</code> defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
 
-<p align="center"><img src="figures/log_reg.png" alt="Sparse logistic regression"></p>
+$$ \mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1 $$
 
 <p>as follows:</p>
 
@@ -266,19 +266,26 @@ and some additional information like the progress of the algorithm during the it
 
 <p>We consider now problems with linear equality constraints, of the following form:</p>
 
-<p align="center"><img src="figures/miname_problem.png" alt="Equality constrained convex problem"></p>
+$$\begin{align*}
+\mathrm{minimize}\ & f_1(x_1) + f_2(x_2) + g(z) \tag{2}\\
+\mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = c
+\end{align*}$$
 
-<p>with <em>f1</em> (if present) is strongly convex and quadratic on its domain, <em>f2</em> (if present) is strongly
-convex and twice continuously differentiable in the interior of its domain, while <em>g</em> is proper, closed
-and convex. Linear operators <em>A1, A2, B</em> need to be specified only if the corresponding term in the 
-objective is present, and they are of appropriate dimension along with vector <em>c</em> in the constraints.</p>
+<p>with $f_1$ (if present) strongly convex and quadratic on its domain, $f_2$ (if present) strongly
+convex and twice continuously differentiable in the interior of its domain, while $g$ is proper, closed
+and convex. Linear operators $A_1, A_2, B$ need to be specified only if the corresponding term in the 
+objective is present, and they are of appropriate dimension along with vector $c$ in the constraints.</p>
 
 <p>The problem is described by specifying the constraint and providing appropriate procedures for computing
 the primal iterates (and the corresponding objective values) given a dual variable. Specifically:</p>
 
-<p align="center"><img src="figures/miname_primal_updates.png"></p>
+$$\begin{align*}
+x_1 &= x_1(w) = \mathrm{argmin}_u \left\{f_1(u) - \langle w, u\rangle\right\} \\
+x_2 &= x_2(w) = \mathrm{argmin}_u \left\{f_2(u) - \langle w, u\rangle\right\} \\
+z &= z_\gamma(y) = \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y+Bv\|^2\right\}
+\end{align*}$$
 
-<p>The following table summarizes the attributes defining problem (2). Again, notice that <strong>many of them are optional</strong>.</p>
+<p>The following table summarizes the attributes defining problem $(2)$. Again, notice that <strong>many of them are optional</strong>.</p>
 
 <table>
 <thead>
@@ -296,77 +303,83 @@ the primal iterates (and the corresponding objective values) given a dual variab
 <td>function</td>
 <td>no</td>
 <td>-</td>
-<td>Procedure minimizing <em>f1(w)- y'w</em> with respect to <em>w</em>, given <em>y</em> (since <em>f1</em> is quadratic, this procedure computes an affine mapping).</td>
+<td>Procedure computing $x_1(w) = \mathrm{argmin}_u \left\{f_1(u) - \langle w, u\rangle\right\}$, given $w$ (since $f_1$ is quadratic, this procedure computes an affine mapping).</td>
 </tr>
 <tr>
 <td><code>prob.A1</code></td>
 <td>matrix or function</td>
 <td>yes, if <code>prob.x1step</code> is defined</td>
 <td>-</td>
-<td>Matrix <em>A1</em> in the constraint.</td>
+<td>Matrix $A_1$ in the constraint.</td>
 </tr>
 <tr>
 <td><code>prob.A1T</code></td>
 <td>function</td>
 <td>yes, if <code>prob.A1</code> is defined as a function</td>
 <td>-</td>
-<td>Procedure computing the adjoint of <em>A1</em>.</td>
+<td>Procedure computing the adjoint mapping of $A_1$.</td>
 </tr>
 <tr>
 <td><code>prob.x2step</code></td>
 <td>function</td>
 <td>no</td>
 <td>-</td>
-<td>Procedure minimizing <em>f2(w)- y'w</em> with respect to <em>w</em>, given <em>y</em>.</td>
+<td>Procedure computing $x_2(w) = \mathrm{argmin}_u \left\{f_2(u) - \langle w, u\rangle\right\}$, given <em>w</em>, and $f_2(x_2(w))$.</td>
 </tr>
 <tr>
 <td><code>prob.A2</code></td>
 <td>matrix or function</td>
 <td>yes, if <code>prob.x2step</code> is defined</td>
 <td>-</td>
-<td>Matrix <em>A2</em> in the constraint.</td>
+<td>Matrix $A_2$ in the constraint.</td>
 </tr>
 <tr>
 <td><code>prob.A2T</code></td>
 <td>function</td>
 <td>yes, if <code>prob.A2</code> is defined as a function</td>
 <td>-</td>
-<td>Procedure computing the adjoint of <em>A2</em>.</td>
+<td>Procedure computing the adjoint mapping of $A_2$.</td>
 </tr>
 <tr>
 <td><code>prob.zsetp</code></td>
 <td>function</td>
 <td>yes</td>
 <td>-</td>
-<td>Procedure minimizing the augmented Lagrangian with respect to <em>z</em> and computing <em>g(z)</em>.</td>
+<td>Procedure computing $z_\gamma(y) = \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y+Bv\|^2\right\}$ and $g(z_\gamma(y))$, given $y$ and $\gamma$.</td>
 </tr>
 <tr>
 <td><code>prob.B</code></td>
 <td>matrix</td>
 <td>yes</td>
 <td>-</td>
-<td>Matrix <em>B</em> in the constraint.</td>
+<td>Matrix $B$ in the constraint.</td>
 </tr>
 <tr>
 <td><code>prob.c</code></td>
 <td>vector</td>
 <td>yes</td>
 <td>-</td>
-<td>The right hand side of the constraint.</td>
+<td>The right hand side $c$ of the constraint.</td>
 </tr>
 </tbody>
 </table>
 
 <p><strong>Example: support vector machines.</strong> SVMs can be cast as the following convex optimization problem</p>
-<p align="center"><img src="figures/svm.png"/></p>
-<p>Therefore we have in problem (1)</p>
-<p align="center"><img src="figures/svm_terms.png"/></p>
-<p>Function <em>g</em> is called <em>hinge loss</em>, and the <em>x</em> and <em>z</em> update steps can be formulated as</p>
-<p align="center"><img src="figures/svm_updates.png"/></p>
-<p>The proximal mapping of <em>g</em> can be computed componentwise, its i-th component being</p>
-<p align="center"><img src="figures/hinge_prox.png"/></p>
+$$ \begin{align*}
+\mathrm{minimize}\ &\frac{\lambda}{2}\|x\|_2^2 + \sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
+\mathrm{subject\ to}\ &Ax = z
+\end{align*}$$
+<p>Therefore we have in problem $(2)$</p>
+$$ x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I$$
+<p>Function $g$ is called <em>hinge loss</em>, and the $x$ and $z$ update steps can be formulated as</p>
+$$\begin{align*}
+x(w) &= \mathrm{argmin}_u \left\{\tfrac{\lambda}{2}\|u\|_2^2 - \langle w, u\rangle\right\} = \lambda^{-1}w \\
+z_{\gamma}(y) &= \mathrm{argmin}_v \left\{g(v) + \tfrac{\gamma}{2}\|\gamma^{-1}y-v\|_2^2\right\} = \mathrm{prox}_{\gamma^{-1} g}(\gamma^{-1}y)
+\end{align*}$$
+<p>The proximal mapping of $g$ can be computed componentwise, its $i$-th component being</p>
+$$\left[\mathrm{prox}_{\gamma g}(x)\right]_i = \begin{cases}b_i\min\{1, b_ix_i+\gamma\} & \mathrm{if}\ b_ix_i < 1 \\ x_i & \mathrm{otherwise}\end{cases}$$
 <p>Therefore the problem can be solved with <code>miname</code> with</p>
-<pre><code>function [prox, g] = Hinge (x, gam, b)
+<pre><code>function [prox, g] = Hinge(x, gam, b)
     bx = b.*x ; ind = bx &lt; 1;
     prox( ind,1) = b( ind).*min(bx(ind)+gam, 1);
     prox(~ind,1) = x(~ind);
@@ -400,14 +413,14 @@ as second argument to <code>minfbe</code> and <code>miname</code>.</p>
 <tbody>
 <tr>
 <td><code>opt.tolOpt</code></td>
-<td>scalar</td>
-<td>1e-5</td>
+<td>real</td>
+<td>$10^5$</td>
 <td>Tolerance on the optimality condition.</td>
 </tr>
 <tr>
 <td><code>opt.maxit</code></td>
 <td>integer</td>
-<td>100<em>n</em>
+<td>$100 n$
 </td>
 <td>Maximum number of iterations.</td>
 </tr>
