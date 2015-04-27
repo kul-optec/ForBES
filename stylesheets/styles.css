@@ -9,17 +9,31 @@ html {
   background: #6c7989 linear-gradient(#6c7989, #434b55) fixed;
 }
 
+@font-face {
+    font-family: "OSbold";
+    src: url("fonts/OpenSans-Bold.ttf") format("truetype");
+/*    src: url("fonts/LinLibertine_aBS.ttf") format("truetype");*/
+/*    src: url("fonts/Minecraftia.ttf") format("truetype");*/
+}
+@font-face {
+    font-family: "OSlight";
+    src: url("fonts/OpenSans-Light.ttf") format("truetype");
+/*    src: url("fonts/LinLibertine_R.ttf") format("truetype");*/
+/*    src: url("fonts/Minecraftia.ttf") format("truetype");*/
+}
+
 body {
   padding: 50px 0;
   margin: 0;
-  font: 14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+/*  font: 14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;*/
+  font: 14px/1.5 "OSlight", sans;
   color: #555;
-  font-weight: 300;
+  font-weight: 500;
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAeCAYAAABNChwpAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAAAUdEVYdENyZWF0aW9uIFRpbWUAMy82LzEygrTcTAAAAFRJREFUSIljfPDggZRf5RIGGNjUHsNATz6jXmSL1Kb2GLiAX+USBnrymRgGGDCORgFmoNAXjEbBaBSMRsFoFIxGwWgUjEbBaBSMRsFoFIxGwWgUAABYNujumib3wAAAAABJRU5ErkJggg==') fixed;
 }
 
 .wrapper {
-  width: 640px;
+  width: 800px;
   margin: 0 auto;
   background: #DEDEDE;
   -webkit-border-radius: 8px;
@@ -71,7 +85,7 @@ header {
 header h1 {
   margin: 0;
   padding: 0;
-  font-size: 24px;
+  font-size: 42px;
   line-height: 1.2;
   color: #069;
   text-shadow: rgba(255, 255, 255, 0.9) 0 1px 0;
@@ -83,7 +97,7 @@ header p {
   margin: 0;
   color: #61778B;
   width: 300px;
-  font-size: 13px;
+  font-size: 14px;
 }
 header p.view {
   display: none;
@@ -157,7 +171,7 @@ header ul li + li + li {
 }
 header ul a {
   line-height: 1;
-  font-size: 11px;
+  font-size: 14px;
   color: #fff;
   color: rgba(255, 255, 255, 0.8);
   display: block;
@@ -176,7 +190,7 @@ header ul a strong {
 
 section {
   padding: 15px 20px;
-  font-size: 15px;
+  font-size: 16px;
   border-top: 1px solid #fff;
   background: -webkit-gradient(linear, 50% 0%, 50% 700, color-stop(0%, #fafafa), color-stop(100%, #dedede));
   background: -webkit-linear-gradient(#fafafa, #dedede 700px);
@@ -235,7 +249,7 @@ img {
 code, pre {
   font-family: Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
   color: #333;
-  font-size: 12px;
+  font-size: 14px;
   overflow-x: auto;
 }
 

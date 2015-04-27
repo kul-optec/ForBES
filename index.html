@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>ForBES by lostella</title>
+    <title>ForBES</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
@@ -38,14 +38,14 @@ known as fast proximal gradient method) and ADMM (alternating direction method o
 applied to a Lasso problem with 3K observations and 500K features, for a total of 7.5M nonzero coefficients.</p>
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/lasso_random_3e3_5e5_lambda_3e-1_transparent.png" width="640" height="404">
+<img src="figures/lasso_random_3e3_5e5_lambda_3e-1_noborder.png" width="640" height="404">
 </p>
 
 <h2>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<p>Simply clone the git repository, or click on this <a href="https://github.com/lostella/ForBES/archive/master.zip">link</a>
-to download it as a zip archive and decompress the archive. Then move with the MATLAB command line to
+<p>Simply click on one of the links on top of the page, and either clone the GitHub repository or uncompress the
+zip or tar.gz archive. Then move with the MATLAB command line to
 the directory of ForBES. Compile all the <em>mex</em>-files required by simply hitting</p>
 
 <pre><code>&gt; make
@@ -78,7 +78,7 @@ these structures. Output <code>out</code> will contain the results of the optimi
 
 <p>We consider here problems in the form</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/minfbe_problem.png" alt="Convex composite problem"></p>
+<p align="center"><img src="figures/minfbe_problem.png" alt="Convex composite problem"></p>
 
 <p>where <em>f1</em> is convex quadratic, <em>l</em> is a linear term and <em>f2</em> is any convex, twice continuously
 differentiable function with Lipschitz continuous gradient. Any of these terms may be omitted in the
@@ -89,14 +89,14 @@ control, data analysis, machine learning, image and signal processing to name a 
 
 <p>Since <em>f1</em> is quadratic, it is entirely specified by its Hessian and linear parts:</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/quad_fun.png" alt="Quadratic function"></p>
+<p align="center"><img src="figures/quad_fun.png" alt="Quadratic function"></p>
 
 <p>The generic nonlinear term <em>f2</em> is described by an appropriate function returning its value and gradient
 (in this exact order) at any specified point.
 The gradient may be computed only when the corresponding output argument is requested.
 For example, the logistic function</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/log_loss.png" alt="Logistic function"></p>
+<p align="center"><img src="figures/log_loss.png" alt="Logistic function"></p>
 
 <p>can be defined in MATLAB as follows</p>
 
@@ -112,7 +112,7 @@ end
 <p>The nonsmooth term <em>g(x)</em> is defined through its proximal mapping and the value of
 <em>g</em> at the proximal point:</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/prox_definition.png"></p>
+<p align="center"><img src="figures/prox_definition.png"></p>
 
 <p>For example, if <em>g(x) = r||x||_1</em> (the L1-norm) then it is described in MATLAB as the following soft-thresholding
 procedure:</p>
@@ -241,7 +241,7 @@ end
 
 <p><strong>Example</strong>: using LogReg and L1Norm defined above, we can test the <code>minfbe</code> onto the sparse logistic regression problem</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/log_reg.png" alt="Sparse logistic regression"></p>
+<p align="center"><img src="figures/log_reg.png" alt="Sparse logistic regression"></p>
 
 <p>as follows:</p>
 
@@ -260,7 +260,7 @@ and some additional information like the progress of the algorithm during the it
 
 <p>We consider now problems with linear equality constraints, of the following form:</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/miname_problem.png" alt="Equality constrained convex problem"></p>
+<p align="center"><img src="figures/miname_problem.png" alt="Equality constrained convex problem"></p>
 
 <p>with <em>f1</em> (if present) is strongly convex and quadratic on its domain, <em>f2</em> (if present) is strongly
 convex and twice continuously differentiable in the interior of its domain, while <em>g</em> is proper, closed
@@ -270,7 +270,7 @@ objective is present, and they are of appropriate dimension along with vector <e
 <p>The problem is described by specifying the constraint and providing appropriate procedures for computing
 the primal iterates (and the corresponding objective values) given a dual variable. Specifically:</p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/lostella/ForBES/master/figures/miname_primal_updates.png"></p>
+<p align="center"><img src="figures/miname_primal_updates.png"></p>
 
 <p>The following table summarizes the attributes defining problem (2). Again, notice that <strong>many of them are optional</strong>.</p>
 
@@ -404,7 +404,7 @@ as second argument to <code>minfbe</code> and <code>miname</code>.</p>
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
 
-<p>ForBES is developed by Lorenzo Stella [<code>lorenzo.stella-at-imtlucca.it</code>] and Panos Patrinos [<code>panagiotis.patrinos-at-imtlucca.it</code>]. Any feedback, bug report or suggestion for future improvements is more than welcome. We recommend using the <a href="https://github.com/lostella/ForBES/issues">issue tracker</a> to report bugs.</p>
+<p>ForBES is developed by Lorenzo Stella [<code>lorenzo.stella-at-imtlucca.it</code>] and Panos Patrinos [<code>panagiotis.patrinos-at-imtlucca.it</code>]. Any feedback, bug report or suggestion for future improvements is more than welcome. We recommend using the <a href="https://github.com/lostella/ForBES/issues">issue tracker</a> on GitHub to report bugs.</p>
       </section>
     </div>
     <footer>
