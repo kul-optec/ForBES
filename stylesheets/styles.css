@@ -68,42 +68,49 @@ header {
   padding: 15px 20px;
   border-bottom: 1px solid #B2D2E1;
 }
-.inset-text {
-    color: rgba(10,60,150, 0.8);
-    text-shadow: 1px 2px 2px #def, 0 0 0 #000, 1px 2px 2px #def;
-}
-::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
-::selection { background: #5af; color: #fff; text-shadow: none; }
 
 header h1 {
+  color: rgba(10,60,150,1.0);
   margin: 0;
   padding: 0;
   font-size: 50px;
   line-height: 1.2;
-  color: #069;
   text-shadow: rgba(255, 255, 255, 0.9) 0 1px 0;
 }
+
+h1.inset-text {
+  color: rgba(10,60,150,0.8);
+  text-shadow: 1px 2px 3px #def, 0 0 0 #000;
+}
+::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
+::selection { background: #5af; color: #fff; text-shadow: none; }
+
 header.without-description h1 {
   margin: 10px 0;
 }
+
 header p {
   margin: 0;
   color: #61778B;
   width: 300px;
   font-size: 14px;
 }
+
 header p.view {
   display: none;
   font-weight: 700;
   text-shadow: rgba(255, 255, 255, 0.9) 0 1px 0;
   -webkit-font-smoothing: antialiased;
 }
+
 header p.view a {
   color: #06c;
 }
+
 header p.view small {
   font-weight: 400;
 }
+
 header ul {
   margin: 0;
   padding: 0;
@@ -127,6 +134,7 @@ header ul {
   box-shadow: inset rgba(255, 255, 255, 0.45) 0 1px 0, inset rgba(0, 0, 0, 0.2) 0 -1px 0;
   width: auto;
 }
+
 header ul:before {
   content: '';
   position: absolute;
@@ -145,23 +153,28 @@ header ul:before {
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0, inset rgba(255, 255, 255, 0.7) 0 -1px 0;
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0, inset rgba(255, 255, 255, 0.7) 0 -1px 0;
 }
+
 header ul li {
   width: 79px;
   float: left;
   border-right: 1px solid #3A7CBE;
   height: 38px;
 }
+
 header ul li.single {
   border: none;
 }
+
 header ul li + li {
   width: 78px;
   border-left: 1px solid #8BBEF3;
 }
+
 header ul li + li + li {
   border-right: none;
   width: 79px;
 }
+
 header ul a {
   line-height: 1;
   font-size: 14px;
@@ -174,6 +187,7 @@ header ul a {
   height: 40px;
   text-shadow: rgba(0, 0, 0, 0.4) 0 -1px 0;
 }
+
 header ul a strong {
   font-size: 14px;
   display: block;
@@ -200,11 +214,19 @@ section {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  color: rgba(10,60,150,1.0);
   padding: 0;
   margin: 0 0 20px;
   line-height: 1.2;
   font-size: 32px;
 }
+
+h2.inset-text {
+  color: rgba(10,60,150,0.8);
+  text-shadow: 1px 2px 3px #def, 0 0 0 #000;
+}
+::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
+::selection { background: #5af; color: #fff; text-shadow: none; }
 
 p, ul, ol, table, pre, dl {
   margin: 0 0 20px;
@@ -248,16 +270,17 @@ code, pre {
 }
 
 pre {
-  padding: 20px;
-  background: #3A3C42;
-/*  background: #e5ffd9;*/
+  padding: 15px;
+  background: rgba(48, 50, 56, 1.0);
   color: #f8f8f2;
-/*  color: #000000;*/
   margin: 0 -20px 20px;
+  -moz-box-shadow:    inset 1px 2px 3px #141414;
+  -webkit-box-shadow: inset 1px 2px 3px #141414;
+  box-shadow:         inset 1px 2px 3px #141414;
 }
 pre code {
   color: #f8f8f2;
-/*  color: #000000;*/
+  text-shadow: 1px 2px 3px #141414;
 }
 li pre {
   margin-left: -60px;
