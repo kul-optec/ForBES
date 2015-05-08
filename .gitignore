@@ -1,2 +1,5 @@
 private/LBFGS.mex*
 library/RiccatiSolve.mex*
+*~
+*.out
+
