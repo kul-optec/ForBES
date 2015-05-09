@@ -287,8 +287,8 @@ $$ x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \frac{1}{m}\sum_{i=1}^
 The problem can therefore be defined as</p>
 
 <pre><code>prob.f1 = squaredNorm(lambda);
-prob.g = hingeLoss(1/m);
-prob.A1 = A;
+prob.g = hingeLoss(1/m, b); % vector b contains the labels
+prob.A1 = A; % matrix A is the features (or 'design') matrix
 prob.B = -1;
 prob.c = zeros(m, 1);
 out = forbes(prob);
@@ -312,7 +312,7 @@ g(x) &= r\|x\|_1 = \sum_i |x_i|
 <p>This problem can be defined using the functions in the library (see <a href="#functions">Functions</a> for more information)
 as follows:</p>
 
-<pre><code>prob.C2 = diag(sparse(b))*A;
+<pre><code>prob.C2 = diag(sparse(b))*A; % vector b contains the labels, A is the design matrix
 prob.f2 = logLogistic();
 prob.g = l1Norm(r);
 prob.x0 = zeros(n,1);
