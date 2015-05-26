@@ -107,18 +107,13 @@ problem takes the unconstrained composite form</p>
 
 $$ \mathrm{minimize}\ f_1(C_1x-d_1) + f_2(C_2x-d_2) + g(x) \tag{2} $$
 
-Here $f_1$ is assumed to be quadratic, and therefore entirely specified by its Hessian and linear parts:</p>
-
-$$ f_1(x) = \tfrac{1}{2}\langle Qx, x\rangle + \langle q, x\rangle $$
-
-<p>Function $f_2$ is assumed to be convex, smooth (i.e. with Lipschitz continuous gradient) and twice continuously
+Here $f_1$ is assumed to be quadratic, while $f_2$ is assumed to be convex, smooth (i.e. with Lipschitz continuous gradient) and twice continuously
 differentiable. Function $g$ is any closed, proper, convex function.</p>
 
 <h2 class="inset-text">
 <a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
 
-<p>All the functions involved in the problem (except for $f_1$ in the unconstrained case, when it is assumed to be quadratic
-and therefore defined by its Hessian $Q$ and linear term $q$), can be picked from a library of functions available in the
+<p>All the functions involved in the problem can be picked from a library of functions available in the
 <a href="https://github.com/lostella/ForBES/tree/master/library" target="_blank">library folder</a>. This contains procedures returning commonly used functions, specified by a list of parameters if needed.
 These procedures can be invoked and their result directly assigned to the structure containing the problem. For example:</p>
 
@@ -153,15 +148,6 @@ for more information on how to use them and what parameters they require.</p>
 </tr>
 <tr>
 <td>
-<code>prob.Q</code> <br> <code>prob.q</code>
-</td>
-<td>matrix (or function) and vector</td>
-<td>no</td>
-<td>$Q = 0$ <br> $q = 0$</td>
-<td>The Hessian and linear parts of the quadratic term $f_1$, in case of unconstrained composite problems $(2).$</td>
-</tr>
-<tr>
-<td>
 <code>prob.C1</code> <br> <code>prob.d1</code> <br> <code>prob.C2</code> <br> <code>prob.d2</code>
 </td>
 <td>matrices (or functions) and vectors</td>
@@ -175,13 +161,6 @@ for more information on how to use them and what parameters they require.</p>
 <td>yes, if $C_1$ or $C_2$ are defined as functions</td>
 <td>-</td>
 <td>The functions computing the adjoint of $C_1$ and $C_2$.</td>
-</tr>
-<tr>
-<td><code>prob.normC2</code></td>
-<td>real</td>
-<td>no</td>
-<td>computed numerically</td>
-<td>The 2-norm of matrix $C_2$.</td>
 </tr>
 <tr>
 <td><code>prob.A1</code> <br> <code>prob.A2</code></td>
@@ -238,7 +217,7 @@ as second argument to <code>forbes</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>opt.tolOpt</code></td>
+<td><code>opt.tol</code></td>
 <td>real</td>
 <td>$10^{-5}$</td>
 <td>Tolerance on the optimality condition.</td>
