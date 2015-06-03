@@ -16,7 +16,7 @@ the following we describe more in detail how to define these structures. Output
 ``out`` will contain the results of the optimization process.
 
 Examples on how to use forbes can be found in the `demos folder`_. Furthermore, you
-can access the help file of the solvers directly from MATLAB with::
+can access the help file of the solver directly from MATLAB with::
 
     help forbes
 
