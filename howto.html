@@ -135,7 +135,7 @@ can access the help file of the solver directly from MATLAB with:</p>
 <p>If <span class="math">\(A_1, A_2, B, b\)</span> in the constraints are omitted, then it is assumed to be
 <span class="math">\(x_1=x_2=z\)</span> and the problem takes the unconstrained composite form</p>
 <div class="math" id="equation-composite">
-<span class="eqno">(1)</span>\[\begin{split}\mathrm{minimize}\ &amp; f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(z)\end{split}\]</div>
+<span class="eqno">(1)</span>\[\begin{split}\mathrm{minimize}\ &amp; f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(x)\end{split}\]</div>
 <p>Here <span class="math">\(f_1\)</span> is assumed to be quadratic, while <span class="math">\(f_2\)</span> is assumed to be convex, smooth
 (i.e. with Lipschitz continuous gradient) and twice continuously differentiable.
 Function <span class="math">\(g\)</span> is any closed, proper, convex function.</p>
@@ -149,7 +149,7 @@ affine subspace, <span class="math">\(f_2\)</span> (if present) is strongly conv
 differentiable in the interior of its domain, while g is proper, closed and
 convex. Linear operators <span class="math">\(A_1,A_2,B\)</span> need to be specified only if the corresponding
 term in the objective is present, and they are of appropriate dimension along
-with vector b in the constraints.</p>
+with vector <span class="math">\(b\)</span> in the constraints.</p>
 <div class="section" id="functions">
 <h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
 <p>All the functions involved in the problem can be picked from a library of

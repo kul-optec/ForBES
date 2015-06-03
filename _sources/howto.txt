@@ -33,7 +33,7 @@ If :math:`A_1, A_2, B, b` in the constraints are omitted, then it is assumed to 
 :math:`x_1=x_2=z` and the problem takes the unconstrained composite form
 
 .. math::
-    \mathrm{minimize}\ & f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(z)
+    \mathrm{minimize}\ & f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(x)
     :label: composite
 
 Here :math:`f_1` is assumed to be quadratic, while :math:`f_2` is assumed to be convex, smooth
@@ -53,7 +53,7 @@ affine subspace, :math:`f_2` (if present) is strongly convex and twice continuou
 differentiable in the interior of its domain, while g is proper, closed and
 convex. Linear operators :math:`A_1,A_2,B` need to be specified only if the corresponding
 term in the objective is present, and they are of appropriate dimension along
-with vector b in the constraints.
+with vector :math:`b` in the constraints.
 
 Functions
 ---------
