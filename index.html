@@ -1,317 +1,222 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>ForBES</title>
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-    </script>
-    <script type="text/javascript"
-        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1 class="inset-text">ForBES</h1>
-        <p>Generic and efficient MATLAB solver for nonsmooth convex optimization problems</p>
-        <p class="view"><a href="https://github.com/lostella/ForBES">View the Project on GitHub <small>lostella/ForBES</small></a></p>
-        <ul>
-          <li><a href="https://github.com/lostella/ForBES/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/lostella/ForBES/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/lostella/ForBES">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p><strong>ForBES</strong> (standing for <strong>For</strong>ward-<strong>B</strong>ackward <strong>E</strong>nvelope <strong>S</strong>olver) is a MATLAB solver for
-nonsmooth convex optimization problems.</p>
 
-<p>It is generic in the sense that the user can customize the problem to solve in an easy and flexible way.
-It is efficient since it features very efficient algorithms, suited for large scale applications.</p>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to ForBES &mdash; ForBES 0.1 documentation</title>
+  
 
-<p>Here is a performance comparison between ForBES, the fast forward-backward splitting method (also
-known as fast proximal gradient method) and ADMM (alternating direction method of multipliers),
-applied to a Lasso problem with 3K observations and 500K features, for a total of 7.5M nonzero coefficients.</p>
+  
+  
 
-<p align="center">
-<img src="figures/lasso_random_3e3_5e5_lambda_3e-1_noborder.png" width="640" height="404">
-</p>
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
-<h2 class="inset-text">
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
-
-<p>Simply click on one of the links on top of the page, and either clone the GitHub repository or uncompress the
-zip or tar.gz archive. Then move with the MATLAB command line to
-the directory of ForBES, and execute the following command:</p>
-
-<pre><code>&gt; setup_forbes
-</code></pre>
-
-<p>This will compile all the necessary source files and install the directory into MATLAB's path.</p>
-
-<h2 class="inset-text">
-<a id="how-to-use-it" class="anchor" href="#how-to-use-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to use it</h2>
-
-<p>ForBES consist of a MATLAB routine, taking a problem description and (optionally) a set
-of options and returning the solution to the problem.</p>
-
-<pre><code>out = forbes(prob, opt);</code></pre>
-
-<p>Structure <code>prob</code> contains attributes describing the details of the problem, such as objective
-terms and constraints, while <code>opt</code> describes, e.g., details on the algorithm to use, termination
-criteria, the level of verbosity, and so on. In the following we describe more in detail how to define
-these structures. Output <code>out</code> will contain the results of the optimization process.</p>
-
-<p>Examples on how to use <code>forbes</code> can be found in the <a href="https://github.com/lostella/ForBES/tree/master/demos" target="_blank">demos folder</a>.
-Furthermore, you can access the help file of the solvers directly from MATLAB with</p>
-
-<pre><code>&gt; help forbes
-</code></pre>
-
-<h2 class="inset-text">
-<a id="problems" class="anchor" href="#problems" aria-hidden="true"><span class="octicon octicon-link"></span></a>Defining the problem</h2>
-
-<p>We consider here problems in the form</p>
-
-$$\begin{align*}
-\mathrm{minimize}\ & f_1(C_1x_1-d_1) + f_2(C_2x_2-d_2) + g(z)\\
-\mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
-\end{align*}$$
-
-<p>If $A_1, A_2, B, b$ in the constraints are defined, then $C_1 = C_2 = I$ and $d_1 = d_2 = 0$, and the
-problem has the separable form</p>
-
-$$\begin{align*}
-\mathrm{minimize}\ & f_1(x_1) + f_2(x_2) + g(z) \tag{1}\\
-\mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
-\end{align*}$$
-
-<p>Here $f_1$ (if present) is strongly convex and quadratic plus the indicator of an affine subspace,
-$f_2$ (if present) is strongly convex and twice continuously differentiable in the interior of its domain,
-while $g$ is proper, closed and convex. Linear operators $A_1, A_2, B$ need to be specified only if the
-corresponding term in the objective is present, and they are of appropriate dimension along with vector
-$b$ in the constraints.</p>
-
-<p>In case the equality constraint is not specified, then it is assumed to be $x_1 = x_2 = z$ and the
-problem takes the unconstrained composite form</p>
-
-$$ \mathrm{minimize}\ f_1(C_1x-d_1) + f_2(C_2x-d_2) + g(x) \tag{2} $$
-
-Here $f_1$ is assumed to be quadratic, while $f_2$ is assumed to be convex, smooth (i.e. with Lipschitz continuous gradient) and twice continuously
-differentiable. Function $g$ is any closed, proper, convex function.</p>
-
-<h2 class="inset-text">
-<a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
-
-<p>All the functions involved in the problem can be picked from a library of functions available in the
-<a href="https://github.com/lostella/ForBES/tree/master/library" target="_blank">library folder</a>. This contains procedures returning commonly used functions, specified by a list of parameters if needed.
-These procedures can be invoked and their result directly assigned to the structure containing the problem. For example:</p>
-
-<pre><code>prob.f2 = logLogistic(m); % f2 is the log-logistic function times a coefficient m
-prob.g = nuclearNorm(m, n); % g is the nuclear norm for m-by-n matrices
-prob.g = indPos(); % g is the indicator function of the nonnegative orthant
-</code></pre>
-
-<p>Check the documentation of each of the functions in the <a href="https://github.com/lostella/ForBES/tree/master/library" target="_blank">library folder</a>
-for more information on how to use them and what parameters they require.</p>
-
-<h2 class="inset-text">
-<a id="parameters" class="anchor" href="#parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem attributes</h2>
-
-<table>
-<thead>
-<tr>
-<th>Attribute</th>
-<th>Type</th>
-<th>Mandatory?</th>
-<th>Default</th>
-<th>What is it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>prob.f1</code> <br> <code>prob.f2</code> <br> <code>prob.g</code></td>
-<td>functions of the <a href="https://github.com/lostella/ForBES/tree/master/library" target="_blank">library folder</a>.</td>
-<td>no</td>
-<td>the zero function</td>
-<td>Functions $f_1$, $f_2$ and $g$ in the cost. See <a href="#functions">Functions</a> for more information. Function $f_1$ is specified this way only for problems in the form $(1)$.</td>
-</tr>
-<tr>
-<td>
-<code>prob.C1</code> <br> <code>prob.d1</code> <br> <code>prob.C2</code> <br> <code>prob.d2</code>
-</td>
-<td>matrices (or functions) and vectors</td>
-<td>no</td>
-<td>$C_1 = I$ <br> $d_1 = 0$ <br> $C_2 = I$ <br> $d_2 = 0$</td>
-<td>The affine mapping with which $f_1$ and $f_2$ are composed.</td>
-</tr>
-<tr>
-<td><code>prob.C1t</code> <br> <code>prob.C2t</code></td>
-<td>function</td>
-<td>yes, if $C_1$ or $C_2$ are defined as functions</td>
-<td>-</td>
-<td>The functions computing the adjoint of $C_1$ and $C_2$.</td>
-</tr>
-<tr>
-<td><code>prob.A1</code> <br> <code>prob.A2</code></td>
-<td>matrix or function</td>
-<td>no</td>
-<td>-</td>
-<td>Matrix $A_1$ and $A_2$in the constraint.</td>
-</tr>
-<tr>
-<td><code>prob.A1t</code> <br> <code>prob.A2t</code></td>
-<td>function</td>
-<td>yes, if <code>prob.A1</code> or <code>prob.A2</code> are defined as a function</td>
-<td>-</td>
-<td>Procedure computing the adjoint mapping of $A_1$ and $A_2$.</td>
-</tr>
-<tr>
-<td><code>prob.B</code></td>
-<td>matrix</td>
-<td>yes</td>
-<td>-</td>
-<td>Matrix $B$ in the constraint.</td>
-</tr>
-<tr>
-<td><code>prob.b</code></td>
-<td>vector</td>
-<td>yes, if problem has the form $(1)$</td>
-<td>-</td>
-<td>The right hand side $b$ of the constraint.</td>
-</tr>
-<tr>
-<td><code>prob.x0</code></td>
-<td>vector</td>
-<td>yes, if problem has the form $(2)$</td>
-<td>-</td>
-<td>The starting point for the algorithm.</td>
-</tr>
-</tbody>
-</table>
-
-<h2 class="inset-text">
-<a id="options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
-
-<p>Optional settings may be enabled by specifying the correspondent fields in the <code>opt</code> structure passed
-as second argument to <code>forbes</code>.</p>
-
-<table>
-<thead>
-<tr>
-<th>Attribute</th>
-<th>Type</th>
-<th>Default</th>
-<th>What is it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>opt.tol</code></td>
-<td>real</td>
-<td>$10^{-5}$</td>
-<td>Tolerance on the optimality condition.</td>
-</tr>
-<tr>
-<td><code>opt.maxit</code></td>
-<td>integer</td>
-<td>$100 n$
-</td>
-<td>Maximum number of iterations.</td>
-</tr>
-<tr>
-<td><code>opt.method</code></td>
-<td>string</td>
-<td>'lbfgs'</td>
-<td>Algorithm to use for computing descent steps. Can select between: <br> 'sd' (steepest descent) <br> 'lbfgs' (limited memory BFGS) <br>  'cg-desc', 'cg-prp', 'cg-dyhs' (various nonlinear CG algorithms) <br> 'bb' (Barzilai-Borwein).</td>
-</tr>
-<tr>
-<td><code>opt.variant</code></td>
-<td>string</td>
-<td>'global'</td>
-<td>'basic': Use the basic algorithm<br> 'global': Use the <strong>global</strong> variant<br> 'fast': Use the <strong>fast</strong> variant</td>
-</tr>
-<tr>
-<td><code>opt.linesearch</code></td>
-<td>string</td>
-<td>method dependant</td>
-<td>Line search strategy to use. Can select between: <br> 'armijo' (default for 'sd') <br> 'nonmonotone-armijo' (default for 'bb') <br> 'hager-zhang' (default for the rest) <br> 'lemarechal' <br> 'fletcher'</td>
-</tr>
-</tbody>
-</table>
-
-<h2 class="inset-text">
-<a id="svms" class="anchor" href="#svms" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example: support vector machines</h2>
-
-<p>SVMs can be cast as the following convex optimization problem</p>
-$$ \begin{align*}
-\mathrm{minimize}\ &\frac{\lambda}{2}\|x\|_2^2 + \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
-\mathrm{subject\ to}\ &Ax = z
-\end{align*}$$
-
-<p>Therefore we have in problem $(1)$</p>
-$$ x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I$$
-
-<p>Function $g$ is called <em>hinge loss</em> and is provided in the library (see <a href="#functions">Functions</a> for more information).
-The problem can therefore be defined as</p>
-
-<pre><code>prob.f1 = squaredNorm(lambda);
-prob.g = hingeLoss(1/m, b); % vector b contains the labels
-prob.A1 = A; % matrix A is the features (or 'design') matrix
-prob.B = -1;
-prob.c = zeros(m, 1);
-out = forbes(prob);
-</code></pre>
-
-<h2 class="inset-text">
-<a id="logreg" class="anchor" href="#logreg" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example: sparse logistic regression</h2>
-
-<p>Consider the following problem</p>
-
-$$ \mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1 $$
-
-<p>The smooth term in this case is the logistic function, and the nonsmooth term is the $\ell_1$ regularization.
-In problem $(2)$ we have</p>
-
-$$ \begin{align*}
-f_2(x) &= \sum_{i=1}^m \log(1+\exp(-x_i)) \\
-g(x) &= r\|x\|_1 = \sum_i |x_i|
-\end{align*}$$
-
-<p>This problem can be defined using the functions in the library (see <a href="#functions">Functions</a> for more information)
-as follows:</p>
-
-<pre><code>prob.C2 = diag(sparse(b))*A; % vector b contains the labels, A is the design matrix
-prob.f2 = logLogistic();
-prob.g = l1Norm(r);
-prob.x0 = zeros(n,1);
-out = forbes(prob);
-</code></pre>
-
-<h2 class="inset-text">
-<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
-
-<p>ForBES is developed by Lorenzo Stella [<code>lorenzo.stella-at-imtlucca.it</code>] and Panos Patrinos [<code>panagiotis.patrinos-at-imtlucca.it</code>]
-at <a href="http://www.imtlucca.it" target="_blank">IMT Lucca</a>.
-Any feedback, bug report or suggestion for future improvements is more than welcome.
-We recommend using the <a href="https://github.com/lostella/ForBES/issues" target="_blank">issue tracker</a> on GitHub to report bugs.</p>
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/lostella">lostella</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+  
+  
     
-  </body>
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="ForBES 0.1 documentation" href="#"/>
+        <link rel="next" title="Installation" href="installation.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="#" class="fa fa-home"> ForBES</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#defining-the-problem">Defining the problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#specifying-the-options">Specifying the options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">ForBES</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Welcome to ForBES</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="welcome-to-forbes">
+<h1>Welcome to ForBES<a class="headerlink" href="#welcome-to-forbes" title="Permalink to this headline">¶</a></h1>
+<p>ForBES (<em>For</em>ward-<em>B</em>ackward <em>E</em>nvelope <em>S</em>olver) is a MATLAB solver for
+nonsmooth convex optimization problems. It is generic in the sense that the user
+can customize the problem to solve in an easy and flexible way. It is efficient
+since it features very efficient algorithms, suited for large scale applications.</p>
+<p>ForBES is open source and <a class="reference external" href="https://github.com/lostella/ForBES">available on GitHub</a>.</p>
+<p>Here is a performance comparison between ForBES, the fast forward-backward
+splitting method (also known as fast proximal gradient method) and ADMM
+(alternating direction method of multipliers), applied to a Lasso problem with
+3K observations and 500K features, for a total of 7.5M nonzero coefficients.</p>
+<a class="reference internal image-reference" href="_images/lasso_random_3e3_5e5_lambda_3e-1_noborder.png"><img alt="_images/lasso_random_3e3_5e5_lambda_3e-1_noborder.png" class="align-center" src="_images/lasso_random_3e3_5e5_lambda_3e-1_noborder.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#defining-the-problem">Defining the problem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#problem-attributes">Problem attributes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#specifying-the-options">Specifying the options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="credits">
+<h1>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h1>
+<p>ForBES is developed by <a class="reference external" href="http://lostella.github.io">Lorenzo Stella</a> [lorenzo.stella-at-imtlucca.it] and Panos
+Patrinos [panagiotis.patrinos-at-imtlucca.it] at <a class="reference external" href="http://www.imtlucca.it">IMT Lucca</a>. Any feedback, bug
+report or suggestion for future improvements is more than welcome. We recommend
+using the <a class="reference external" href="https://github.com/lostella/ForBES/issues">issue tracker</a> on GitHub to report bugs.</p>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Lorenzo Stella, Panagiotis Patrinos.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+   
+
+
+</body>
 </html>
