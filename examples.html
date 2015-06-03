@@ -1,0 +1,225 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Examples &mdash; ForBES 0.1 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="ForBES 0.1 documentation" href="index.html"/>
+        <link rel="prev" title="How to use it" href="howto.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> ForBES</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#defining-the-problem">Defining the problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#specifying-the-options">Specifying the options</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#support-vector-machines">Support vector machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sparse-logistic-regression">Sparse logistic regression</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">ForBES</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Examples</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="examples">
+<span id="examples-rst"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>In the following we show how ForBES can be used to model and solve some well
+known optimization problems.</p>
+<div class="section" id="support-vector-machines">
+<h2>Support vector machines<a class="headerlink" href="#support-vector-machines" title="Permalink to this headline">¶</a></h2>
+<p>SVMs can be cast as the following convex optimization problem</p>
+<div class="math">
+\[\begin{split}\mathrm{minimize}\ &amp;\frac{\lambda}{2}\|x\|_2^2 + \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
+\mathrm{subject\ to}\ &amp;Ax = z\end{split}\]</div>
+<p>Therefore we have</p>
+<div class="math">
+\[x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I\]</div>
+<p>Function <span class="math">\(g\)</span> is called hinge loss and is provided in the library (see Functions
+for more information). The problem can therefore be defined as:</p>
+<div class="highlight-python"><div class="highlight"><pre>prob.f1 = squaredNorm(lambda);
+prob.g = hingeLoss(1/m, b); % vector b contains the labels
+prob.A1 = A; % matrix A is the features (or &#39;design&#39;) matrix
+prob.B = -1;
+prob.c = zeros(m, 1);
+out = forbes(prob);
+</pre></div>
+</div>
+</div>
+<div class="section" id="sparse-logistic-regression">
+<h2>Sparse logistic regression<a class="headerlink" href="#sparse-logistic-regression" title="Permalink to this headline">¶</a></h2>
+<p>Consider the following problem</p>
+<div class="math">
+\[\mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1\]</div>
+<p>The smooth term in this case is the logistic function, and the nonsmooth term is
+the <span class="math">\(\ell_1\)</span> regularization. We then have</p>
+<div class="math">
+\[\begin{split}f_2(x) &amp;= \sum_{i=1}^m \log(1+\exp(-x_i)) \\
+g(x) &amp;= r\|x\|_1 = \sum_i |x_i|\end{split}\]</div>
+<p>This problem can be defined using the functions in the library (see Functions
+for more information) as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>prob.C2 = diag(sparse(b))*A; % vector b contains the labels, A is the design matrix
+prob.f2 = logLogistic();
+prob.g = l1Norm(r);
+prob.x0 = zeros(n,1);
+out = forbes(prob);
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="howto.html" class="btn btn-neutral" title="How to use it"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Lorenzo Stella, Panagiotis Patrinos.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+   
+
+
+</body>
+</html>

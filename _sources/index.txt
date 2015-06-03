@@ -1,0 +1,53 @@
+.. ForBES documentation master file, created by
+   sphinx-quickstart on Tue May 26 21:56:24 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+.. .. figure:: _images/logo.png
+ 	:width: 260 px
+	:figwidth: 280 px
+	:align: left
+	:target: `GitHub project`_
+
+Welcome to ForBES
+=================
+
+ForBES (\ *For*\ ward-\ *B*\ ackward *E*\ nvelope *S*\ olver) is a MATLAB solver for
+nonsmooth convex optimization problems. It is generic in the sense that the user
+can customize the problem to solve in an easy and flexible way. It is efficient
+since it features very efficient algorithms, suited for large scale applications.
+
+ForBES is open source and `available on GitHub`_.
+
+Here is a performance comparison between ForBES, the fast forward-backward
+splitting method (also known as fast proximal gradient method) and ADMM
+(alternating direction method of multipliers), applied to a Lasso problem with
+3K observations and 500K features, for a total of 7.5M nonzero coefficients.
+
+.. image:: _images/lasso_random_3e3_5e5_lambda_3e-1_noborder.png
+	:width: 600 px
+	:align: center
+
+Contents
+========
+
+.. toctree::
+	:maxdepth: 3
+
+	installation.rst
+	howto.rst
+	examples.rst
+
+Credits
+=======
+
+ForBES is developed by `Lorenzo Stella`_ [lorenzo.stella-at-imtlucca.it] and Panos
+Patrinos [panagiotis.patrinos-at-imtlucca.it] at `IMT Lucca`_. Any feedback, bug
+report or suggestion for future improvements is more than welcome. We recommend
+using the `issue tracker`_ on GitHub to report bugs.
+
+.. _Lorenzo Stella: http://lostella.github.io
+.. _IMT Lucca: http://www.imtlucca.it
+.. _available on GitHub: https://github.com/lostella/ForBES
+.. _GitHub project: https://github.com/lostella/ForBES
+.. _issue tracker: https://github.com/lostella/ForBES/issues

@@ -1,0 +1,140 @@
+.. _howto.rst:
+
+*************
+How to use it
+*************
+
+ForBES consist of a MATLAB routine, taking a problem description and
+(optionally) a set of options and returning the solution to the problem::
+
+    out = forbes(prob, opt);
+
+Structure ``prob`` contains attributes describing the details of the problem, such
+as objective terms and constraints, while opt describes, e.g., details on the
+algorithm to use, termination criteria, the level of verbosity, and so on. In
+the following we describe more in detail how to define these structures. Output
+``out`` will contain the results of the optimization process.
+
+Examples on how to use forbes can be found in the `demos folder`_. Furthermore, you
+can access the help file of the solvers directly from MATLAB with::
+
+    help forbes
+
+Defining the problem
+====================
+
+We consider here problems in the form
+
+.. math::
+    \mathrm{minimize}\ & f_1(C_1x_1−d_1) + f_2(C_2x_2−d_2) + g(z)\\
+    \mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
+
+If :math:`A_1, A_2, B, b` in the constraints are omitted, then it is assumed to be
+:math:`x_1=x_2=z` and the problem takes the unconstrained composite form
+
+.. math::
+    \mathrm{minimize}\ & f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(z)
+    :label: composite
+
+Here :math:`f_1` is assumed to be quadratic, while :math:`f_2` is assumed to be convex, smooth
+(i.e. with Lipschitz continuous gradient) and twice continuously differentiable.
+Function :math:`g` is any closed, proper, convex function.
+
+If :math:`A_1, A_2, B, b` are specified, then :math:`C_1=C_2=I` and :math:`d_1=d_2=0`,
+and the problem has the separable form
+
+.. math::
+    \mathrm{minimize}\ & f_1(x_1) + f_2(x_2) + g(z)\\
+    \mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
+    :label: separable
+
+Here :math:`f_1` (if present) is strongly convex and quadratic plus the indicator of an
+affine subspace, :math:`f_2` (if present) is strongly convex and twice continuously
+differentiable in the interior of its domain, while g is proper, closed and
+convex. Linear operators :math:`A_1,A_2,B` need to be specified only if the corresponding
+term in the objective is present, and they are of appropriate dimension along
+with vector b in the constraints.
+
+Functions
+---------
+
+All the functions involved in the problem can be picked from a library of
+functions available in the `library folder`_. This contains procedures returning
+commonly used functions, specified by a list of parameters if needed. These
+procedures can be invoked and their result directly assigned to the structure
+containing the problem. For example::
+
+    prob.f2 = logLogistic(m); % f2 is the log-logistic function times a coefficient m
+    prob.g = nuclearNorm(m, n); % g is the nuclear norm for m-by-n matrices
+    prob.g = indPos(); % g is the indicator function of the nonnegative orthant
+
+Check the documentation of each of the functions in the `library folder`_ for more
+information on how to use them and what parameters they require.
+
+Problem attributes
+------------------
+
++---------------+-----------------------+------------------------------+
+| Attribute     | Type                  | What is it                   |
++===============+=======================+==============================+
+| ``prob.f1``   | functions             | The functions appearing in   |
++---------------+                       | the objective                |
+| ``prob.f2``   |                       |                              |
++---------------+                       |                              |
+| ``prob.g``    |                       |                              |
++---------------+-----------------------+------------------------------+
+| ``prob.C1``   | matrices              | The affine terms f1 and f2   |
++---------------+ or function handles   | are composed with            |
+| ``prob.C2``   |                       |                              |
++---------------+-----------------------+                              |
+| ``prob.d1``   | vectors               |                              |
++---------------+                       |                              |
+| ``prob.d2``   |                       |                              |
++---------------+-----------------------+------------------------------+
+| ``prob.C1t``  | function handles      | The adjoint operators of     |
++---------------+                       | C1 and C2                    |
+| ``prob.C2t``  |                       |                              |
++---------------+-----------------------+------------------------------+
+| ``prob.A1``   | matrices              | Matrices A1 and A2 appearing |
++---------------+ or function handles   | in the constraint            |
+| ``prob.A2``   |                       |                              |
++---------------+-----------------------+------------------------------+
+| ``prob.A1t``  | function handles      | The adjoint operators of     |
++---------------+                       | A1 and A2                    |
+| ``prob.A2t``  |                       |                              |
++---------------+-----------------------+------------------------------+
+| ``prob.B``    | matrix                | Matrix B in the constraint   |
++---------------+-----------------------+------------------------------+
+| ``prob.b``    | vector                | Right hand side in the       |
+|               |                       | constraint                   |
++---------------+-----------------------+------------------------------+
+| ``prob.x0``   | vector                | Initial approximation        |
++---------------+-----------------------+------------------------------+
+
+Specifying the options
+======================
+
++--------------------+-----------------------+-----------------------------------------------------------+
+| Attribute          | Type                  | What is it                                                |
++====================+=======================+===========================================================+
+| ``opt.tol``        | real                  | Tolerance for optimality                                  |
++--------------------+-----------------------+-----------------------------------------------------------+
+| ``opt.maxit``      | integer               | Maximum number of iterations                              |
++--------------------+-----------------------+-----------------------------------------------------------+
+| ``opt.method``     | string                | - ``'sd'``: steepest descent                              |
+|                    |                       | - ``'cg-desc'``, ``'cg-prp'``, ``'cg-dyhs'``: nonliner CG |
+|                    |                       | - ``'lbfgs'``: L-BFGS                                     |
++--------------------+-----------------------+-----------------------------------------------------------+
+|``opt.variant``     | string                | - ``'basic'``                                             |
+|                    |                       | - ``'global'``                                            |
+|                    |                       | - ``'fast'``                                              |
++--------------------+-----------------------+-----------------------------------------------------------+
+| ``opt.linesearch`` | string                | - ``'armijo'``                                            |
+|                    |                       | - ``'hager-zhang'``                                       |
+|                    |                       | - ``'lemarechal'``                                        |
+|                    |                       | - ``'fletcher'``                                          |
+|                    |                       | - ``'more-thuente'``                                      |
++--------------------+-----------------------+-----------------------------------------------------------+
+
+.. _library folder: https://github.com/lostella/ForBES/tree/master/library
+.. _demos folder: https://github.com/lostella/ForBES/tree/master/demos

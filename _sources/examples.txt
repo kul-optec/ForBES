@@ -1,0 +1,57 @@
+.. _examples.rst:
+
+********
+Examples
+********
+
+In the following we show how ForBES can be used to model and solve some well
+known optimization problems.
+
+Support vector machines
+=======================
+
+SVMs can be cast as the following convex optimization problem
+
+.. math::
+    \mathrm{minimize}\ &\frac{\lambda}{2}\|x\|_2^2 + \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
+    \mathrm{subject\ to}\ &Ax = z
+
+Therefore we have
+
+.. math::
+    x_1 = x,\ f_1(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \frac{1}{m}\sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I
+
+Function :math:`g` is called hinge loss and is provided in the library (see Functions
+for more information). The problem can therefore be defined as::
+
+    prob.f1 = squaredNorm(lambda);
+    prob.g = hingeLoss(1/m, b); % vector b contains the labels
+    prob.A1 = A; % matrix A is the features (or 'design') matrix
+    prob.B = -1;
+    prob.c = zeros(m, 1);
+    out = forbes(prob);
+
+Sparse logistic regression
+==========================
+
+Consider the following problem
+
+.. math::
+    \mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1
+
+The smooth term in this case is the logistic function, and the nonsmooth term is
+the :math:`\ell_1` regularization. We then have
+
+.. math::
+    f_2(x) &= \sum_{i=1}^m \log(1+\exp(-x_i)) \\
+    g(x) &= r\|x\|_1 = \sum_i |x_i|
+
+This problem can be defined using the functions in the library (see Functions
+for more information) as follows::
+
+    prob.C2 = diag(sparse(b))*A; % vector b contains the labels, A is the design matrix
+    prob.f2 = logLogistic();
+    prob.g = l1Norm(r);
+    prob.x0 = zeros(n,1);
+    out = forbes(prob);
+

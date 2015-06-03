@@ -1,0 +1,15 @@
+.. _installation.rst:
+
+************
+Installation
+************
+
+Simply clone the `GitHub repository`_, or uncompress this `zip archive`_. Then move with the MATLAB
+command line to the directory of ForBES, and execute the following command::
+
+    setup_forbes
+
+This will compile all the necessary source files and install the directory into MATLAB's path.
+
+.. _GitHub repository: https://github.com/lostella/ForBES
+.. _zip archive: https://github.com/lostella/ForBES/archive/master.zip
