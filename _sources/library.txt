@@ -1,0 +1,7 @@
+.. _library.rst:
+
+********************
+Library of functions
+********************
+
+Todo.

@@ -8,11 +8,14 @@
 	:figwidth: 280 px
 	:align: left
 	:target: `GitHub project`_
+	
+.. role:: underline
+    :class: underline
 
 Welcome to ForBES
 =================
 
-ForBES (\ *For*\ ward-\ *B*\ ackward *E*\ nvelope *S*\ olver) is a MATLAB solver for
+ForBES (Forward-Backward Envelope Solver) is a MATLAB solver for
 nonsmooth convex optimization problems. It is generic in the sense that the user
 can customize the problem to solve in an easy and flexible way. It is efficient
 since it features very efficient algorithms, suited for large scale applications.
@@ -32,10 +35,12 @@ Contents
 ========
 
 .. toctree::
-	:maxdepth: 3
+	:maxdepth: 2
 
 	installation.rst
 	howto.rst
+	advanced.rst
+	library.rst
 	examples.rst
 
 Credits

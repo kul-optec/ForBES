@@ -6,6 +6,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>How to use it &mdash; ForBES 0.1 documentation</title>
@@ -15,7 +16,6 @@
   
 
   
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
 
   
   
@@ -32,11 +32,11 @@
 
   
     <link rel="top" title="ForBES 0.1 documentation" href="index.html"/>
-        <link rel="next" title="Examples" href="examples.html"/>
+        <link rel="next" title="Advanced features" href="advanced.html"/>
         <link rel="prev" title="Installation" href="installation.html"/> 
 
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+  <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
@@ -48,8 +48,14 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-nav-search">
         
-          <a href="index.html" class="fa fa-home"> ForBES</a>
+
         
+          <a href="index.html" class="icon icon-home"> ForBES
+        
+
+        
+        </a>
+
         
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -58,6 +64,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+
+        
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
@@ -67,10 +75,14 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">How to use it</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#defining-the-problem">Defining the problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#specifying-the-options">Specifying the options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#problem-structure">Problem structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <tt class="docutils literal"><span class="pre">forbes</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Library of functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
@@ -103,6 +115,8 @@
     <li>How to use it</li>
       <li class="wy-breadcrumbs-aside">
         
+          
+        
       </li>
   </ul>
   <hr/>
@@ -111,138 +125,85 @@
             
   <div class="section" id="how-to-use-it">
 <span id="howto-rst"></span><h1>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this headline">¶</a></h1>
-<p>ForBES consist of a MATLAB routine, taking a problem description and
-(optionally) a set of options and returning the solution to the problem:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">out</span> <span class="o">=</span> <span class="n">forbes</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">opt</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>Structure <tt class="docutils literal"><span class="pre">prob</span></tt> contains attributes describing the details of the problem, such
-as objective terms and constraints, while opt describes, e.g., details on the
-algorithm to use, termination criteria, the level of verbosity, and so on. In
-the following we describe more in detail how to define these structures. Output
-<tt class="docutils literal"><span class="pre">out</span></tt> will contain the results of the optimization process.</p>
-<p>Examples on how to use forbes can be found in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/demos">demos folder</a>. Furthermore, you
-can access the help file of the solver directly from MATLAB with:</p>
+<p>ForBES consist of the MATLAB routine <tt class="docutils literal"><span class="pre">forbes</span></tt> taking a problem description
+and (optionally) some options, and returning the results of the optimization
+process. We will now describe the structure of the problems that ForBES solves,
+and how to specify it to the <tt class="docutils literal"><span class="pre">forbes</span></tt> routine.</p>
+<p>Examples on how to use forbes can be found in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/demos">demos folder</a>.</p>
+<p>You can access the help file of the solver directly from MATLAB in any moment with:</p>
 <div class="highlight-python"><div class="highlight"><pre>help forbes
 </pre></div>
 </div>
-<div class="section" id="defining-the-problem">
-<h2>Defining the problem<a class="headerlink" href="#defining-the-problem" title="Permalink to this headline">¶</a></h2>
-<p>We consider here problems in the form</p>
+<div class="section" id="problem-structure">
+<span id="id1"></span><h2>Problem structure<a class="headerlink" href="#problem-structure" title="Permalink to this headline">¶</a></h2>
+<p>The generic formulation of the problems we consider is the following:</p>
 <div class="math">
-\[\begin{split}\mathrm{minimize}\ &amp; f_1(C_1x_1−d_1) + f_2(C_2x_2−d_2) + g(z)\\
-\mathrm{subject\ to}\ &amp; A_1x_1 + A_2x_2 + Bz = b\end{split}\]</div>
-<p>If <span class="math">\(A_1, A_2, B, b\)</span> in the constraints are omitted, then it is assumed to be
-<span class="math">\(x_1=x_2=z\)</span> and the problem takes the unconstrained composite form</p>
-<div class="math" id="equation-composite">
-<span class="eqno">(1)</span>\[\begin{split}\mathrm{minimize}\ &amp; f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(x)\end{split}\]</div>
-<p>Here <span class="math">\(f_1\)</span> is assumed to be quadratic, while <span class="math">\(f_2\)</span> is assumed to be convex, smooth
-(i.e. with Lipschitz continuous gradient) and twice continuously differentiable.
-Function <span class="math">\(g\)</span> is any closed, proper, convex function.</p>
-<p>If <span class="math">\(A_1, A_2, B, b\)</span> are specified, then <span class="math">\(C_1=C_2=I\)</span> and <span class="math">\(d_1=d_2=0\)</span>,
-and the problem has the separable form</p>
-<div class="math" id="equation-separable">
-<span class="eqno">(2)</span>\[\begin{split}\mathrm{minimize}\ &amp; f_1(x_1) + f_2(x_2) + g(z)\\
-\mathrm{subject\ to}\ &amp; A_1x_1 + A_2x_2 + Bz = b\end{split}\]</div>
-<p>Here <span class="math">\(f_1\)</span> (if present) is strongly convex and quadratic plus the indicator of an
-affine subspace, <span class="math">\(f_2\)</span> (if present) is strongly convex and twice continuously
-differentiable in the interior of its domain, while g is proper, closed and
-convex. Linear operators <span class="math">\(A_1,A_2,B\)</span> need to be specified only if the corresponding
-term in the objective is present, and they are of appropriate dimension along
-with vector <span class="math">\(b\)</span> in the constraints.</p>
-<div class="section" id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
-<p>All the functions involved in the problem can be picked from a library of
-functions available in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a>. This contains procedures returning
-commonly used functions, specified by a list of parameters if needed. These
-procedures can be invoked and their result directly assigned to the structure
-containing the problem. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre>prob.f2 = logLogistic(m); % f2 is the log-logistic function times a coefficient m
-prob.g = nuclearNorm(m, n); % g is the nuclear norm for m-by-n matrices
-prob.g = indPos(); % g is the indicator function of the nonnegative orthant
+\[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(z)\\
+\mathrm{subject\ to}\ &amp; Ax + Bz = b\end{split}\]</div>
+<p>Not all the terms need to be present: if <span class="math">\(A, B, b\)</span> in the constraints are
+omitted, then it is assumed to be <span class="math">\(x=z\)</span> and the problem takes the
+unconstrained composite form</p>
+<div class="math">
+\[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(x)\end{split}\]</div>
+<p>Here <span class="math">\(f\)</span> is assumed to be convex, smooth (i.e. with Lipschitz continuous
+gradient) and twice continuously differentiable. Function <span class="math">\(g\)</span> is any
+closed, proper, convex function.</p>
+<p>If <span class="math">\(A, B, b\)</span> are specified, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>, and the
+problem has the separable form</p>
+<div class="math">
+\[\begin{split}\mathrm{minimize}\ &amp; f(x) + g(z)\\
+\mathrm{subject\ to}\ &amp; Ax + Bz = b\end{split}\]</div>
+<p>Here <span class="math">\(f\)</span> (if present) is strongly convex and twice continuously differentiable
+in the interior of its domain, while g is proper, closed and convex. Linear operators
+<span class="math">\(A,B\)</span> are of appropriate dimension along with vector <span class="math">\(b\)</span> in the constraints.</p>
+</div>
+<div class="section" id="calling-forbes">
+<h2>Calling <tt class="docutils literal"><span class="pre">forbes</span></tt><a class="headerlink" href="#calling-forbes" title="Permalink to this headline">¶</a></h2>
+<p>The most generic call to <tt class="docutils literal"><span class="pre">forbes</span></tt> is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">out</span> <span class="o">=</span> <span class="n">forbes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">aff</span><span class="p">,</span> <span class="n">constr</span><span class="p">,</span> <span class="n">opt</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Check the documentation of each of the functions in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a> for more
-information on how to use them and what parameters they require.</p>
+<ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">f</span></tt> and <tt class="docutils literal"><span class="pre">g</span></tt> contain the objective terms of the problem (see section <a class="reference internal" href="#functions"><em>Functions</em></a> below on how to select them).</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">init</span></tt> is the initial value of <span class="math">\(x\)</span> if there are no equality constraints,
+or the initial dual variable associated with the constraint <span class="math">\(Ax+Bz=b\)</span> otherwise.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">aff</span></tt> is a cell array describing the affine terms composed with <span class="math">\(f\)</span>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aff</span> <span class="o">=</span> <span class="p">{</span><span class="n">C</span><span class="p">,</span> <span class="n">d</span><span class="p">};</span>
+</pre></div>
 </div>
-<div class="section" id="problem-attributes">
-<h3>Problem attributes<a class="headerlink" href="#problem-attributes" title="Permalink to this headline">¶</a></h3>
-<table border="1" class="docutils">
-<colgroup>
-<col width="22%" />
-<col width="34%" />
-<col width="44%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Attribute</th>
-<th class="head">Type</th>
-<th class="head">What is it</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.f1</span></tt></td>
-<td rowspan="3">functions</td>
-<td rowspan="3">The functions appearing in
-the objective</td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.f2</span></tt></td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.g</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.C1</span></tt></td>
-<td rowspan="2">matrices
-or function handles</td>
-<td rowspan="4">The affine terms f1 and f2
-are composed with</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.C2</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.d1</span></tt></td>
-<td rowspan="2">vectors</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.d2</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.C1t</span></tt></td>
-<td rowspan="2">function handles</td>
-<td rowspan="2">The adjoint operators of
-C1 and C2</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.C2t</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.A1</span></tt></td>
-<td rowspan="2">matrices
-or function handles</td>
-<td rowspan="2">Matrices A1 and A2 appearing
-in the constraint</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.A2</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.A1t</span></tt></td>
-<td rowspan="2">function handles</td>
-<td rowspan="2">The adjoint operators of
-A1 and A2</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.A2t</span></tt></td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.B</span></tt></td>
-<td>matrix</td>
-<td>Matrix B in the constraint</td>
-</tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">prob.b</span></tt></td>
-<td>vector</td>
-<td>Right hand side in the
-constraint</td>
-</tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">prob.x0</span></tt></td>
-<td>vector</td>
-<td>Initial approximation</td>
-</tr>
-</tbody>
-</table>
+<p>If omitted or empty, that is <tt class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">{}</span></tt>, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">constr</span></tt> is a cell array describing the linear equality constraints:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">constr</span> <span class="o">=</span> <span class="p">{</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">b</span><span class="p">};</span>
+</pre></div>
 </div>
+<p>If omitted or empty, that is <tt class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">{}</span></tt>, then <span class="math">\(A=I\)</span>, <span class="math">\(B=-I\)</span> and <span class="math">\(b=0\)</span>.</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">opt</span></tt> describes, e.g., details on the algorithm to use, termination criteria,
+the level of verbosity, and so on. More on this in the <a class="reference internal" href="#options"><em>Options</em></a> section below.</p>
+</li>
+</ul>
+<p>Output <tt class="docutils literal"><span class="pre">out</span></tt> will contain the results of the optimization process.</p>
 </div>
-<div class="section" id="specifying-the-options">
-<h2>Specifying the options<a class="headerlink" href="#specifying-the-options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="functions">
+<span id="id2"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<p>All the functions involved in the problem can be picked from a library of
+functions available in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a>: this contains procedures returning
+commonly used functions, specified by a list of parameters if needed. The return
+object can directly be fed to <tt class="docutils literal"><span class="pre">forbes</span></tt> to describe the problem. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre>f = logLoss(m); % f is the log-logistic function times a coefficient m
+g = indPos(); % g is the indicator function of the nonnegative orthant
+out = forbes(f, g);
+</pre></div>
+</div>
+<p>Check out the <a class="reference internal" href="library.html#library-rst"><em>Library of functions</em></a> section for more information on the available
+functions and how to use them and the parameters they require, or the documentation
+of each of the functions in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a>.</p>
+</div>
+<div class="section" id="options">
+<span id="id3"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="20%" />
@@ -304,10 +265,10 @@ constraint</td>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="examples.html" class="btn btn-neutral float-right" title="Examples">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="advanced.html" class="btn btn-neutral float-right" title="Advanced features" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="installation.html" class="btn btn-neutral" title="Installation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -319,10 +280,10 @@ constraint</td>
         &copy; Copyright 2015, Lorenzo Stella, Panagiotis Patrinos.
     </p>
   </div>
-
   Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-  
+
 </footer>
+
         </div>
       </div>
 

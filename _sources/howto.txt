@@ -4,115 +4,97 @@
 How to use it
 *************
 
-ForBES consist of a MATLAB routine, taking a problem description and
-(optionally) a set of options and returning the solution to the problem::
+ForBES consist of the MATLAB routine ``forbes`` taking a problem description
+and (optionally) some options, and returning the results of the optimization
+process. We will now describe the structure of the problems that ForBES solves,
+and how to specify it to the ``forbes`` routine.
 
-    out = forbes(prob, opt);
+Examples on how to use forbes can be found in the `demos folder`_. 
 
-Structure ``prob`` contains attributes describing the details of the problem, such
-as objective terms and constraints, while opt describes, e.g., details on the
-algorithm to use, termination criteria, the level of verbosity, and so on. In
-the following we describe more in detail how to define these structures. Output
-``out`` will contain the results of the optimization process.
-
-Examples on how to use forbes can be found in the `demos folder`_. Furthermore, you
-can access the help file of the solver directly from MATLAB with::
+You can access the help file of the solver directly from MATLAB in any moment with::
 
     help forbes
 
-Defining the problem
-====================
+.. _problem-structure:
 
-We consider here problems in the form
+Problem structure
+=================
 
-.. math::
-    \mathrm{minimize}\ & f_1(C_1x_1−d_1) + f_2(C_2x_2−d_2) + g(z)\\
-    \mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
-
-If :math:`A_1, A_2, B, b` in the constraints are omitted, then it is assumed to be
-:math:`x_1=x_2=z` and the problem takes the unconstrained composite form
+The generic formulation of the problems we consider is the following:
 
 .. math::
-    \mathrm{minimize}\ & f_1(C_1x−d_1) + f_2(C_2x−d_2) + g(x)
-    :label: composite
+    \mathrm{minimize}\ & f(Cx+d) + g(z)\\
+    \mathrm{subject\ to}\ & Ax + Bz = b
 
-Here :math:`f_1` is assumed to be quadratic, while :math:`f_2` is assumed to be convex, smooth
-(i.e. with Lipschitz continuous gradient) and twice continuously differentiable.
-Function :math:`g` is any closed, proper, convex function.
-
-If :math:`A_1, A_2, B, b` are specified, then :math:`C_1=C_2=I` and :math:`d_1=d_2=0`,
-and the problem has the separable form
+Not all the terms need to be present: if :math:`A, B, b` in the constraints are
+omitted, then it is assumed to be :math:`x=z` and the problem takes the
+unconstrained composite form
 
 .. math::
-    \mathrm{minimize}\ & f_1(x_1) + f_2(x_2) + g(z)\\
-    \mathrm{subject\ to}\ & A_1x_1 + A_2x_2 + Bz = b
-    :label: separable
+    \mathrm{minimize}\ & f(Cx+d) + g(x)
 
-Here :math:`f_1` (if present) is strongly convex and quadratic plus the indicator of an
-affine subspace, :math:`f_2` (if present) is strongly convex and twice continuously
-differentiable in the interior of its domain, while g is proper, closed and
-convex. Linear operators :math:`A_1,A_2,B` need to be specified only if the corresponding
-term in the objective is present, and they are of appropriate dimension along
-with vector :math:`b` in the constraints.
+Here :math:`f` is assumed to be convex, smooth (i.e. with Lipschitz continuous
+gradient) and twice continuously differentiable. Function :math:`g` is any
+closed, proper, convex function.
+
+If :math:`A, B, b` are specified, then :math:`C=I` and :math:`d=0`, and the
+problem has the separable form
+
+.. math::
+    \mathrm{minimize}\ & f(x) + g(z)\\
+    \mathrm{subject\ to}\ & Ax + Bz = b
+
+Here :math:`f` (if present) is strongly convex and twice continuously differentiable
+in the interior of its domain, while g is proper, closed and convex. Linear operators
+:math:`A,B` are of appropriate dimension along with vector :math:`b` in the constraints.
+
+Calling ``forbes``
+==================
+
+The most generic call to ``forbes`` is as follows::
+
+    out = forbes(f, g, init, aff, constr, opt);
+
+- ``f`` and ``g`` contain the objective terms of the problem (see section :ref:`functions` below on how to select them).
+- ``init`` is the initial value of :math:`x` if there are no equality constraints,
+  or the initial dual variable associated with the constraint :math:`Ax+Bz=b` otherwise.
+- ``aff`` is a cell array describing the affine terms composed with :math:`f`::
+
+    aff = {C, d};
+    
+  If omitted or empty, that is ``aff = []`` or ``aff = {}``, then :math:`C=I` and :math:`d=0`.
+- ``constr`` is a cell array describing the linear equality constraints::
+
+    constr = {A, B, b};
+    
+  If omitted or empty, that is ``constr = []`` or ``constr = {}``, then :math:`A=I`, :math:`B=-I` and :math:`b=0`.
+- ``opt`` describes, e.g., details on the algorithm to use, termination criteria,
+  the level of verbosity, and so on. More on this in the :ref:`options` section below.
+
+Output ``out`` will contain the results of the optimization process.
+
+.. _functions:
 
 Functions
----------
+=========
 
 All the functions involved in the problem can be picked from a library of
-functions available in the `library folder`_. This contains procedures returning
-commonly used functions, specified by a list of parameters if needed. These
-procedures can be invoked and their result directly assigned to the structure
-containing the problem. For example::
+functions available in the `library folder`_: this contains procedures returning
+commonly used functions, specified by a list of parameters if needed. The return
+object can directly be fed to ``forbes`` to describe the problem. For example::
 
-    prob.f2 = logLogistic(m); % f2 is the log-logistic function times a coefficient m
-    prob.g = nuclearNorm(m, n); % g is the nuclear norm for m-by-n matrices
-    prob.g = indPos(); % g is the indicator function of the nonnegative orthant
+    f = logLoss(m); % f is the log-logistic function times a coefficient m
+    g = indPos(); % g is the indicator function of the nonnegative orthant
+    out = forbes(f, g);
 
-Check the documentation of each of the functions in the `library folder`_ for more
-information on how to use them and what parameters they require.
+Check out the :ref:`library.rst` section for more information on the available
+functions and how to use them and the parameters they require, or the documentation
+of each of the functions in the `library folder`_.
 
-Problem attributes
-------------------
+.. _options:
 
-+---------------+-----------------------+------------------------------+
-| Attribute     | Type                  | What is it                   |
-+===============+=======================+==============================+
-| ``prob.f1``   | functions             | The functions appearing in   |
-+---------------+                       | the objective                |
-| ``prob.f2``   |                       |                              |
-+---------------+                       |                              |
-| ``prob.g``    |                       |                              |
-+---------------+-----------------------+------------------------------+
-| ``prob.C1``   | matrices              | The affine terms f1 and f2   |
-+---------------+ or function handles   | are composed with            |
-| ``prob.C2``   |                       |                              |
-+---------------+-----------------------+                              |
-| ``prob.d1``   | vectors               |                              |
-+---------------+                       |                              |
-| ``prob.d2``   |                       |                              |
-+---------------+-----------------------+------------------------------+
-| ``prob.C1t``  | function handles      | The adjoint operators of     |
-+---------------+                       | C1 and C2                    |
-| ``prob.C2t``  |                       |                              |
-+---------------+-----------------------+------------------------------+
-| ``prob.A1``   | matrices              | Matrices A1 and A2 appearing |
-+---------------+ or function handles   | in the constraint            |
-| ``prob.A2``   |                       |                              |
-+---------------+-----------------------+------------------------------+
-| ``prob.A1t``  | function handles      | The adjoint operators of     |
-+---------------+                       | A1 and A2                    |
-| ``prob.A2t``  |                       |                              |
-+---------------+-----------------------+------------------------------+
-| ``prob.B``    | matrix                | Matrix B in the constraint   |
-+---------------+-----------------------+------------------------------+
-| ``prob.b``    | vector                | Right hand side in the       |
-|               |                       | constraint                   |
-+---------------+-----------------------+------------------------------+
-| ``prob.x0``   | vector                | Initial approximation        |
-+---------------+-----------------------+------------------------------+
-
-Specifying the options
-======================
+Options
+=======
 
 +--------------------+-----------------------+-----------------------------------------------------------+
 | Attribute          | Type                  | What is it                                                |

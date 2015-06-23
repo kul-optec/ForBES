@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; ForBES 0.1 documentation</title>
+  <title>Advanced features &mdash; ForBES 0.1 documentation</title>
   
 
   
@@ -32,7 +32,8 @@
 
   
     <link rel="top" title="ForBES 0.1 documentation" href="index.html"/>
-        <link rel="prev" title="Library of functions" href="library.html"/> 
+        <link rel="next" title="Library of functions" href="library.html"/>
+        <link rel="prev" title="How to use it" href="howto.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -79,11 +80,11 @@
 <li class="toctree-l2"><a class="reference internal" href="howto.html#options">Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Advanced features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="library.html">Library of functions</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#support-vector-machines">Support vector machines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sparse-logistic-regression">Sparse logistic regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
 </ul>
 </li>
 </ul>
@@ -110,7 +111,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Examples</li>
+    <li>Advanced features</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -121,46 +122,9 @@
 </div>
           <div role="main" class="document">
             
-  <div class="section" id="examples">
-<span id="examples-rst"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<p>In the following we show how ForBES can be used to model and solve some well
-known optimization problems.</p>
-<div class="section" id="support-vector-machines">
-<h2>Support vector machines<a class="headerlink" href="#support-vector-machines" title="Permalink to this headline">¶</a></h2>
-<p>SVMs can be cast as the following convex optimization problem</p>
-<div class="math">
-\[\begin{split}\mathrm{minimize}\ &amp;\frac{\lambda}{2}\|x\|_2^2 + \sum_{i=1}^m \max\{0, 1-b_iz_i\},\\
-\mathrm{subject\ to}\ &amp;Ax = z\end{split}\]</div>
-<p>Therefore we have</p>
-<div class="math">
-\[x_1 = x,\ f(x) = \frac{\lambda}{2}\|x\|_2^2,\ g(z) = \sum_{i=1}^m \max\{0, 1-b_iz_i\},\ A_1 = A,\ B = -I\]</div>
-<p>Function <span class="math">\(g\)</span> is called hinge loss and is provided in the library (see Functions
-for more information). The problem can therefore be defined as:</p>
-<div class="highlight-python"><div class="highlight"><pre>f = squaredNorm(lambda);
-g = hingeLoss(1, b); % vector b contains the labels
-out = forbes(f, g, [], [], {A, -1, zeros(m, 1)});
-</pre></div>
-</div>
-</div>
-<div class="section" id="sparse-logistic-regression">
-<h2>Sparse logistic regression<a class="headerlink" href="#sparse-logistic-regression" title="Permalink to this headline">¶</a></h2>
-<p>Consider the following problem</p>
-<div class="math">
-\[\mathrm{minimize}\ \sum_{i=1}^m\log(1+\exp(-b_i \langle a_{i}, x\rangle)) + r\|x\|_1\]</div>
-<p>The smooth term in this case is the logistic function, and the nonsmooth term is
-the <span class="math">\(\ell_1\)</span> regularization. We then have</p>
-<div class="math">
-\[\begin{split}f(x) &amp;= \frac{1}{m}\sum_{i=1}^m \log(1+\exp(-x_i)) \\
-g(x) &amp;= r\|x\|_1 = \sum_i |x_i|\end{split}\]</div>
-<p>This problem can be defined using the functions in the library (see Functions
-for more information) as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre>f = logLoss(1/m);
-g = l1Norm(r);
-C = diag(sparse(b))*X; % vector b contains the labels, X is the design matrix
-out = forbes(f, g, [], C);
-</pre></div>
-</div>
-</div>
+  <div class="section" id="advanced-features">
+<span id="advanced-rst"></span><h1>Advanced features<a class="headerlink" href="#advanced-features" title="Permalink to this headline">¶</a></h1>
+<p>Todo.</p>
 </div>
 
 
@@ -169,8 +133,10 @@ out = forbes(f, g, [], C);
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="library.html" class="btn btn-neutral float-right" title="Library of functions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="library.html" class="btn btn-neutral" title="Library of functions" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="howto.html" class="btn btn-neutral" title="How to use it" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
