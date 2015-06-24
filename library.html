@@ -76,12 +76,20 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#problem-structure">Problem structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#calling-forbes">Calling <tt class="docutils literal"><span class="pre">forbes</span></tt></a></li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#functions">Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#options">Options</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Library of functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Library of functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#distances">Distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indicator-functions">Indicator functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#norms-and-regularization-functions">Norms and regularization functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-functions">Other functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linear-mappings">Linear mappings</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
@@ -124,7 +132,186 @@
             
   <div class="section" id="library-of-functions">
 <span id="library-rst"></span><h1>Library of functions<a class="headerlink" href="#library-of-functions" title="Permalink to this headline">¶</a></h1>
+<p>In the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a> we provide a set of commonly used functions and linear
+operators that can be used to formulate problems (see section <a class="reference internal" href="howto.html#howto-rst"><em>How to use it</em></a> on how
+to formulate a problem and invoke <tt class="docutils literal"><span class="pre">forbes</span></tt> to solve it). Each of these functions
+is provided as a constructor taking as input all the parameters that define the
+function, and returning an object: this will contain all the information
+needed to compute the value, the gradient or the proximal mapping of the
+correspondent function or its conjugate.</p>
+<p>We now describe each of these functions and their parameters. You can also access the
+help file of any of these function directly from MATLAB with:</p>
+<div class="highlight-python"><div class="highlight"><pre>help &lt;function-name&gt;
+</pre></div>
+</div>
+<div class="section" id="distances">
+<h2>Distances<a class="headerlink" href="#distances" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="47%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name and parameters</th>
+<th class="head"><span class="math">\(h(x)\)</span></th>
+<th class="head">Default</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">distBall_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></tt></td>
+<td><span class="math">\(w\|x-\Pi_{\mathcal{B}_r(c)}x\|\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">distBox(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></tt></td>
+<td><span class="math">\(\sum_i w_i(x_i-\min\{u,\max\{l,x_i\}\})\)</span></td>
+<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">distNeg(w,</span> <span class="pre">u)</span></tt></td>
+<td><span class="math">\(\sum_i w_i(x_i-\min\{u_i,x_i\})\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">distPos(w,</span> <span class="pre">l)</span></tt></td>
+<td><span class="math">\(\sum_i w_i(x_i-\max\{l_i,x_i\})\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">dist2Ball_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></tt></td>
+<td><span class="math">\(\tfrac{w}{2}\|x-\Pi_{\mathcal{B}_r(c)}x\|^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">dist2Box(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></tt></td>
+<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,\max\{l_i,x\}\})^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">dist2Neg(w,</span> <span class="pre">u)</span></tt></td>
+<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,x_i\})^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">dist2Pos(w,</span> <span class="pre">l)</span></tt></td>
+<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\max\{l_i,x_i\})^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="indicator-functions">
+<h2>Indicator functions<a class="headerlink" href="#indicator-functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="47%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name and parameters</th>
+<th class="head"><span class="math">\(h(x)\)</span></th>
+<th class="head">Default</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">indBall_l2(r,</span> <span class="pre">c)</span></tt></td>
+<td><span class="math">\(\mathrm{ind}_{\{x:\ \|x-c\|\leq r\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">indBox(l,</span> <span class="pre">u)</span></tt></td>
+<td><span class="math">\(\mathrm{ind}_{\{x:\ l\leq x\leq u\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">indNeg(u)</span></tt></td>
+<td><span class="math">\(\mathrm{ind}_{\{x:\ x\leq u\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">indPos(l)</span></tt></td>
+<td><span class="math">\(\mathrm{ind}_{\{x:\ x\geq l\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="norms-and-regularization-functions">
+<h2>Norms and regularization functions<a class="headerlink" href="#norms-and-regularization-functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="56%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name and parameters</th>
+<th class="head"><span class="math">\(h(x)\)</span></th>
+<th class="head">Default</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">l1Norm(r)</span></tt></td>
+<td><span class="math">\(r\|x\|_1\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">l2Norm(r)</span></tt></td>
+<td><span class="math">\(r\|x\|_2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">l2NormSum(m,</span> <span class="pre">r)</span></tt></td>
+<td><span class="math">\(r \sum_{i=1}^k \|x_i\|_2,\ \mbox{where}\ x=(x_1,\ldots,x_k),\ x_i\in\mathbb{R}^m\)</span></td>
+<td><tt class="docutils literal"><span class="pre">m=1</span></tt>, <tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">nuclearNorm(m,</span> <span class="pre">n,</span> <span class="pre">r)</span></tt></td>
+<td><span class="math">\(r \sum_i \sigma_i(X),\ \mbox{where}\ X=[x_1\cdots x_n],\ x_i\in\mathbb{R}^m\)</span></td>
+<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">elasticNet(m,</span> <span class="pre">r)</span></tt></td>
+<td><span class="math">\(m\|x\|_1 + \tfrac{r}{2}\|x\|_2^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">m=1</span></tt>, <tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="other-functions">
+<h2>Other functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="54%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name and parameters</th>
+<th class="head"><span class="math">\(h(x)\)</span></th>
+<th class="head">Default</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">quadratic(Q,</span> <span class="pre">q)</span></tt></td>
+<td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle\)</span></td>
+<td><tt class="docutils literal"><span class="pre">Q=1</span></tt>, <tt class="docutils literal"><span class="pre">q=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">quadraticOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">Q,</span> <span class="pre">q)</span></tt></td>
+<td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">Q=1</span></tt>, <tt class="docutils literal"><span class="pre">q=0</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">quadLoss(w,</span> <span class="pre">p)</span></tt></td>
+<td><span class="math">\(\sum_i w_i(x_i-p_i)^2\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">p=0</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">quadLossOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">w,</span> <span class="pre">p)</span></tt></td>
+<td><span class="math">\(\sum_i w_i(x_i-p_i)^2 + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
+<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">p=0</span></tt></td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">logLoss(m)</span></tt></td>
+<td><span class="math">\(m \sum_i \log(1+\exp\{-x_i\})\)</span></td>
+<td><tt class="docutils literal"><span class="pre">m=1</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">powabs(p,</span> <span class="pre">c)</span></tt></td>
+<td><span class="math">\(c|x|^p\)</span></td>
+<td><tt class="docutils literal"><span class="pre">p=1</span></tt>, <tt class="docutils literal"><span class="pre">c=1</span></tt></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="linear-mappings">
+<h2>Linear mappings<a class="headerlink" href="#linear-mappings" title="Permalink to this headline">¶</a></h2>
 <p>Todo.</p>
+</div>
 </div>
 
 
@@ -192,7 +379,7 @@
       });
   </script>
   
-  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+<!--  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a> -->
    
 
 
