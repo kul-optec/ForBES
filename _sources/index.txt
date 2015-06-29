@@ -39,8 +39,8 @@ Contents
 
 	installation.rst
 	howto.rst
-	advanced.rst
 	library.rst
+	advanced.rst
 	examples.rst
 
 Credits
