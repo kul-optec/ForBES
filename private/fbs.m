@@ -16,6 +16,7 @@ function out = fbs(prob, opt)
     
     %      Q,C1,C2,f2, g
     cnt = [0, 0, 0, 0, 0];
+    flagChangedGamma = 0;
     
     gam = 1/prob.Lf;
     xk = prob.x0;
@@ -43,11 +44,13 @@ function out = fbs(prob, opt)
             cache_0 = cache_yk;
         end
         
+        flagChangedGamma = 0;
         if opt.adaptive || prob.unknownLf
             [fz, cnt1] = Evaluatef(prob, u);
             cnt = cnt+cnt1;
             % increase Lf until a candidate Lipschitz constant is found
             while fz + cache_yk.gz > cache_yk.FBE
+                flagChangedGamma = 1;
                 prob.Lf = prob.Lf*2;
                 gam = 1/prob.Lf;
                 [cache_yk, cnt1] = ForwardBackwardStep(prob, gam, yk, cache_yk);
@@ -63,23 +66,27 @@ function out = fbs(prob, opt)
         if opt.toRecord
             record = [record, opt.record(prob, it, gam, cache_0, cache_yk, cnt)];
         end
-
-        if ~opt.customTerm
-            % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
-            absFBE = abs(objective(1, it));
-            if residual(1, it) <= 10*sqrt(eps) || ...
-                    (it > 1 && residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
+        
+        %% check for termination
+        if ~flagChangedGamma
+            if ~opt.customTerm
+                % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
+                absFBE = abs(cache_current.FBE);
+                flagStop = residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
                     norm(cache_yk1.z-cache_yk.z, inf) < sqrt(opt.tol)*(1+norm(cache_yk.z, inf)) && ...
-                    abs(objective(1, it-1)-objective(1, it)) < opt.tol*(1+absFBE))
-                msgTerm = [msgTerm, 'reached optimum (up to tolerance)'];
-                flagTerm = 0;
-                break;
-            end
-        else
-            if opt.term(prob, it, gam, cache_0, cache_yk, cnt)
-                msgTerm = [msgTerm, 'reached optimum (custom criterion)'];
-                flagTerm = 0;
-                break;
+                    abs(objective(1, it-1)-objective(1, it)) < opt.tol*(1+absFBE);
+                if residual(1, it) <= 10*sqrt(eps) || ((prob.unknownLf == 0 || it > 1) && flagStop)
+                    msgTerm = 'reached optimum (up to tolerance)';
+                    flagTerm = 0;
+                    break;
+                end
+            else
+                flagStop = opt.term(prob, it, gam, cache_0, cache_yk, cnt);
+                if (prob.unknownLf == 0 || it > 1) && flagStop
+                    msgTerm = 'reached optimum (custom criterion)';
+                    flagTerm = 0;
+                    break;
+                end
             end
         end
         

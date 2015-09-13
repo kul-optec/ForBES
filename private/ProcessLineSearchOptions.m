@@ -22,7 +22,7 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
     % Wolfe line search parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
     lsopt.delta = 0.1;
-    lsopt.testGamma = prob.unknownLf;
+    lsopt.testGamma = prob.unknownLf || opt.adaptive;
     switch opt.linesearch
         case 1 % armijo backtracking
             lsopt.progTol = 0;

@@ -98,16 +98,17 @@ function out = minfbe(prob, opt)
             if ~opt.customTerm
                 % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
                 absFBE = abs(cache_current.FBE);
-                if residual(1, it) <= 10*sqrt(eps) || ...
-                        (it > 1 && residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
+                flagStop = residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
                         norm(cache_previous.x-cache_current.x, inf) < sqrt(opt.tol)*(1+norm(cache_current.x, inf)) && ...
-                        cache_previous.FBE-cache_current.FBE < opt.tol*(1+absFBE))
+                        cache_previous.FBE-cache_current.FBE < opt.tol*(1+absFBE);
+                if residual(1, it) <= 10*sqrt(eps) || ((prob.unknownLf == 0 || it > 1) && flagStop)
                     msgTerm = 'reached optimum (up to tolerance)';
                     flagTerm = 0;
                     break;
                 end
             else
-                if opt.term(prob, it, gam, cache_0, cache_current, cnt)
+                flagStop = opt.term(prob, it, gam, cache_0, cache_current, cnt);
+                if (prob.unknownLf == 0 || it > 1) && flagStop
                     msgTerm = 'reached optimum (custom criterion)';
                     flagTerm = 0;
                     break;
@@ -129,8 +130,18 @@ function out = minfbe(prob, opt)
                     LBFGS_col = 1;
                     LBFGS_mem = 0;
                 else
-                    Sk = cache_current.x - cache_previous.x;
-                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    %%% x' - x
+%                    Sk = cache_current.x - cache_previous.x;
+%                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    %%% other options (is this additional gradient eval needed?)
+                    [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
+                    cnt = cnt+cnt1;
+                    %%% w - x
+                    Sk = cache_tau.x - cache_previous.x;
+                    Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+                    %%% x' - w
+%                    Sk = cache_current.x - cache_tau.x;
+%                    Yk = cache_current.gradFBE - cache_tau.gradFBE;
                     YSk = Yk'*Sk;
                     if YSk > 0;
                         LBFGS_col = 1+mod(LBFGS_col, opt.memory);
@@ -151,17 +162,28 @@ function out = minfbe(prob, opt)
             case 7 % BFGS
                 if it == 1 || flagChangedGamma
                     dir = -cache_current.gradFBE;
-                elseif it == 2
-                    % Compute difference vectors
-                    Sk = cache_current.x - cache_previous.x;
-                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
-                    YSk = Yk'*Sk;
-                    R = sqrt((Yk'*Yk)/(YSk))*eye(prob.n);
-                    %                     dir = -R\(R'\cache_current.gradFBE);
-                    dir = -cache_current.gradFBE./(diag(R).^2);
+                    R = eye(prob.n);
+%                elseif it == 2
+%                    % Compute difference vectors
+%                    Sk = cache_current.x - cache_previous.x;
+%                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
+%                    YSk = Yk'*Sk;
+%                    R = sqrt((Yk'*Yk)/(YSk))*eye(prob.n);
+%                    %                     dir = -R\(R'\cache_current.gradFBE);
+%                    dir = -cache_current.gradFBE./(diag(R).^2);
                 else
-                    Sk = cache_current.x - cache_previous.x;
-                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    %%% x' - x
+%                     Sk = cache_current.x - cache_previous.x;
+%                     Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    %%% other options (is this additional gradient eval needed?)
+                    [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
+                    cnt = cnt+cnt1;
+                    %%% w - x
+                    Sk = cache_tau.x - cache_previous.x;
+                    Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+                    %%% x' - w
+%                     Sk = cache_current.x - cache_tau.x;
+%                     Yk = cache_current.gradFBE - cache_tau.gradFBE;
                     YSk = Yk'*Sk;
                     Bs = R'*(R*Sk);
                     sBs = Sk'*Bs;
