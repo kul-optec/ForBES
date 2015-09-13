@@ -71,7 +71,7 @@ function out = fbs(prob, opt)
         if ~flagChangedGamma
             if ~opt.customTerm
                 % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
-                absFBE = abs(cache_current.FBE);
+                absFBE = abs(cache_yk.FBE);
                 flagStop = residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
                     norm(cache_yk1.z-cache_yk.z, inf) < sqrt(opt.tol)*(1+norm(cache_yk.z, inf)) && ...
                     abs(objective(1, it-1)-objective(1, it)) < opt.tol*(1+absFBE);
