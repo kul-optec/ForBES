@@ -32,6 +32,8 @@ constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 opt.maxit = 10000;
 opt.tol = 1e-12;
+opt.adaptive = 1;
+opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;

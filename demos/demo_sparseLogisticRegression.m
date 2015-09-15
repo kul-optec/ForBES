@@ -18,8 +18,9 @@ aff = {diag(sparse(b))*A};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 1000;
-opt.tol = 1e-14;
-opt.display = 0;
+opt.tol = 1e-12;
+opt.adaptive = 1;
+opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;

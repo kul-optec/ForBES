@@ -68,8 +68,13 @@ function out = fbs(prob, opt)
         end
         
         %% check for termination
+        if residual(1, it) <= 10*sqrt(eps)
+            msgTerm = 'reached optimum (fpr close to eps)';
+            flagTerm = 0;
+            break;
+        end
         if ~flagChangedGamma
-            if ~opt.customTerm
+            if it > 1 && ~opt.customTerm
                 % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
                 absFBE = abs(cache_yk.FBE);
                 flagStop = residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
@@ -80,7 +85,8 @@ function out = fbs(prob, opt)
                     flagTerm = 0;
                     break;
                 end
-            else
+            end
+            if opt.customTerm
                 flagStop = opt.term(prob, it, gam, cache_0, cache_yk, cnt);
                 if (prob.unknownLf == 0 || it > 1) && flagStop
                     msgTerm = 'reached optimum (custom criterion)';

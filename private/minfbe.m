@@ -94,8 +94,13 @@ function out = minfbe(prob, opt)
         end
         
         %% check for termination
+        if residual(1, it) <= 10*sqrt(eps)
+            msgTerm = 'reached optimum (fpr close to eps)';
+            flagTerm = 0;
+            break;
+        end
         if ~flagChangedGamma
-            if ~opt.customTerm
+            if it > 1 && ~opt.customTerm
                 % From sec. 8.2.3.2 of Gill, Murray, Wright (1982).
                 absFBE = abs(cache_current.FBE);
                 flagStop = residual(1, it) <= nthroot(opt.tol, 3)*(1+absFBE) && ...
@@ -106,7 +111,8 @@ function out = minfbe(prob, opt)
                     flagTerm = 0;
                     break;
                 end
-            else
+            end
+            if opt.customTerm
                 flagStop = opt.term(prob, it, gam, cache_0, cache_current, cnt);
                 if (prob.unknownLf == 0 || it > 1) && flagStop
                     msgTerm = 'reached optimum (custom criterion)';
@@ -249,7 +255,7 @@ function out = minfbe(prob, opt)
 
         %% set initial guess for the step length
         switch opt.method
-            case 2 % L-BFGS
+            case {2, 7} % L-BFGS
                 tau0 = 1.0;
             case 6 % BARZILAI-BORWEIN
                 if it == 1 || flagChangedGamma
