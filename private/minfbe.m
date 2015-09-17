@@ -94,7 +94,7 @@ function out = minfbe(prob, opt)
         end
         
         %% check for termination
-        if residual(1, it) <= 10*sqrt(eps)
+        if residual(1, it) <= 10*eps
             msgTerm = 'reached optimum (fpr close to eps)';
             flagTerm = 0;
             break;
@@ -506,10 +506,10 @@ function [cache, cnt] = CacheGradFBE(prob, gam, cache)
         if prob.useHessian
             HC2diff = cache.Hessf2res2x*C2diff;
         else
-            res2xepsdiff = cache.res2x + 1e-100i*C2diff;
+            res2xepsdiff = cache.res2x + 1e-12i*C2diff;
             [~, gradf2res2xepsd] = prob.callf2(res2xepsdiff);
             cnt(4) = cnt(4)+1;
-            HC2diff = imag(gradf2res2xepsd)/1e-100;
+            HC2diff = imag(gradf2res2xepsd)/1e-12;
         end
         if prob.isthereC2
             if prob.isC2fun, Hdiff = Hdiff + prob.C2t(HC2diff);

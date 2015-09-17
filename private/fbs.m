@@ -68,7 +68,7 @@ function out = fbs(prob, opt)
         end
         
         %% check for termination
-        if residual(1, it) <= 10*sqrt(eps)
+        if residual(1, it) <= 10*eps
             msgTerm = 'reached optimum (fpr close to eps)';
             flagTerm = 0;
             break;

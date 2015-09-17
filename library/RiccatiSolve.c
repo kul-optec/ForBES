@@ -42,7 +42,7 @@ void ZERO(int n, double * x)
         x[i] = 0.0;
     }
 }
-    
+
 void AXPY(int n, double * y, double a, double * x)
 {
     int i;
