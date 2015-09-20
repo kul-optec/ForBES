@@ -45,6 +45,7 @@ function [cachet, cnt] = DirFBE(prob, gam, tau, cache, mode, cachet)
                 [f2xt, gradf2res2xt, cachet.Hessf2res2x] = prob.callf2(cachet.res2x);
             else
                 [f2xt, gradf2res2xt] = prob.callf2(cachet.res2x);
+                cachet.gradf2res2x = gradf2res2xt;
             end
             cnt(4) = cnt(4)+1;
             if prob.isthereC2
@@ -93,6 +94,10 @@ function [cachet, cnt] = DirFBE(prob, gam, tau, cache, mode, cachet)
                 [~, gradf2res2xtepsdir] = prob.callf2(res2xtepsdir);
                 cnt(4) = cnt(4)+1;
                 HC2dir = imag(gradf2res2xtepsdir)/1e-100;
+%                 res2xtepsdir = cache.res2x + 1e-8*cache.C2dir;
+%                 [~, gradf2res2xtepsdir] = prob.callf2(res2xtepsdir);
+%                 cnt(4) = cnt(4)+1;
+%                 HC2dir = (gradf2res2xtepsdir-cachet.gradf2res2x)/1e-8;
             end
             if prob.isthereC2
                 if prob.isC2fun, Hdir = Hdir + prob.C2t(HC2dir);

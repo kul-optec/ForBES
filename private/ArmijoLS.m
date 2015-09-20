@@ -62,7 +62,7 @@ function [cachet, t, cnt, exitflag] = ArmijoLS(prob, gam, cache, df0, t0, lsopt,
         [fz, cnt1] = Evaluatef(prob, cachet.z);
         cnt = cnt+cnt1;
         % check whether gam is small enough
-        if fz + cachet.gz > cachet.FBE
+        if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
             exitflag = -1;
         end
     end

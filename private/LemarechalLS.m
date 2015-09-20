@@ -57,7 +57,7 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
             [fz, cnt1] = Evaluatef(prob, cachet.z);
             cnt = cnt+cnt1;
             % check whether gam is small enough
-            if fz + cachet.gz > cachet.FBE
+            if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
                 exitflag = -1;
                 break;
             end
@@ -131,7 +131,7 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
         [fz, cnt1] = Evaluatef(prob, cachet.z);
         cnt = cnt+cnt1;
         % check whether gam is small enough
-        if fz + cachet.gz > cachet.FBE
+        if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
             exitflag = -1;
         end
     end

@@ -137,8 +137,8 @@ function out = minfbe(prob, opt)
                     LBFGS_mem = 0;
                 else
                     %%% x' - x
-%                    Sk = cache_current.x - cache_previous.x;
-%                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
+%                     Sk = cache_current.x - cache_previous.x;
+%                     Yk = cache_current.gradFBE - cache_previous.gradFBE;
                     %%% other options (is this additional gradient eval needed?)
                     [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
                     cnt = cnt+cnt1;
@@ -146,8 +146,8 @@ function out = minfbe(prob, opt)
                     Sk = cache_tau.x - cache_previous.x;
                     Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                     %%% x' - w
-%                    Sk = cache_current.x - cache_tau.x;
-%                    Yk = cache_current.gradFBE - cache_tau.gradFBE;
+%                     Sk = cache_current.x - cache_tau.x;
+%                     Yk = cache_current.gradFBE - cache_tau.gradFBE;
                     YSk = Yk'*Sk;
                     if YSk > 0;
                         LBFGS_col = 1+mod(LBFGS_col, opt.memory);
@@ -438,6 +438,7 @@ function [cache, cnt] = CacheFBE(prob, gam, x, cache)
                     [f2x, gradf2res2x, cache.Hessf2res2x] = prob.callf2(cache.res2x);
                 else
                     [f2x, gradf2res2x] = prob.callf2(cache.res2x);
+                    cache.gradf2res2x = gradf2res2x;
                 end
                 if prob.isC2fun, gradf2x = prob.C2t(gradf2res2x);
                 else gradf2x = prob.C2'*gradf2res2x; end
@@ -448,6 +449,7 @@ function [cache, cnt] = CacheFBE(prob, gam, x, cache)
                     [f2x, gradf2res2x, cache.Hessf2res2x] = prob.callf2(cache.res2x);
                 else
                     [f2x, gradf2res2x] = prob.callf2(cache.res2x);
+                    cache.gradf2res2x = gradf2res2x;
                 end
                 gradf2x = gradf2res2x;
             end
@@ -506,10 +508,14 @@ function [cache, cnt] = CacheGradFBE(prob, gam, cache)
         if prob.useHessian
             HC2diff = cache.Hessf2res2x*C2diff;
         else
-            res2xepsdiff = cache.res2x + 1e-12i*C2diff;
+            res2xepsdiff = cache.res2x + 1e-100i*C2diff;
             [~, gradf2res2xepsd] = prob.callf2(res2xepsdiff);
             cnt(4) = cnt(4)+1;
-            HC2diff = imag(gradf2res2xepsd)/1e-12;
+            HC2diff = imag(gradf2res2xepsd)/1e-100;
+%             res2xepsdiff = cache.res2x + 1e-8*C2diff;
+%             [~, gradf2res2xepsd] = prob.callf2(res2xepsdiff);
+%             cnt(4) = cnt(4)+1;
+%             HC2diff = (gradf2res2xepsd-cache.gradf2res2x)/1e-8;
         end
         if prob.isthereC2
             if prob.isC2fun, Hdiff = Hdiff + prob.C2t(HC2diff);

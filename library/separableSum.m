@@ -1,6 +1,6 @@
 %SEPARABLESUM Combines separable functions into their sum
 %
-%   SEPARABLESUM(fs, idx, sizes) where fs is a cell array of function
+%   SEPARABLESUM(fs, sizes, idx) where fs is a cell array of function
 %   objects, while idx and sizes are integer vectors of the same length.
 %   If length(idx) = length(sizes) = k, then SEPARABLESUM returns the
 %   function object correspondent to the sum
@@ -32,13 +32,13 @@ function obj = separableSum(objs, sizes, idx)
     if nargin < 3
         idx = 1:l;
     end
-    obj.makeprox = @() make_separableSum_prox(objs, idx, sizes, gam0);
+    obj.makeprox = @() make_separableSum_prox(objs, idx, sizes);
 end
 
-function op = make_separableSum_prox(objs, idx, sizes, gam0)
+function op = make_separableSum_prox(objs, idx, sizes)
     proxes = {};
     for i=1:length(objs)
-        proxes{end+1} = objs{i}.makeprox(gam0);
+        proxes{end+1} = objs{i}.makeprox();
     end
     op = @(x, gam) call_separableSum_prox(x, gam, proxes, idx, sizes);
 end

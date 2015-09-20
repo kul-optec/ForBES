@@ -3,7 +3,7 @@
 close all;
 clear;
 
-% rng(0, 'twister'); % uncomment this to control the random number generator
+rng(0, 'twister'); % uncomment this to control the random number generator
 
 m = 6000;
 n = 50000;
@@ -20,7 +20,7 @@ x0 = zeros(n, 1);
 opt.maxit = 1000;
 opt.tol = 1e-12;
 opt.adaptive = 1;
-opt.display = 1;
+opt.display = 2;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
