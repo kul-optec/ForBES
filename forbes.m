@@ -132,7 +132,7 @@ function prob = MakeProb(fs, gs, init, aff, constr, opt)
         end
         flagconstr = 1;
         if length(constr) ~= N+M+1
-            error('must have as many terms in the constraints as f and g functions');
+            error('must have as many terms in the constraints as f and g functions, plus the rhs');
         end
     end
     if isempty(aff)

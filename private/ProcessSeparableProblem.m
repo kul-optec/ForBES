@@ -35,7 +35,7 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
     end
     if isfield(prob, 'f1')
         if ~isfield(prob.f1, 'isConjQuadratic') || ~prob.f1.isConjQuadratic
-            error('the conjugate function f1 must be quadratic');
+            error('the conjugate function of f1 must be quadratic');
         end
         dualprob.istheref1 = true;
         if ~isfield(prob.f1, 'makefconj'), error('conjugate function of f1 is not defined'); end
@@ -102,19 +102,19 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         error('you must specify matrix B in the constraint');
     end
     mus = sum((prob.B).*(prob.B), 1);
-    if (max(mus)-min(mus))/max(mus) > 10*eps, error('B''*B must be a multiple of the identity'); end
+    if (max(mus)-min(mus))/max(mus) > 10*eps, error('B''B must be a multiple of the identity'); end
     prob.muB = mus(1);
     if ~isfield(prob, 'g'), error('you must specify term g'); end
     if ~isfield(prob.g, 'makeprox'), error('the prox for the term g you specified is not available'); end
-    dualprob.callg = make_prox_conj(prob.g, prob.B, prob.muB);
+    prob.callg = prob.g.makeprox();
+    dualprob.callg = make_prox_conj(prob.callg, prob.B, prob.muB);
     [dualprob.Lf, dualprob.unknownLf] = EstimateLipschitzConstant(dualprob, opt);
     dualprob.muf = 0;
     dualprob.processed = true;
 end
 
-function op = make_prox_conj(g, B, mu)
-    prox = g.makeprox();
-    op = @(y, gam) call_prox_conj(y, gam, prox, B, mu);
+function op = make_prox_conj(proxg, B, mu)
+    op = @(y, gam) call_prox_conj(y, gam, proxg, B, mu);
 end
 
 function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu)
