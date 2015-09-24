@@ -137,14 +137,14 @@ function out = minfbe(prob, opt)
                     LBFGS_mem = 0;
                 else
                     %%% x' - x
-%                     Sk = cache_current.x - cache_previous.x;
-%                     Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    Sk = cache_current.x - cache_previous.x;
+                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
                     %%% other options (is this additional gradient eval needed?)
-                    [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
-                    cnt = cnt+cnt1;
-                    %%% w - x
-                    Sk = cache_tau.x - cache_previous.x;
-                    Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+%                     [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
+%                     cnt = cnt+cnt1;
+%                     %%% w - x
+%                     Sk = cache_tau.x - cache_previous.x;
+%                     Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                     %%% x' - w
 %                     Sk = cache_current.x - cache_tau.x;
 %                     Yk = cache_current.gradFBE - cache_tau.gradFBE;
@@ -179,14 +179,14 @@ function out = minfbe(prob, opt)
 %                    dir = -cache_current.gradFBE./(diag(R).^2);
                 else
                     %%% x' - x
-%                     Sk = cache_current.x - cache_previous.x;
-%                     Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                    Sk = cache_current.x - cache_previous.x;
+                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
                     %%% other options (is this additional gradient eval needed?)
-                    [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
-                    cnt = cnt+cnt1;
-                    %%% w - x
-                    Sk = cache_tau.x - cache_previous.x;
-                    Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+%                     [cache_tau, cnt1] = CacheGradFBE(prob, gam, cache_tau);
+%                     cnt = cnt+cnt1;
+%                     %%% w - x
+%                     Sk = cache_tau.x - cache_previous.x;
+%                     Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                     %%% x' - w
 %                     Sk = cache_current.x - cache_tau.x;
 %                     Yk = cache_current.gradFBE - cache_tau.gradFBE;

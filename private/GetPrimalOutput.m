@@ -23,19 +23,19 @@ function out = GetPrimalOutput(prob, dualprob, dualout)
     y = dualout.x;
     if isfield(prob, 'f1')
         if isa(prob.A1, 'function_handle')
-            out.x1 = dualprob.Q(-prob.A1t(y))+dualprob.q;
+            out.x1 = dualprob.Q(prob.A1t(y))+dualprob.q;
             Ax = Ax+prob.A1(out.x1);
         else
-            out.x1 = dualprob.Q(-prob.A1'*y)+dualprob.q;
+            out.x1 = dualprob.Q(prob.A1'*y)+dualprob.q;
             Ax = Ax+prob.A1*out.x1;
         end
     end
     if isfield(prob, 'f2')
         if isa(prob.A2, 'function_handle')
-            [~, out.x2] = dualprob.callf2(-prob.A2t(y));
+            [~, out.x2] = dualprob.callf2(prob.A2t(y));
             Ax = Ax+prob.A2(out.x2);
         else
-            [~, out.x2] = dualprob.callf2(-prob.A2'*y);
+            [~, out.x2] = dualprob.callf2(prob.A2'*y);
             Ax = Ax+prob.A2*out.x2;
         end
     end

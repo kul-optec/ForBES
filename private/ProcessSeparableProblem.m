@@ -92,6 +92,7 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
             error('yout must specify matrix A2 in the constraint');
         end
         if isfield(prob.f2, 'mu'), dualprob.Lf2 = 1/prob.f2.mu; end
+        dualprob.useHessian = 0;
     else
         dualprob.istheref2 = false;
     end
