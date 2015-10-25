@@ -15,7 +15,7 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function [cachet, t, cnt, exitflag] = ArmijoLS(prob, gam, cache, df0, t0, lsopt, fr)
+function [t, cachet, cachet1, ops, exitflag] = ArmijoLS(cache, df0, t0, lsopt, fr)
 %ARMIJOLS - computes a steplength t > 0 so that it satisfies the Armijo condition
 %
 % f(t) <= f(0) + delta*f'(0)
@@ -25,8 +25,12 @@ function [cachet, t, cnt, exitflag] = ArmijoLS(prob, gam, cache, df0, t0, lsopt,
 % exitflag =  1: maximum number of backtracking steps exceeded
 % exitflag =  2: no further progress can be made
 
-    %      Q, A, C, f2, proxg
-    cnt = [0, 0, 0, 0, 0];
+    ops = OpsInit();
+    cachet1 = [];
+    
+    prob = cache.prob;
+    gam = cache.gam;
+    
     arm_hi = lsopt.delta*df0;
     t = t0;
     exitflag = 1;
@@ -36,22 +40,23 @@ function [cachet, t, cnt, exitflag] = ArmijoLS(prob, gam, cache, df0, t0, lsopt,
         f0 = cache.FBE;
     end
     for i = 1:lsopt.nLS
-        [cachet, cnt1] = DirFBE(prob, gam, t, cache, 1);
-        cnt = cnt+cnt1;
+        [cachet, ops1] = DirFBE(cache, t, 1);
+        ops = OpsSum(ops, ops1);
         ft = cachet.FBE;
         if ft <= f0 + t*arm_hi
             exitflag = 0;
             break;
         end
         if i == 1 %quadratic interpolation
-            tn = ArmijoQuadInterp(f0,df0,t,ft);
+            tn = ArmijoQuadInterp(f0, df0, t, ft);
         else %cubic interpolation
-            tn = ArmijoCubInterp(f0,df0,told,ftold,t,ft);
+            tn = ArmijoCubInterp(f0, df0, told, ftold, t, ft);
         end
         if tn <= 0
             tn = 0.5*t;
         end
-        told = t;ftold = ft;
+        told = t; 
+        ftold = ft;
         t = tn;
         if t <= lsopt.progTol
             exitflag = 2;
@@ -59,10 +64,12 @@ function [cachet, t, cnt, exitflag] = ArmijoLS(prob, gam, cache, df0, t0, lsopt,
         end
     end
     if exitflag == 0 && lsopt.testGamma
-        [fz, cnt1] = Evaluatef(prob, cachet.z);
-        cnt = cnt+cnt1;
+        cachet1 = CacheInit(prob, cachet.z, gam);
+        [cachet1, ops1] = CacheEvalf(cachet1);
+        ops = OpsSum(ops, ops1);
+        fz = cachet1.fx;
         % check whether gam is small enough
-        if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
+        if fz + cachet.gz > cachet.FBE %+ 1e-14*(1+abs(cachet.FBE))
             exitflag = -1;
         end
     end

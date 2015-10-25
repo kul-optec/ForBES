@@ -15,7 +15,7 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, lsopt)
+function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, lsopt)
 %LEMARECHALLS - computes a steplength t > 0 so that it satisfies the (weak) Wolfe conditions
 %
 % f(t) <= f(0) + delta*f'(0)
@@ -38,8 +38,12 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
 % Convex Analysis and Minimization Algorithms, vol I.
 % Springer Verlag, Heidelberg, Algorithm 3.3.1 (Wolfe's line-search)
 
-    %      Q, A, C, f2, proxg
-    cnt = [0, 0, 0, 0, 0];
+    ops = OpsInit();
+    cachet1 = [];
+    
+    prob = cache.prob;
+    gam = cache.gam;
+    
     t = t0;
     wolfe_hi = lsopt.delta*slope;
     wolfe_lo = lsopt.sigma*slope;
@@ -51,13 +55,15 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
     exitflag = 1;
     testGammaFlag = 0;
     for it = 1:lsopt.nbracket
-        [cachet, cnt1] = DirFBE(prob, gam, t, cache, 1);
-        cnt = cnt+cnt1;
+        [cachet, ops1] = DirFBE(cache, t, 1);
+        ops = OpsSum(ops, ops1);
         if lsopt.testGamma && testGammaFlag
-            [fz, cnt1] = Evaluatef(prob, cachet.z);
-            cnt = cnt+cnt1;
+            cachet1 = CacheInit(prob, cachet.z, gam);
+            [cachet1, ops1] = CacheEvalf(cachet1);
+            ops = OpsSum(ops, ops1);
+            fz = cachet1.fx;
             % check whether gam is small enough
-            if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
+            if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
                 exitflag = -1;
                 break;
             end
@@ -71,8 +77,8 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
                 tn = min(tn,b - theta*(b - a));
                 tn = max(tn,a + theta*(b - a));
             elseif lsopt.interp == 2
-                [cachet, cnt1] = DirFBE(prob, gam, t, cache, 3, cachet);
-                cnt = cnt+cnt1;
+                [cachet, ops1] = DirFBE(cache, t, 3, cachet);
+                cnt = cnt+ops1;
                 dfb = cachet.dFBE;
                 tn = LemarechalCubInterp(a,fa,dfa,b,fb,dfb);
                 % safeguard
@@ -83,8 +89,8 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
             end
             t = tn;
         else
-            [cachet, cnt1] = DirFBE(prob, gam, t, cache, 2, cachet);
-            cnt = cnt+cnt1;
+            [cachet, ops1] = DirFBE(cache, t, 2, cachet);
+            ops = OpsSum(ops, ops1);
             if cachet.dFBE < wolfe_lo
                 a = t; fa = cachet.FBE; dfa = cachet.dFBE;
                 if b == inf
@@ -127,11 +133,13 @@ function [cachet, t, cnt, exitflag] = LemarechalLS(prob, gam, cache, slope, t0, 
         end
     end
     
-    if lsopt.testGamma && exitflag == 0;
-        [fz, cnt1] = Evaluatef(prob, cachet.z);
-        cnt = cnt+cnt1;
+    if exitflag == 0 && lsopt.testGamma
+        cachet1 = CacheInit(prob, cachet.z, gam);
+        [cachet1, ops1] = CacheEvalf(cachet1);
+        ops = OpsSum(ops, ops1);
+        fz = cachet1.fx;
         % check whether gam is small enough
-        if fz + cachet.gz - cachet.FBE > 1e-14*(1+abs(cachet.FBE))
+        if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
             exitflag = -1;
         end
     end

@@ -60,7 +60,7 @@ opt_fbs.variant = 'fast';
 out = forbes(f, g, y0, [], constr, opt_fbs);
 fprintf('message    : %s\n', out.message);
 fprintf('iterations : %d\n', out.iterations);
-fprintf('matvecs    : %d\n', out.operations.cnt_C1);
+fprintf('matvecs    : %d\n', out.operations.C1);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
@@ -70,7 +70,7 @@ opt_lbfgs.method = 'lbfgs';
 out = forbes(f, g, y0, [], constr, opt_lbfgs);
 fprintf('message    : %s\n', out.message);
 fprintf('iterations : %d\n', out.iterations);
-fprintf('matvecs    : %d\n', out.operations.cnt_C1);
+fprintf('matvecs    : %d\n', out.operations.C1);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
@@ -80,7 +80,7 @@ opt_cg.method = 'cg-dyhs';
 out = forbes(f, g, y0, [], constr, opt_cg);
 fprintf('message    : %s\n', out.message);
 fprintf('iterations : %d\n', out.iterations);
-fprintf('matvecs    : %d\n', out.operations.cnt_C1);
+fprintf('matvecs    : %d\n', out.operations.C1);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 

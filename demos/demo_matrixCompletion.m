@@ -23,15 +23,18 @@ f = quadLoss(P(:), B(:));
 g = nuclearNorm(m, n, lam);
 x0 = zeros(m*n, 1);
 opt.maxit = 1000;
-opt.tol = 1e-12;
+opt.tol = 1e-8;
+opt.Lf = 1;
+opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
 opt_fbs.method = 'fbs';
 opt_fbs.variant = 'fast';
 out = forbes(f, g, x0, [], [], opt_fbs);
+fprintf('\n');
 fprintf('iterations : %d\n', out.iterations);
-fprintf('SVDs       : %d\n', out.operations.cnt_g);
+fprintf('SVDs       : %d\n', out.operations.proxg);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
@@ -39,8 +42,9 @@ fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
 opt_lbfgs.method = 'lbfgs';
 out = forbes(f, g, x0, [], [], opt_lbfgs);
+fprintf('\n');
 fprintf('iterations : %d\n', out.iterations);
-fprintf('SVDs       : %d\n', out.operations.cnt_g);
+fprintf('SVDs       : %d\n', out.operations.proxg);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
@@ -48,8 +52,8 @@ fprintf('\nCG-DYHS\n');
 opt_cg = opt;
 opt_cg.method = 'cg-dyhs';
 out = forbes(f, g, x0, [], [], opt_cg);
+fprintf('\n');
 fprintf('iterations : %d\n', out.iterations);
-fprintf('SVDs       : %d\n', out.operations.cnt_g);
+fprintf('SVDs       : %d\n', out.operations.proxg);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
-
