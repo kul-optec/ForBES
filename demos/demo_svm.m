@@ -31,7 +31,7 @@ g = hingeLoss(1, b);
 constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 opt.maxit = 10000;
-opt.tol = 1e-6;
+opt.tol = 1e-4;
 opt.adaptive = 1;
 opt.display = 1;
 
