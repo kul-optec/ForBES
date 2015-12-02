@@ -1,6 +1,10 @@
 function [cache, ops] = CacheLineSearch(cache, dir)
 
-ops = OpsInit();
+if cache.flagGradStep == 0
+    [cache, ops] = CacheGradStep(cache, cache.gam);
+else
+    ops = OpsInit();
+end
 
 prob = cache.prob;
 cache.dir = dir;

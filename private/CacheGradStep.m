@@ -1,9 +1,13 @@
 function [cache, ops] = CacheGradStep(cache, gam)
 
-ops = OpsInit();
+if nargin < 2
+    gam = cache.gam;
+end
 
 if cache.flagEvalf == 0
     [cache, ops] = CacheEvalf(cache);
+else
+    ops = OpsInit();
 end
 
 % if the gradient step was performed already, then compute it only

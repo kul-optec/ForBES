@@ -4,8 +4,8 @@
 %       
 %       f(x) = 0.5*x'*Q*x+q'*x
 %
-%   With one argument, it is assumed q = 0.
-%   With no arguments, it is assumed Q = Id, q = 0;
+%   Both arguments are required. Matrix Q can be a scalar, in which case
+%   it is intended to be a diagonal matrix with uniform diagonal elements.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -25,13 +25,8 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = quadratic(Q, q)
-    if nargin < 1,
-        Q = 1;
-    end
     obj.Q = Q;
-    if nargin >= 2,
-        obj.q = q;
-    end
+    obj.q = q;
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;
 %     obj.makef = @() @(x) call_quadratic(Q, q, x); % do we need to keep this?

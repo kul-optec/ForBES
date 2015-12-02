@@ -22,8 +22,9 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = quadraticOverAffine(A, b, Q, q)
-    if nargin < 4, q = zeros(size(A, 2)); end
+    if nargin < 2, error('you should provide at least 2 arguments'); end
     if nargin < 3, Q = 1; end
+    if nargin < 4, q = zeros(size(A, 2)); end
     if isscalar(Q), Q = Q*speye(size(A, 2)); end
     obj.isQuadratic = 0;
     obj.isConjQuadratic = 1;

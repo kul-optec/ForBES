@@ -385,8 +385,10 @@ out.skip = skipCount;
 
 function gam = SelectGamma(prob, opt)
 
-if opt.method == 0 || opt.fast || opt.global
-    gam = 1/prob.Lf;
-else
-    gam = 0.95/prob.Lf;
-end
+gam = 0.95/prob.Lf;
+
+% if opt.method == 0 || opt.fast || opt.global
+%     gam = 1/prob.Lf;
+% else
+%     gam = 0.95/prob.Lf;
+% end

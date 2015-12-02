@@ -43,7 +43,7 @@
 %       g = l1Norm() % l1 regularization term
 %
 %   Consider looking into the "library" directory for specific information
-%   any of the functions.
+%   on any of the functions.
 %
 %   Options
 %   -------
@@ -193,7 +193,7 @@ function prob = MakeProb(fs, gs, init, aff, constr, opt)
                 if isa(gs, 'cell'), prob.g = gs{1};
                 else prob.g = gs; end
             elseif N > 1
-                prob.g = separableSum(gs, ns);
+                error('not implemented yet');
             end
         case 2
             prob.y0 = init;
@@ -224,7 +224,7 @@ function prob = MakeProb(fs, gs, init, aff, constr, opt)
                 if isa(gs, 'cell'), prob.g = gs{1};
                 else prob.g = gs; end
             elseif N > 1
-                prob.g = separableSum(gs, ns);
+                error('not implemented yet');
             end
             prob.B = horzcat(constr{M+1:M+N});
             prob.b = constr{M+N+1};
@@ -235,7 +235,7 @@ function op = separableSumLinear(linops)
     N = length(linops);
     % for a single linear operator, return the operator itself
     if N == 1
-        if isa(linops, 'cell') op = linops{1};
+        if isa(linops, 'cell'), op = linops{1};
         else op = linops; end
         return;
     end

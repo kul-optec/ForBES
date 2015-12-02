@@ -1,9 +1,13 @@
 function [cache, ops] = CacheGradFBE(cache, gam)
 
-ops = OpsInit();
+if nargin < 2
+    gam = cache.gam;
+end
 
 if cache.flagProxGradStep == 0 || cache.gam ~= gam
     [cache, ops] = CacheProxGradStep(cache, gam);
+else
+    ops = OpsInit();
 end
 
 prob = cache.prob;

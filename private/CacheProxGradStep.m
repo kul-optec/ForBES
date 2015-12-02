@@ -1,10 +1,15 @@
 function [cache, ops] = CacheProxGradStep(cache, gam)
 
-ops = OpsInit();
+if nargin < 2
+    gam = cache.gam;
+end
+
 gam0 = cache.gam;
 
 if cache.flagGradStep == 0 || gam0 ~= gam
     [cache, ops] = CacheGradStep(cache, gam);
+else
+    ops = OpsInit();
 end
 
 if cache.flagProxGradStep == 0 || gam0 ~= gam

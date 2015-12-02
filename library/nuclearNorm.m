@@ -40,7 +40,8 @@ function obj = nuclearNorm(m, n, lam, mode)
         error('you must provide the number of rows and columns, m and n, as arguments');
     end
     if nargin < 3, lam = 1; end
-    if nargin < 4 || mode == 0
+    if nargin < 4, mode = 0; end
+    if mode == 0
         obj.makeprox = @() @(x, gam) call_nuclearNorm_prox(x, gam, m, n, lam);
     elseif mode == 1
         obj.makeprox = @() @(x, gam) call_nuclearNorm_prox_adaptive(x, gam, m, n, lam);

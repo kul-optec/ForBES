@@ -53,7 +53,7 @@ function opt = ProcessOptions(opt)
     if ~isfield(opt, 'recache'), opt.recache = 100; end
     if ~isfield(opt, 'memory'), opt.memory = 10; end
     if ~isfield(opt, 'adaptive'), opt.adaptive = 0; end
-    if ~isfield(opt, 'display'), opt.display = 0; end
+    if ~isfield(opt, 'display'), opt.display = 2; end
     if ~isfield(opt, 'useHessian'), opt.useHessian = 0; end
     
     % translate labels into integer codes

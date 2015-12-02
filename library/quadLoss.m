@@ -4,9 +4,9 @@
 %       
 %       f(x) = 0.5*sum_i w_i(x_i-p_i)^2
 %   
-%   If the arguments are omitted, it is assumed that w = 1, p = 0.
-%   If w is a positive scalar then w_i = w. Length of p must instead be
-%   compliant with the dimension of the domain of the function.
+%   Both arguments are required. If w is a positive scalar then w_i = w.
+%   Length of p must instead be compliant with the dimension of the domain
+%   of the function.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -26,22 +26,16 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = quadLoss(w, p)
-    if nargin < 1, w = 1; end
-    if nargin < 2, p = 0; end
     if any(w < 0)
-        error('first argument should be a nonnegative');
+        error('first argument should be nonnegative');
     end
     if isscalar(w)
         obj.Q = w;
-        if norm(p) > 0
-            obj.q = -w*p;
-        end
+        obj.q = -w*p;
     elseif isvector(w)
         n = length(w);
         obj.Q = spdiags(w,0,n,n);
-        if norm(p) > 0
-            obj.q = -w.*p;
-        end
+        obj.q = -w.*p;
     end
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;

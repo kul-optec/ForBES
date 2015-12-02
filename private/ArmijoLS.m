@@ -34,7 +34,7 @@ function [t, cachet, cachet1, ops, exitflag] = ArmijoLS(cache, df0, t0, lsopt, f
     arm_hi = lsopt.delta*df0;
     t = t0;
     exitflag = 1;
-    if nargin >= 7
+    if nargin >= 5
         f0 = fr;
     else
         f0 = cache.FBE;
