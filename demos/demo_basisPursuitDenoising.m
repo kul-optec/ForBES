@@ -18,7 +18,7 @@ fprintf('%.2f nnz per row\n', nnz(A)/numel(A)*n);
 lam_max = norm(A'*b,'inf');
 lam = 0.05*lam_max;
 
-f = quadLoss();
+f = quadLoss(1, zeros(m,1));
 aff = {A, -b};
 g = l1Norm(lam);
 x0 = zeros(n, 1);

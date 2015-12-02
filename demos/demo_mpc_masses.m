@@ -52,6 +52,7 @@ constr = {1, -1, b};
 y0 = zeros(n*(N+1)+m*N,1);
 opt.maxit = 10000;
 opt.tol = 1e-9;
+opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;

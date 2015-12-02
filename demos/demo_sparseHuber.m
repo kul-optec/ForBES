@@ -23,6 +23,7 @@ g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
 opt.tol = 1e-8;
+opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
