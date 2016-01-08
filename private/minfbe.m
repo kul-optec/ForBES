@@ -136,14 +136,14 @@ for it = 1:opt.maxit
                 LBFGS_mem = 0;
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 Sk = cache_current.x - cache_previous.x;
-%                 Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_current.gradFBE - cache_previous.gradFBE;
                 %%% other options (is this additional gradient eval needed?)
-                [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
-                ops = OpsSum(ops, ops1);
+%                 [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
+%                 ops = OpsSum(ops, ops1);
                 %%% w - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_tau.x - cache_previous.x;
-                Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+%                 Sk = cache_tau.x - cache_previous.x;
+%                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 if YSk > 0;
@@ -176,14 +176,14 @@ for it = 1:opt.maxit
 %                    dir = -cache_current.gradFBE./(diag(R).^2);
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 Sk = cache_current.x - cache_previous.x;
-%                 Yk = cache_current.gradFBE - cache_previous.gradFBE;
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_current.gradFBE - cache_previous.gradFBE;
                 %%% other options (is this additional gradient eval needed?)
-                [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
-                ops = OpsSum(ops, ops1);
+%                 [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
+%                 ops = OpsSum(ops, ops1);
                 %%% w - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_tau.x - cache_previous.x;
-                Yk = cache_tau.gradFBE - cache_previous.gradFBE;
+%                 Sk = cache_tau.x - cache_previous.x;
+%                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
