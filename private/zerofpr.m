@@ -40,7 +40,7 @@ flag = -1; % to track what happened at every iteration
 flag_gamma = 0;
 
 MAXIMUM_Lf = 1e15;
-MINIMUM_tau = 1e-15;
+% MINIMUM_tau = 1e-15;
 MINIMUM_d = 1e-15;
 
 t0 = tic();
@@ -111,10 +111,10 @@ for it = 1:opt.maxit
             else
                 s = cache_current.x - cache_previous.x;
                 y = cache_current.diff - cache_previous.diff;
-                rho = (B\y)'*s;
+                rho = (B\y)'*s/(s'*s);
                 if abs(rho) >= thetabar, theta = 1.0;
                 else theta = (1-sign(rho)*thetabar)/(1+rho); end
-                B = B + (theta/(s'*s))*(y-B*s)*s';
+                B = B + (theta/(s'*s))*((y-B*s)*s');
                 d = B\cache_current.diff;
             end
         otherwise
@@ -124,14 +124,13 @@ for it = 1:opt.maxit
     % select a stepsize
     
     if norm(d) <= MINIMUM_d
-        % if d is zero then tau = 1.0 cannot be accepted
-        tau = alpha;
+        % if d is zero then tau = 0.0 and the algorithm becomes FBS
+        tau = 0.0;
     else
         tau = 1.0;
     end
     
     while 1
-        if tau <= MINIMUM_tau, break; end
         x = cache_current.z + tau*(d - cache_current.diff);
         cache_next = CacheInit(prob, x, gam);
         [cache_next, ops1] = CacheProxGradStep(cache_next, gam);
@@ -154,12 +153,6 @@ for it = 1:opt.maxit
             break;
         end
         tau = alpha*tau;
-    end
-    
-    if tau <= MINIMUM_tau
-        msgTerm = ['stepsize tau became too small: ', num2str(tau)];
-        flagTerm = 1;
-        break;
     end
 
     % display stuff
