@@ -43,6 +43,8 @@ function opt = ProcessOptions(opt)
                 opt.linesearch = 'nonmonotone-armijo';
             case 'fbs'
                 opt.linesearch = 'none';
+            case 'broyden'
+                opt.linesearch = 'none';
             otherwise
                 error('unknown method');
         end
@@ -76,6 +78,8 @@ function opt = ProcessOptions(opt)
             opt.optsU.UT = true;
         case 'fbs'
             opt.method = 0;
+        case 'broyden'
+            opt.method = 11;
         otherwise
             error('unknown method');
     end

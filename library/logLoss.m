@@ -41,7 +41,7 @@ function [val, grad, hess] = call_logLoss_f(x, mu)
     grad = (px-1)*mu;
     if nargout >= 3
       h = px.*(1-px);
-      hess = diag(sparse(h));
+      hess = mu*diag(sparse(h));
     end
   end
 end

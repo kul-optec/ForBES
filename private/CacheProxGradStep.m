@@ -18,6 +18,9 @@ if cache.flagProxGradStep == 0 || gam0 ~= gam
     ops.g = ops.g + 1;
 end
 
+cache.diff = cache.z-cache.x;
+cache.normdiff = norm(cache.diff);
+
 cache.gam = gam;
 
 cache.flagProxGradStep = 1;
