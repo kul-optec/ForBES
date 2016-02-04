@@ -136,7 +136,7 @@ for it = 1:opt.maxit
         cache_next = CacheInit(prob, x, gam);
         [cache_next, ops1] = CacheProxGradStep(cache_next, gam);
         ops = OpsSum(ops, ops1);
-        if cache_next.normdiff <= c*eta
+        if cache_current.normdiff <= c*eta && cache_next.normdiff <= c*eta
             eta = cache_current.normdiff;
             cache_previous = cache_current;
             cache_current = cache_next;
