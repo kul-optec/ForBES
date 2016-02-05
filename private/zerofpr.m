@@ -54,23 +54,27 @@ eta = cache_current.normdiff;
 
 for it = 1:opt.maxit
     
+    flag_gamma = 0;
+    
     % backtracking on gamma
     
     cache_z = CacheInit(prob, cache_current.z, gam);
     [cache_z, ops1] = CacheEvalf(cache_z);
     ops = OpsSum(ops, ops1);
     
-    while cache_z.fx > cache_current.fx + cache_current.gradfx'*cache_current.diff ...
-            + prob.Lf/2*cache_current.normdiff^2
-        if prob.Lf >= MAXIMUM_Lf, break; end
-        prob.Lf = 2*prob.Lf;
-        gam = SelectGamma(prob, opt);
-        flag_gamma = 1;
-        [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
-        ops = OpsSum(ops, ops1);
-        cache_z = CacheInit(prob, cache_current.z, gam);
-        [cache_z, ops1] = CacheEvalf(cache_z);
-        ops = OpsSum(ops, ops1);
+    if prob.unknownLf || opt.adaptive
+        while cache_z.fx > cache_current.fx + cache_current.gradfx'*cache_current.diff ...
+                + prob.Lf/2*cache_current.normdiff^2
+            if prob.Lf >= MAXIMUM_Lf, break; end
+            prob.Lf = 2*prob.Lf;
+            gam = SelectGamma(prob, opt);
+            flag_gamma = 1;
+            [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
+            ops = OpsSum(ops, ops1);
+            cache_z = CacheInit(prob, cache_current.z, gam);
+            [cache_z, ops1] = CacheEvalf(cache_z);
+            ops = OpsSum(ops, ops1);
+        end
     end
     
     if prob.Lf >= MAXIMUM_Lf
@@ -86,7 +90,7 @@ for it = 1:opt.maxit
     % trace stuff
     
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_current.diff, 'inf');
     
     % check for termination
     
@@ -95,10 +99,12 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if cache_current.normdiff/(1+norm(cache_current.x)) <= 100*eps
-        msgTerm = 'reached optimum (fpr close to eps)';
-        flagTerm = 0;
-        break;
+    if ~flag_gamma
+        if residual(1, it) <= opt.tol
+            msgTerm = 'reached optimum (up to tolerance)';
+            flagTerm = 0;
+            break;
+        end
     end
     
     % select a direction
@@ -110,12 +116,69 @@ for it = 1:opt.maxit
                 d = cache_current.diff;
             else
                 s = cache_current.x - cache_previous.x;
-                y = cache_current.diff - cache_previous.diff;
+                y = cache_previous.diff-cache_current.diff ;
                 rho = (B\y)'*s/(s'*s);
                 if abs(rho) >= thetabar, theta = 1.0;
                 else theta = (1-sign(rho)*thetabar)/(1+rho); end
                 B = B + (theta/(s'*s))*((y-B*s)*s');
                 d = B\cache_current.diff;
+            end
+        case 12 % BFGS
+            opt.optsL.UT = true; opt.optsL.TRANSA = true;
+            opt.optsU.UT = true;
+            if it == 1 || flag_gamma
+                d = cache_current.diff;
+                R = eye(prob.n);
+            else
+                %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff ;
+                %%% other options (is this additional gradient eval needed?)
+                YSk = Yk'*Sk;
+                Bs = R'*(R*Sk);
+                sBs = Sk'*Bs;
+                if YSk>= 0.2*sBs
+                    theta = 1;
+                else
+                    theta = (0.8*sBs)/(sBs-YSk);
+                end
+                r = theta*Yk + (1-theta)*Bs;
+                R = cholupdate(cholupdate(R,r/sqrt(Sk'*r)),Bs/sqrt(sBs),'-');
+%                 if YSk > 0
+%                     R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
+%                 else
+%                     skipCount = skipCount+1;
+%                 end
+                d = linsolve(R,linsolve(R,cache_current.diff,opt.optsL),opt.optsU);
+                %                     dir = -R\(R'\cache_current.gradFBE);
+            end
+        case 13
+            if it == 1 || flag_gamma
+                d = cache_current.diff;
+                skipCount = 0;
+                LBFGS_col = 1;
+                LBFGS_mem = 0;
+            else
+                %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff ;
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                YSk = Yk'*Sk;
+                if YSk > 1e-12;
+                    LBFGS_col = 1+mod(LBFGS_col, opt.memory);
+                    LBFGS_mem = min(LBFGS_mem+1, opt.memory);
+                    S(:,LBFGS_col) = Sk;
+                    Y(:,LBFGS_col) = Yk;
+                    YS(LBFGS_col) = YSk;
+                else
+                    skipCount = skipCount+1;
+                end
+                if LBFGS_mem > 0
+                    H = YS(LBFGS_col)/(Y(:,LBFGS_col)'*Y(:,LBFGS_col));
+                    d = LBFGS(S, Y, YS, H, cache_current.diff, int32(LBFGS_col), int32(LBFGS_mem));
+                else
+                    d = cache_current.diff;
+                end
             end
         otherwise
             error('search direction not implemented');
