@@ -67,7 +67,7 @@ for it = 1:opt.maxit
     end
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_yk.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_yk.diff, 'inf');
     objective(1, it) = cache_yk.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_yk, ops)];
@@ -86,7 +86,7 @@ for it = 1:opt.maxit
     end
     if ~flagChangedGamma
         if ~opt.customTerm
-            if residual(1, it) <= opt.tol*residual(1, 1)
+            if residual(1, it) <= opt.tol
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
