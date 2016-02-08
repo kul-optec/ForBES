@@ -112,11 +112,12 @@ function opt = ProcessOptions(opt)
     end
     
     if ~isfield(opt, 'variant')
-        switch opt.method
-            case 0 % FBS
-                opt.variant = 'fast';
-            otherwise
-                opt.variant = 'global';
+        if opt.method == 0
+            opt.variant = 'basic';
+        elseif opt.method <= 10
+            opt.variant = 'global';
+        else
+            opt.variant = '1b';
         end
     end
     
@@ -133,8 +134,6 @@ function opt = ProcessOptions(opt)
             opt.fast = 1;
             opt.global = 0;
             opt.monotone = 1;
-        otherwise
-            error('unknown variant');
     end
     
     opt.processed = true;

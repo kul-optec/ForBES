@@ -38,9 +38,10 @@ c = 0.9;
 thetabar = 0.1;
 flag = -1; % to track what happened at every iteration
 flag_gamma = 0;
+flagTerm = 0;
 
 MAXIMUM_Lf = 1e15;
-% MINIMUM_tau = 1e-15;
+MINIMUM_tau = 1e-15;
 MINIMUM_d = 1e-15;
 
 t0 = tic();
@@ -110,18 +111,20 @@ for it = 1:opt.maxit
     % select a direction
     
     switch opt.method
-        case 11
+        case 11 % Broyden
             if it == 1 || flag_gamma
-                B = eye(prob.n);
+                R = eye(prob.n);
                 d = cache_current.diff;
             else
                 s = cache_current.x - cache_previous.x;
-                y = cache_previous.diff-cache_current.diff ;
-                rho = (B\y)'*s/(s'*s);
-                if abs(rho) >= thetabar, theta = 1.0;
-                else theta = (1-sign(rho)*thetabar)/(1+rho); end
-                B = B + (theta/(s'*s))*((y-B*s)*s');
-                d = B\cache_current.diff;
+                y = cache_previous.diff-cache_current.diff;
+                sts = s'*s;
+                lambda = (R*y)'*s/sts;
+                if abs(lambda) >= thetabar, theta = 1.0;
+                else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
+                v = R*y-s;
+                R = R - (theta/(sts+theta*(v'*s)))*(v*(s'*R));
+                d = R*cache_current.diff;
             end
         case 12 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
@@ -161,7 +164,7 @@ for it = 1:opt.maxit
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 Sk = cache_current.x - cache_previous.x;
-                Yk = cache_previous.diff-cache_current.diff ;
+                Yk = cache_previous.diff-cache_current.diff;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 if YSk > 1e-12;
@@ -194,21 +197,42 @@ for it = 1:opt.maxit
     end
     
     while 1
+        if tau ~= 0.0 && tau <= MINIMUM_tau
+            msgTerm = strcat('tau became too small: ', num2str(tau));
+            flagTerm = 1;
+            break;
+        end
         x = cache_current.z + tau*(d - cache_current.diff);
         cache_next = CacheInit(prob, x, gam);
         [cache_next, ops1] = CacheProxGradStep(cache_next, gam);
         ops = OpsSum(ops, ops1);
-        if cache_current.normdiff <= c*eta && cache_next.normdiff <= c*eta
+        % (C1) set flag to 1, then check the enabled condition and put the
+        % flag to 0 if any of those is not verified
+        flag_C1 = 1;
+        if ~isempty(strfind(opt.variant, '1')) && ~(cache_current.normdiff <= c*eta), flag_C1 = 0; end
+        if ~isempty(strfind(opt.variant, '2')) && ~(cache_next.normdiff <= c*eta), flag_C1 = 0; end
+        if ~isempty(strfind(opt.variant, 'a'))
+            [cache_current, ops1] = CacheFBE(cache_current, gam);
+            ops = OpsSum(ops, ops1);
+            [cache_next, ops1] = CacheFBE(cache_next, gam);
+            ops = OpsSum(ops, ops1);
+            if ~(cache_next.FBE <= cache_current.FBE), flag_C1 = 0; end
+        end
+        if ~isempty(strfind(opt.variant, 'b')) && ~(tau == 1.0), flag_C1 = 0; end
+        if flag_C1
             eta = cache_current.normdiff;
             cache_previous = cache_current;
             cache_current = cache_next;
             flag = 1;
             break;
         end
+        % compute FBE (if needed: if 'C1/a' is enabled the following
+        % steps should count zero operations)
         [cache_current, ops1] = CacheFBE(cache_current, gam);
         ops = OpsSum(ops, ops1);
         [cache_next, ops1] = CacheFBE(cache_next, gam);
         ops = OpsSum(ops, ops1);
+        % (C2)
         if cache_next.FBE <= cache_current.FBE - sig*cache_current.normdiff^2
             cache_previous = cache_current;
             cache_current = cache_next;
@@ -216,6 +240,10 @@ for it = 1:opt.maxit
             break;
         end
         tau = alpha*tau;
+    end
+    
+    if flagTerm == 1
+        break;
     end
 
     % display stuff
@@ -257,4 +285,3 @@ gam = 0.95/prob.Lf;
 function sig = SelectSigma(prob, opt, gam)
 
 sig = (1-gam*prob.Lf)/(4*gam);
-
