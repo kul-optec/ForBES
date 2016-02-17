@@ -87,7 +87,7 @@ for it = 1:opt.maxit
 
     % trace stuff
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf');
+    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
