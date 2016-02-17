@@ -19,6 +19,7 @@ function out = zerofpr(prob, opt)
 
 % initialize output stuff
 ts = zeros(1, opt.maxit);
+taus = zeros(1, opt.maxit);
 residual = zeros(1, opt.maxit);
 msgTerm = '';
 
@@ -157,6 +158,7 @@ for it = 1:opt.maxit
             end
         case 13
             if it == 1 || flag_gamma
+                alphaC = 0.01;
                 d = cache_current.diff;
                 skipCount = 0;
                 LBFGS_col = 1;
@@ -167,8 +169,11 @@ for it = 1:opt.maxit
                 Yk = cache_previous.diff-cache_current.diff;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
-                if YSk > 1e-12;
-                    LBFGS_col = 1+mod(LBFGS_col, opt.memory);
+                if cache_current.normdiff<1
+                    alphaC = 3;
+                end
+                if YSk/(Sk'*Sk) > 1e-6*cache_current.normdiff^alphaC
+                    LBFGS_col = 1 + mod(LBFGS_col, opt.memory);
                     LBFGS_mem = min(LBFGS_mem+1, opt.memory);
                     S(:,LBFGS_col) = Sk;
                     Y(:,LBFGS_col) = Yk;
@@ -182,6 +187,44 @@ for it = 1:opt.maxit
                 else
                     d = cache_current.diff;
                 end
+            end
+        case 14
+            if it == 1 || flag_gamma
+                d = cache_current.diff;
+                skipCount = 0;
+                LB_col = 0;
+                LB_mem = 0;
+                S = zeros(length(d), opt.memory);
+                Y = S;
+                HY = S;
+                YS = zeros(opt.memory, 1);
+                SHY = zeros(opt.memory, 1);
+            else
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff;
+                LB_col      = 1 + mod(LB_col, opt.memory) ;
+                LB_mem      = min(LB_mem+1, opt.memory) ;
+                S(:,LB_col) = Sk;
+                Y(:,LB_col) = Yk;
+                HYk = Yk ;
+                for jm = 0:LB_mem-2
+                    j     = mod(LB_col+jm, LB_mem) + 1;
+                    HYj  = HY(:,j);
+                    Sj   = S(:,j);
+                    SHyj = SHY(j);
+                    HYk  = HYk + (Sj-HYj)*((Sj'*HYk)/SHyj);
+                end
+                HY(:,LB_col) = HYk;
+                SHY(LB_col)  = Sk'*HYk;
+                d = cache_current.diff;
+                for jm = 1:LB_mem-1
+                    j     = mod(LB_col+jm, LB_mem) + 1;
+                    HYj  = HY(:,j);
+                    Sj   = S(:,j);
+                    SHyj = SHY(j);
+                    d    = d + (Sj-HYj)*((Sj'*d)/SHyj);
+                end
+
             end
         otherwise
             error('search direction not implemented');
@@ -208,7 +251,11 @@ for it = 1:opt.maxit
         ops = OpsSum(ops, ops1);
         % (C1) set flag to 1, then check the enabled condition and put the
         % flag to 0 if any of those is not verified
-        flag_C1 = 1;
+        if isempty(opt.variant)
+            flag_C1 = 0;
+        else
+            flag_C1 = 1;
+        end
         if ~isempty(strfind(opt.variant, '1')) && ~(cache_current.normdiff <= c*eta), flag_C1 = 0; end
         if ~isempty(strfind(opt.variant, '2')) && ~(cache_next.normdiff <= c*eta), flag_C1 = 0; end
         if ~isempty(strfind(opt.variant, 'a'))
@@ -241,7 +288,7 @@ for it = 1:opt.maxit
         end
         tau = alpha*tau;
     end
-    
+    taus(1,it) = tau;
     if flagTerm == 1
         break;
     end
@@ -274,6 +321,7 @@ out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
 out.ts = ts(1, 1:it);
+out.tau = taus(1, 1:it-1);
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
