@@ -32,6 +32,6 @@ function [prox, g] = call_l0Norm_prox(x, gam, mu)
     over = abs(x) > sqrt(2*gam*mu); 
     prox = x.*over;
     if nargout >= 2
-        g = mu*sum(uz ~= 0);
+        g = mu*sum(prox ~= 0);
     end
 end
