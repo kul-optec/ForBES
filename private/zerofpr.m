@@ -35,10 +35,8 @@ if opt.display >= 2
 end
 
 alpha = 0.5;
-c = 0.9;
 thetabar = 0.1;
 flag = -1; % to track what happened at every iteration
-flag_gamma = 0;
 flagTerm = 0;
 
 MAXIMUM_Lf = 1e15;
@@ -50,13 +48,10 @@ t0 = tic();
 cache_current = CacheInit(prob, prob.x0, gam);
 [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
 ops = OpsSum(ops, ops1);
-cache_previous = [];
-
-eta = cache_current.normdiff;
 
 for it = 1:opt.maxit
     
-    flag_gamma = 0;
+    flagGamma = 0;
     
     % backtracking on gamma
     
@@ -71,7 +66,7 @@ for it = 1:opt.maxit
             if prob.Lf >= MAXIMUM_Lf, break; end
             prob.Lf = 2*prob.Lf;
             gam = SelectGamma(prob, opt);
-            flag_gamma = 1;
+            flagGamma = 1;
             [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
             ops = OpsSum(ops, ops1);
             cache_z = CacheInit(prob, cache_current.z, gam);
@@ -102,7 +97,7 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if ~flag_gamma
+    if ~flagGamma
         if residual(1, it) <= opt.tol
             msgTerm = 'reached optimum (up to tolerance)';
             flagTerm = 0;
@@ -117,12 +112,12 @@ for it = 1:opt.maxit
     
     switch opt.method
         case 11 % Broyden
-            if it == 1 || flag_gamma
+            if it == 1 || flagGamma
                 R = eye(prob.n);
                 d = cache_z.diff;
             else
-                s = cache_current.x - cache_z.x;
-                y = cache_z.diff-cache_current.diff;
+                s = cache_current.x - cache_previous.x;
+                y = cache_previous.diff-cache_current.diff;
                 sts = s'*s;
                 lambda = (R*y)'*s/sts;
                 if abs(lambda) >= thetabar, theta = 1.0;
@@ -134,13 +129,13 @@ for it = 1:opt.maxit
         case 12 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
             opt.optsU.UT = true;
-            if it == 1 || flag_gamma
+            if it == 1 || flagGamma
                 d = cache_z.diff;
                 R = eye(prob.n);
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_current.x - cache_z.x;
-                Yk = cache_z.diff-cache_current.diff ;
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff ;
                 %%% other options (is this additional gradient eval needed?)
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
@@ -161,7 +156,7 @@ for it = 1:opt.maxit
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
         case 13
-            if it == 1 || flag_gamma
+            if it == 1 || flagGamma
                 alphaC = 0.01;
                 d = cache_z.diff;
                 skipCount = 0;
@@ -169,8 +164,8 @@ for it = 1:opt.maxit
                 LBFGS_mem = 0;
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_current.x - cache_z.x;
-                Yk = cache_z.diff-cache_current.diff;
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 if cache_current.normdiff<1
@@ -193,7 +188,7 @@ for it = 1:opt.maxit
                 end
             end
         case 14
-            if it == 1 || flag_gamma
+            if it == 1 || flagGamma
                 d = cache_z.diff;
                 skipCount = 0;
                 LB_col = 0;
@@ -204,8 +199,8 @@ for it = 1:opt.maxit
                 YS = zeros(opt.memory, 1);
                 SHY = zeros(opt.memory, 1);
             else
-                Sk = cache_current.x - cache_z.x;
-                Yk = cache_z.diff-cache_current.diff;
+                Sk = cache_current.x - cache_previous.x;
+                Yk = cache_previous.diff-cache_current.diff;
                 LB_col      = 1 + mod(LB_col, opt.memory) ;
                 LB_mem      = min(LB_mem+1, opt.memory) ;
                 S(:,LB_col) = Sk;
@@ -261,9 +256,8 @@ for it = 1:opt.maxit
         ops = OpsSum(ops, ops1);
         % check for sufficient decrease in the FBE
         if cache_next.FBE <= cache_current.FBE - sig*cache_current.normdiff^2
-            cache_previous = cache_current;
+            cache_previous = cache_z;
             cache_current = cache_next;
-            flag = 0;
             break;
         end
         tau = alpha*tau;
@@ -282,7 +276,7 @@ for it = 1:opt.maxit
             fprintf('\n');
         end
     elseif opt.display >= 2
-        fprintf('%6d %7.4e %7.4e %7.4e %d\n', it, gam, residual(1,it), tau, flag);
+        fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), tau);
     end
 
 end
