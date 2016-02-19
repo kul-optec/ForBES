@@ -61,11 +61,12 @@ for it = 1:opt.maxit
     % backtracking on gamma
     
     cache_z = CacheInit(prob, cache_current.z, gam);
-    [cache_z, ops1] = CacheEvalf(cache_z);
-    ops = OpsSum(ops, ops1);
     
     if prob.unknownLf || opt.adaptive
-        while cache_z.fx > cache_current.fx + cache_current.gradfx'*cache_current.diff ...
+        [cache_z, ops1] = CacheEvalf(cache_z);
+        ops = OpsSum(ops, ops1);
+        while cache_z.fx > cache_current.fx ...
+                + cache_current.gradfx'*cache_current.diff ...
                 + prob.Lf/2*cache_current.normdiff^2
             if prob.Lf >= MAXIMUM_Lf, break; end
             prob.Lf = 2*prob.Lf;
@@ -79,15 +80,15 @@ for it = 1:opt.maxit
         end
     end
     
+    % adjust sigma
+    
+    sig = SelectSigma(prob, opt, gam);
+    
     if prob.Lf >= MAXIMUM_Lf
         msgTerm = ['estimate for Lf became too large: ', num2str(prob.Lf)];
         flagTerm = 1;
         break;
     end
-    
-    % adjust sigma
-    
-    sig = SelectSigma(prob, opt, gam);
     
     % trace stuff
     
@@ -111,32 +112,35 @@ for it = 1:opt.maxit
     
     % select a direction
     
+    [cache_z, ops1] = CacheProxGradStep(cache_z, gam);
+    ops = OpsSum(ops, ops1);
+    
     switch opt.method
         case 11 % Broyden
             if it == 1 || flag_gamma
                 R = eye(prob.n);
-                d = cache_current.diff;
+                d = cache_z.diff;
             else
-                s = cache_current.x - cache_previous.x;
-                y = cache_previous.diff-cache_current.diff;
+                s = cache_current.x - cache_z.x;
+                y = cache_z.diff-cache_current.diff;
                 sts = s'*s;
                 lambda = (R*y)'*s/sts;
                 if abs(lambda) >= thetabar, theta = 1.0;
                 else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
                 v = R*y-s;
                 R = R - (theta/(sts+theta*(v'*s)))*(v*(s'*R));
-                d = R*cache_current.diff;
+                d = R*cache_z.diff;
             end
         case 12 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
             opt.optsU.UT = true;
             if it == 1 || flag_gamma
-                d = cache_current.diff;
+                d = cache_z.diff;
                 R = eye(prob.n);
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_current.x - cache_previous.x;
-                Yk = cache_previous.diff-cache_current.diff ;
+                Sk = cache_current.x - cache_z.x;
+                Yk = cache_z.diff-cache_current.diff ;
                 %%% other options (is this additional gradient eval needed?)
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
@@ -153,20 +157,20 @@ for it = 1:opt.maxit
 %                 else
 %                     skipCount = skipCount+1;
 %                 end
-                d = linsolve(R,linsolve(R,cache_current.diff,opt.optsL),opt.optsU);
+                d = linsolve(R,linsolve(R,cache_z.diff,opt.optsL),opt.optsU);
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
         case 13
             if it == 1 || flag_gamma
                 alphaC = 0.01;
-                d = cache_current.diff;
+                d = cache_z.diff;
                 skipCount = 0;
                 LBFGS_col = 1;
                 LBFGS_mem = 0;
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_current.x - cache_previous.x;
-                Yk = cache_previous.diff-cache_current.diff;
+                Sk = cache_current.x - cache_z.x;
+                Yk = cache_z.diff-cache_current.diff;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 if cache_current.normdiff<1
@@ -183,14 +187,14 @@ for it = 1:opt.maxit
                 end
                 if LBFGS_mem > 0
                     H = YS(LBFGS_col)/(Y(:,LBFGS_col)'*Y(:,LBFGS_col));
-                    d = LBFGS(S, Y, YS, H, cache_current.diff, int32(LBFGS_col), int32(LBFGS_mem));
+                    d = LBFGS(S, Y, YS, H, cache_z.diff, int32(LBFGS_col), int32(LBFGS_mem));
                 else
-                    d = cache_current.diff;
+                    d = cache_z.diff;
                 end
             end
         case 14
             if it == 1 || flag_gamma
-                d = cache_current.diff;
+                d = cache_z.diff;
                 skipCount = 0;
                 LB_col = 0;
                 LB_mem = 0;
@@ -200,8 +204,8 @@ for it = 1:opt.maxit
                 YS = zeros(opt.memory, 1);
                 SHY = zeros(opt.memory, 1);
             else
-                Sk = cache_current.x - cache_previous.x;
-                Yk = cache_previous.diff-cache_current.diff;
+                Sk = cache_current.x - cache_z.x;
+                Yk = cache_z.diff-cache_current.diff;
                 LB_col      = 1 + mod(LB_col, opt.memory) ;
                 LB_mem      = min(LB_mem+1, opt.memory) ;
                 S(:,LB_col) = Sk;
@@ -216,7 +220,7 @@ for it = 1:opt.maxit
                 end
                 HY(:,LB_col) = HYk;
                 SHY(LB_col)  = Sk'*HYk;
-                d = cache_current.diff;
+                d = cache_z.diff;
                 for jm = 1:LB_mem-1
                     j     = mod(LB_col+jm, LB_mem) + 1;
                     HYj  = HY(:,j);
@@ -245,41 +249,17 @@ for it = 1:opt.maxit
             flagTerm = 1;
             break;
         end
-        x = cache_current.z + tau*(d - cache_current.diff);
-        cache_next = CacheInit(prob, x, gam);
-        [cache_next, ops1] = CacheProxGradStep(cache_next, gam);
-        ops = OpsSum(ops, ops1);
-        % (C1) set flag to 1, then check the enabled condition and put the
-        % flag to 0 if any of those is not verified
-        if isempty(opt.variant)
-            flag_C1 = 0;
-        else
-            flag_C1 = 1;
-        end
-        if ~isempty(strfind(opt.variant, '1')) && ~(cache_current.normdiff <= c*eta), flag_C1 = 0; end
-        if ~isempty(strfind(opt.variant, '2')) && ~(cache_next.normdiff <= c*eta), flag_C1 = 0; end
-        if ~isempty(strfind(opt.variant, 'a'))
-            [cache_current, ops1] = CacheFBE(cache_current, gam);
-            ops = OpsSum(ops, ops1);
-            [cache_next, ops1] = CacheFBE(cache_next, gam);
-            ops = OpsSum(ops, ops1);
-            if ~(cache_next.FBE <= cache_current.FBE), flag_C1 = 0; end
-        end
-        if ~isempty(strfind(opt.variant, 'b')) && ~(tau == 1.0), flag_C1 = 0; end
-        if flag_C1
-            eta = cache_current.normdiff;
-            cache_previous = cache_current;
-            cache_current = cache_next;
-            flag = 1;
-            break;
-        end
-        % compute FBE (if needed: if 'C1/a' is enabled the following
-        % steps should count zero operations)
+        % compute FBE at current point
+        % this should count zero operations if gamma hasn't changed
         [cache_current, ops1] = CacheFBE(cache_current, gam);
         ops = OpsSum(ops, ops1);
+        % compute candidate next point
+        x = cache_current.z + tau*d;
+        % compute FBE at candidate next point
+        cache_next = CacheInit(prob, x, gam);
         [cache_next, ops1] = CacheFBE(cache_next, gam);
         ops = OpsSum(ops, ops1);
-        % (C2)
+        % check for sufficient decrease in the FBE
         if cache_next.FBE <= cache_current.FBE - sig*cache_current.normdiff^2
             cache_previous = cache_current;
             cache_current = cache_next;
