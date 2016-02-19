@@ -87,7 +87,7 @@ for it = 1:opt.maxit
 
     % trace stuff
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_current.diff, 'inf');
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
@@ -367,7 +367,8 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.x = cache_current.x;
+out.cache = cache_current;
+out.x = cache_current.z;
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);

@@ -67,7 +67,7 @@ for it = 1:opt.maxit
     end
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_yk.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_yk.diff, 'inf');
     objective(1, it) = cache_yk.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_yk, ops)];
@@ -130,6 +130,7 @@ out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
 out.gam = gam;
+out.cache = cache_yk;
 out.x = cache_yk.z;
 out.iterations = it;
 out.operations = ops;
