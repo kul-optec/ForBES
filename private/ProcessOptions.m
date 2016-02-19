@@ -49,6 +49,8 @@ function opt = ProcessOptions(opt)
                 opt.linesearch = 'none';
             case 'lbfgs-fpr'
                 opt.linesearch = 'none';
+            case 'lbroyden-fpr'
+                opt.linesearch = 'none';
             otherwise
                 error('unknown method');
         end
@@ -88,6 +90,8 @@ function opt = ProcessOptions(opt)
             opt.method = 12;
         case 'lbfgs-fpr'
             opt.method = 13;
+        case 'lbroyden-fpr'
+            opt.method = 14;
         otherwise
             error('unknown method');
     end
