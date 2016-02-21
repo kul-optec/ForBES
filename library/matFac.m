@@ -22,7 +22,7 @@ function [val, grad] = call_matrixFactorization_fun(x, A, n, r, m)
     mr = m*r;
     U = reshape(x(1:nr), n, r);
     V = reshape(x(nr+1:nr+mr), r, m);
-    res = A - U*V;
+    res = U*V - A;
     val = 0.5*norm(res, 'fro')^2;
-    grad = [reshape((U'*res)', nr, 1); reshape((res*V')', mr, 1)];
+    grad = [reshape((res*V'), nr, 1); reshape((U'*res), mr, 1)];
 end
