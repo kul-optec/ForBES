@@ -1,8 +1,8 @@
-%L0NORM Allocates the L0 norm function.
+%INDRANKBALL Allocates the nuclear norm function
 %
-%   L0NORM(mu) builds the function
+%   INDRANKBALL(m, n, r) builds the function
 %       
-%       g(x) = mu*||x||_0 = mu*nnz(x)
+%       g(X) = 0 if rank(X) <= r, +infinity otherwise
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -21,17 +21,17 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = l0Norm(mu)
-    if nargin < 1
-        mu = 1;
+function obj = indRankBall(m, n, r)
+    if nargin < 3
+        error('you must provide the number of rows and columns, m and n, and rank r as arguments');
     end
-    obj.makeprox = @() @(x, gam) call_l0Norm_prox(x, gam, mu);
+    obj.makeprox = @() @(x, gam) call_indRankBall_proj(x, m, n, r);
 end
 
-function [prox, g] = call_l0Norm_prox(x, gam, mu)
-    over = abs(x) > sqrt(2*gam*mu); 
-    prox = x.*over;
+function [prox, val] = call_indRankBall_proj(x, m, n, r)
+    [U, S, V] = lansvd(reshape(x, m, n), r, 'L');
+    prox = reshape(U*(S*V'), m*n, 1);
     if nargout >= 2
-        g = mu*nnz(prox);
+        val = 0;
     end
 end
