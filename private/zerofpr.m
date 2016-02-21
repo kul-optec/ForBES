@@ -21,6 +21,7 @@ function out = zerofpr(prob, opt)
 ts = zeros(1, opt.maxit);
 taus = zeros(1, opt.maxit);
 residual = zeros(1, opt.maxit);
+objective = zeros(1, opt.maxit);
 msgTerm = '';
 
 % initialize operations counter
@@ -32,6 +33,10 @@ gam = SelectGamma(prob, opt);
 % display header
 if opt.display >= 2
     fprintf('%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'tau');
+end
+
+if opt.toRecord
+    record = [];
 end
 
 alpha = 0.5;
@@ -48,6 +53,7 @@ t0 = tic();
 cache_current = CacheInit(prob, prob.x0, gam);
 [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
 ops = OpsSum(ops, ops1);
+cache_0 = cache_current;
 
 for it = 1:opt.maxit
     
@@ -89,6 +95,9 @@ for it = 1:opt.maxit
     
     ts(1, it) = toc(t0);
     residual(1, it) = norm(cache_current.diff, 'inf');
+    if opt.toRecord
+        record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
+    end
     
     % check for termination
     
@@ -238,16 +247,19 @@ for it = 1:opt.maxit
         tau = 1.0;
     end
     
+    % compute FBE at current point
+    % this should count zero operations if gamma hasn't changed
+    [cache_current, ops1] = CacheFBE(cache_current, gam);
+    ops = OpsSum(ops, ops1);
+    
+    objective(1,it) = cache_current.FBE;
+    
     while 1
         if tau ~= 0.0 && tau <= MINIMUM_tau
             msgTerm = strcat('tau became too small: ', num2str(tau));
             flagTerm = 1;
             break;
         end
-        % compute FBE at current point
-        % this should count zero operations if gamma hasn't changed
-        [cache_current, ops1] = CacheFBE(cache_current, gam);
-        ops = OpsSum(ops, ops1);
         % compute candidate next point
         x = cache_current.z + tau*d;
         % compute FBE at candidate next point
@@ -294,6 +306,11 @@ out.x = cache_current.z;
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
+out.objective = objective(1, 1:it);
+if opt.toRecord
+    out.record = record(1, 1:it);
+end
+out.cache = cache_current;
 out.ts = ts(1, 1:it);
 out.tau = taus(1, 1:it-1);
 out.prob = prob;
