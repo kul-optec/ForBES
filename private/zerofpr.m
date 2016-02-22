@@ -99,6 +99,13 @@ for it = 1:opt.maxit
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
     end
     
+    % compute FBE at current point
+    % this should count zero operations if gamma hasn't changed
+    [cache_current, ops1] = CacheFBE(cache_current, gam);
+    ops = OpsSum(ops, ops1);
+    
+    objective(1,it) = cache_current.FBE;
+    
     % check for termination
     
     if isnan(cache_current.normdiff)
@@ -246,13 +253,6 @@ for it = 1:opt.maxit
     else
         tau = 1.0;
     end
-    
-    % compute FBE at current point
-    % this should count zero operations if gamma hasn't changed
-    [cache_current, ops1] = CacheFBE(cache_current, gam);
-    ops = OpsSum(ops, ops1);
-    
-    objective(1,it) = cache_current.FBE;
     
     while 1
         if tau ~= 0.0 && tau <= MINIMUM_tau
