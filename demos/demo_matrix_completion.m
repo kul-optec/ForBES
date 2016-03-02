@@ -1,4 +1,4 @@
-% solve a sparse logistic regression problem using ForBES
+% solve a nuclear norm regularized matrix completion problem using ForBES
 
 close all;
 clear;
