@@ -15,13 +15,14 @@ X = sprandn(m, n, 10/n);
 btrue = sign(X*w + v);
 
 % noise is function of problem size use 0.1 for large problem
-b = sign(X*w + v + sqrt(0.1)*randn(m,1)); % labels with noise
+% b = sign(X*w + v + sqrt(0.1)*randn(m,1)); % labels with noise
+b = btrue;
 
-A = spdiags(b, 0, m, m) * [X, ones(m, 1)];
+% A = spdiags(b, 0, m, m) * [X, ones(m, 1)];
+A = [X, ones(m, 1)];
 
 ratio = sum(b == 1)/(m);
-lam = 0.1 * norm((1-ratio)*sum(A(b==1,:),1) + ratio*sum(A(b==-1,:),1), 'inf');
-
+lam = 0.5 * norm((1-ratio)*sum(A(b==1,:),1) + ratio*sum(A(b==-1,:),1), 'inf');
 
 fprintf('%d instances, %d features, nnz(A) = %d\n', size(A, 1), size(A, 2), nnz(A));
 

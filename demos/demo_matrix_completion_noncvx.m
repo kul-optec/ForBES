@@ -17,10 +17,8 @@ M = U*V';
 P = sprand(m, n, d) ~= 0; % sampling pattern
 B = full(M.*P);
 
-lam = 1e0;
-
 f = quadLoss(P(:), B(:));
-g = indRankBall(m, n, 10);
+g = indRankBall(m, n, r);
 x0 = zeros(m*n, 1);
 opt.maxit = 1000;
 opt.tol = 1e-8;
