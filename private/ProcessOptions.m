@@ -125,6 +125,8 @@ function opt = ProcessOptions(opt)
         end
     end
     
+    opt.name = strcat(opt.name, ',' , opt.variant);
+    
     switch opt.variant
         case 'basic'
             opt.fast = 0;

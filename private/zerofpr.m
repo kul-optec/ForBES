@@ -262,6 +262,7 @@ for it = 1:opt.maxit
         end
         % compute candidate next point
         x = cache_current.z + tau*d;
+        [cache_z, ~] = CacheFBE(cache_z, gam);
         % compute FBE at candidate next point
         cache_next = CacheInit(prob, x, gam);
         [cache_next, ops1] = CacheFBE(cache_next, gam);
@@ -308,7 +309,7 @@ out.operations = ops;
 out.residual = residual(1, 1:it);
 out.objective = objective(1, 1:it);
 if opt.toRecord
-    out.record = record(1, 1:it);
+    out.record = record(:, 1:it);
 end
 out.cache = cache_current;
 out.ts = ts(1, 1:it);
