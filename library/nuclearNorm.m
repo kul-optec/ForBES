@@ -41,12 +41,13 @@ function obj = nuclearNorm(m, n, lam, mode)
     end
     if nargin < 3, lam = 1; end
     if nargin < 4, mode = 0; end
-    if mode == 0
-        obj.makeprox = @() @(x, gam) call_nuclearNorm_prox(x, gam, m, n, lam);
-    elseif mode == 1
-        obj.makeprox = @() @(x, gam) call_nuclearNorm_prox_adaptive(x, gam, m, n, lam);
-    elseif mode == 2
-        obj.makeprox = @() @(x, gam) call_nuclearNorm_prox_inexact(x, gam, m, n, lam);
+    switch mode
+        case 0 % exact prox
+            obj.makeprox = @() @(x, gam) call_nuclearNorm_prox(x, gam, m, n, lam);
+        case 1 % adaptive prox
+            obj.makeprox = @() @(x, gam) call_nuclearNorm_prox_adaptive(x, gam, m, n, lam);
+        case 2 % adaptive/inexact prox
+            obj.makeprox = @() @(x, gam) call_nuclearNorm_prox_inexact(x, gam, m, n, lam);
     end
 end
 
