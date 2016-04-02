@@ -25,7 +25,7 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = linop(op, adj, m, n)
+function obj = linOp(op, adj, m, n)
     if nargin < 4
         error('you should provide 4 arguments: op, adj, m, n');
     end

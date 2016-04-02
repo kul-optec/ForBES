@@ -33,6 +33,7 @@ function obj = separableSum(objs, sizes, idx)
         idx = 1:l;
     end
     obj.makeprox = @() make_separableSum_prox(objs, idx, sizes);
+    obj.makef = @() make_separableSum_callf(objs, idx, sizes);
 end
 
 function op = make_separableSum_prox(objs, idx, sizes)
@@ -55,4 +56,47 @@ function [prox, val] = call_separableSum_prox(x, gam, proxes, idx, sizes)
         val = val+val1;
         baseidx = endcurr;
     end
+end
+
+function op = make_separableSum_callf(objs, idx, sizes)
+    callfs = {};
+    for i=1:length(objs)
+        if isfield(objs{i}, 'isQuadratic') && objs{i}.isQuadratic
+            callfs{end+1} = @(x) call_quadratic_f(x, objs{i}.Q, objs{i}.q);
+        else
+            callfs{end+1} = objs{i}.makef();
+        end
+    end
+    op = @(x) call_separableSum_f(x, callfs, idx, sizes);
+end
+
+function [val, grad] = call_separableSum_f(x, callfs, idx, sizes)
+    n = sum(sizes);
+    prox = zeros(n, 1);
+    val = 0;
+    grad = [];
+    baseidx = 0;
+    if nargout > 1
+        for i=1:length(idx)
+            endcurr = baseidx+sizes(i);
+            xcurr = x(baseidx+1:endcurr);
+            [val1, grad1] = callfs{idx(i)}(xcurr);
+            val = val+val1;
+            grad = [grad; grad1];
+            baseidx = endcurr;
+        end
+    else
+        for i=1:length(idx)
+            endcurr = baseidx+sizes(i);
+            xcurr = x(baseidx+1:endcurr);
+            val1 = callfs{idx(i)}(xcurr);
+            val = val+val1;
+            baseidx = endcurr;
+        end
+    end
+end
+
+function [val, grad] = call_quadratic_f(x, Q, q)
+    grad = Q*x+q;
+    val = 0.5*(x'*(grad+q));
 end
