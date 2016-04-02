@@ -32,7 +32,7 @@ gam = SelectGamma(prob, opt);
 
 % display header
 if opt.display >= 2
-    fprintf('%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'tau');
+    fprintf('%6s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', 'tau');
 end
 
 if opt.toRecord
@@ -282,14 +282,9 @@ for it = 1:opt.maxit
 
     % display stuff
     if opt.display == 1
-        if mod(it, 100) == 0
-            fprintf('.');
-        end
-        if mod(it, 4000) == 0
-            fprintf('\n');
-        end
+        PrintProgress(it);
     elseif opt.display >= 2
-        fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), tau);
+        fprintf('%6d %7.4e %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it), tau);
     end
 
 end
@@ -297,6 +292,10 @@ end
 if it == opt.maxit
     msgTerm = 'exceeded maximum iterations';
     flagTerm = 1;
+end
+
+if opt.display == 1
+    PrintProgress(it, flagTerm);
 end
 
 % pack up results
@@ -311,7 +310,6 @@ out.objective = objective(1, 1:it);
 if opt.toRecord
     out.record = record(:, 1:it);
 end
-out.cache = cache_current;
 out.ts = ts(1, 1:it);
 out.tau = taus(1, 1:it-1);
 out.prob = prob;

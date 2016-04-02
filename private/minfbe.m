@@ -32,6 +32,7 @@ ops = OpsInit();
 x = prob.x0;
 y = x;
 gam = SelectGamma(prob, opt);
+solution = x;
 
 % initialize specific stuff for the methods
 if opt.method == 2
@@ -243,9 +244,6 @@ for it = 1:opt.maxit
             error('search direction not implemented')
     end
     slope = cache_current.gradFBE'*dir;
-%     cache_eps = CacheInit(prob, cache_current.x + 1e-9/norm(dir)*dir, cache_current.gam);
-%     cache_eps = CacheFBE(cache_eps, cache_current.gam);
-%     numslope = (cache_eps.FBE-cache_current.FBE)/1e-9*norm(dir);
 
     % precompute stuff for the line search
     [cache_current, ops1] = CacheLineSearch(cache_current, dir);
@@ -315,43 +313,38 @@ for it = 1:opt.maxit
         msgTerm = strcat('line search failed at iteration', num2str(it));
     end
 
-    % prepare next iteration
+    % prepare next iteration, store current solution
     flagChangedGamma = 0;
     if info == -1 % gam was too large
         cache_previous = cache_current;
         prob.Lf = prob.Lf*2;
         gam = SelectGamma(prob, opt);
         flagChangedGamma = 1;
-    elseif info > 0
+    elseif info > 0 % line-search failed
         cache_previous = cache_current;
         cache_current = CacheInit(prob, cache_current.z, gam);
-    elseif opt.global
+    elseif opt.global % globalized line-search method
         cache_previous = cache_current;
         if ~isempty(cache_tau1)
             cache_current = cache_tau1;
         else
             cache_current = CacheInit(prob, cache_tau.z, gam);
         end
-    elseif opt.fast
+    elseif opt.fast % accelerated O(1/k^2) line-search method
         theta1 = 2/(it+1);
         theta = 2/(it+2);
         v = x + (1/theta1)*(z-x);
         x = cache_tau.z;
         cache_previous = cache_current;
         cache_current = CacheInit(prob, theta*v + (1-theta)*x, gam);
-    else
+    else % basic line-search method
         cache_previous = cache_current;
         cache_current = cache_tau;
     end
 
     % display stuff
     if opt.display == 1
-        if mod(it, 100) == 0
-            fprintf('.');
-        end
-        if mod(it, 4000) == 0
-            fprintf('\n');
-        end
+        PrintProgress(it);
     elseif opt.display >= 2
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e %7.4e %d\n', it, gam, residual(1,it), objective(1,it), norm(dir), slope, tau, info);
     end
@@ -363,12 +356,19 @@ if it == opt.maxit
     msgTerm = 'exceeded maximum iterations';
 end
 
+if opt.display == 1
+    PrintProgress(it, flagTerm);
+end
+
 % pack up results
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.cache = cache_current;
-out.x = cache_current.z;
+if info ~= 0
+    out.x = cache_current.z;
+else
+    out.x = cache_tau.z;
+end
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
@@ -377,19 +377,12 @@ out.ts = ts(1, 1:it);
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
-
 if opt.toRecord
     out.record = record;
 end
-
 out.skip = skipCount;
 
 function gam = SelectGamma(prob, opt)
 
 gam = 0.95/prob.Lf;
 
-% if opt.method == 0 || opt.fast || opt.global
-%     gam = 1/prob.Lf;
-% else
-%     gam = 0.95/prob.Lf;
-% end

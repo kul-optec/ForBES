@@ -121,7 +121,7 @@ function opt = ProcessOptions(opt)
         elseif opt.method <= 10
             opt.variant = 'global';
         else
-            opt.variant = '1b';
+            opt.variant = '';
         end
     end
     

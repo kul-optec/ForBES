@@ -110,12 +110,7 @@ for it = 1:opt.maxit
 
     % display stuff
     if opt.display == 1
-        if mod(it, 100) == 0
-            fprintf('.');
-        end
-        if mod(it, 4000) == 0
-            fprintf('\n');
-        end
+        PrintProgress(it);
     elseif opt.display >= 2
         fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
     end
@@ -126,11 +121,14 @@ if it == opt.maxit
     msgTerm = [msgTerm, 'exceeded maximum iterations'];
 end
 
+if opt.display == 1
+    PrintProgress(it, flagTerm);
+end
+
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
 out.gam = gam;
-out.cache = cache_yk;
 out.x = cache_yk.z;
 out.iterations = it;
 out.operations = ops;
