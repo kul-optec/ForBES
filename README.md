@@ -1,7 +1,7 @@
 # ForBES
 
 **ForBES** (standing for **For**ward-**B**ackward **E**nvelope **S**olver) is a MATLAB solver for
-nonsmooth convex optimization problems.
+nonsmooth optimization problems.
 
 It is generic in the sense that the user can customize the problem to solve in an easy and flexible way.
 It is efficient since it features very efficient algorithms, suited for large scale applications.
