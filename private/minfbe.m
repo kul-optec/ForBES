@@ -133,8 +133,8 @@ for it = 1:opt.maxit
         case 2 % L-BFGS
             if it == 1 || flagChangedGamma
                 dir = -cache_current.gradFBE; % use steepest descent direction initially
-                LBFGS_col = 1;
-                LBFGS_mem = 0;
+                LBFGS_col = 0; % last column of Sk, Yk that was filled in
+                LBFGS_mem = 0; % current memory of the method
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 Sk = cache_current.x - cache_previous.x;

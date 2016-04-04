@@ -176,7 +176,7 @@ for it = 1:opt.maxit
                 alphaC = 0.01;
                 d = cache_z.diff;
                 skipCount = 0;
-                LBFGS_col = 1;
+                LBFGS_col = 0;
                 LBFGS_mem = 0;
             else
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
