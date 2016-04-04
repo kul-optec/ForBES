@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -46,17 +45,27 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-nav-search">
-        
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
 
-        
-          <a href="index.html" class="icon icon-home"> ForBES
-        
+          
+            <a href="index.html" class="icon icon-home"> ForBES
+          
 
-        
-        </a>
+          
+          </a>
 
-        
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -65,22 +74,16 @@
   </form>
 </div>
 
-        
-      </div>
+          
+        </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-          
-              <ul class="current">
+            
+            
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="howto.html#problem-structure">Problem structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="howto.html#calling-forbes">Calling <tt class="docutils literal"><span class="pre">forbes</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="howto.html#functions">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="howto.html#options">Options</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How to use it</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Library of functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#distances">Distances</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#indicator-functions">Indicator functions</a></li>
@@ -90,17 +93,13 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
+            
           
-        
+        </div>
       </div>
-      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -115,7 +114,13 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
@@ -123,18 +128,21 @@
       <li class="wy-breadcrumbs-aside">
         
           
+            <a href="_sources/library.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="library-of-functions">
 <span id="library-rst"></span><h1>Library of functions<a class="headerlink" href="#library-of-functions" title="Permalink to this headline">¶</a></h1>
-<p>In the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a> we provide a set of commonly used functions and linear
-operators that can be used to formulate problems (see section <a class="reference internal" href="howto.html#howto-rst"><em>How to use it</em></a> on how
-to formulate a problem and invoke <tt class="docutils literal"><span class="pre">forbes</span></tt> to solve it). Each of these functions
+<p>In the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a> we provide a set of commonly used functions and linear
+operators that can be used to formulate problems (see section <a class="reference internal" href="howto.html#howto-rst"><span>How to use it</span></a> on how
+to formulate a problem and invoke <code class="docutils literal"><span class="pre">forbes</span></code> to solve it). Each of these functions
 is provided as a constructor taking as input all the parameters that define the
 function, and returning an object: this will contain all the information
 needed to compute the value, the gradient or the proximal mapping of the
@@ -159,37 +167,37 @@ help file of any of these function directly from MATLAB with:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">distBall_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">distBall_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></code></td>
 <td><span class="math">\(w\|x-\Pi_{\mathcal{B}_r(c)}x\|\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">distBox(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distBox(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></code></td>
 <td><span class="math">\(\sum_i w_i(x_i-\min\{u,\max\{l,x_i\}\})\)</span></td>
-<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">distNeg(w,</span> <span class="pre">u)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">distNeg(w,</span> <span class="pre">u)</span></code></td>
 <td><span class="math">\(\sum_i w_i(x_i-\min\{u_i,x_i\})\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">u=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">distPos(w,</span> <span class="pre">l)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distPos(w,</span> <span class="pre">l)</span></code></td>
 <td><span class="math">\(\sum_i w_i(x_i-\max\{l_i,x_i\})\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">l=0</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">dist2Ball_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Ball_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></code></td>
 <td><span class="math">\(\tfrac{w}{2}\|x-\Pi_{\mathcal{B}_r(c)}x\|^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">dist2Box(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Box(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></code></td>
 <td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,\max\{l_i,x\}\})^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt>, <tt class="docutils literal"><span class="pre">w=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">dist2Neg(w,</span> <span class="pre">u)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Neg(w,</span> <span class="pre">u)</span></code></td>
 <td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,x_i\})^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">u=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">dist2Pos(w,</span> <span class="pre">l)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Pos(w,</span> <span class="pre">l)</span></code></td>
 <td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\max\{l_i,x_i\})^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">l=0</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -209,21 +217,21 @@ help file of any of these function directly from MATLAB with:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">indBall_l2(r,</span> <span class="pre">c)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indBall_l2(r,</span> <span class="pre">c)</span></code></td>
 <td><span class="math">\(\mathrm{ind}_{\{x:\ \|x-c\|\leq r\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt>, <tt class="docutils literal"><span class="pre">c=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">indBox(l,</span> <span class="pre">u)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indBox(l,</span> <span class="pre">u)</span></code></td>
 <td><span class="math">\(\mathrm{ind}_{\{x:\ l\leq x\leq u\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">l=-inf</span></tt>, <tt class="docutils literal"><span class="pre">u=+inf</span></tt></td>
+<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">indNeg(u)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indNeg(u)</span></code></td>
 <td><span class="math">\(\mathrm{ind}_{\{x:\ x\leq u\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">u=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">u=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">indPos(l)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indPos(l)</span></code></td>
 <td><span class="math">\(\mathrm{ind}_{\{x:\ x\geq l\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">l=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">l=0</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -243,25 +251,25 @@ help file of any of these function directly from MATLAB with:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">l1Norm(r)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">l1Norm(r)</span></code></td>
 <td><span class="math">\(r\|x\|_1\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">l2Norm(r)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">l2Norm(r)</span></code></td>
 <td><span class="math">\(r\|x\|_2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">l2NormSum(m,</span> <span class="pre">r)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">l2NormSum(m,</span> <span class="pre">r)</span></code></td>
 <td><span class="math">\(r \sum_{i=1}^k \|x_i\|_2,\ \mbox{where}\ x=(x_1,\ldots,x_k),\ x_i\in\mathbb{R}^m\)</span></td>
-<td><tt class="docutils literal"><span class="pre">m=1</span></tt>, <tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">m=1</span></code>, <code class="docutils literal"><span class="pre">r=1</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">nuclearNorm(m,</span> <span class="pre">n,</span> <span class="pre">r)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">nuclearNorm(m,</span> <span class="pre">n,</span> <span class="pre">r)</span></code></td>
 <td><span class="math">\(r \sum_i \sigma_i(X),\ \mbox{where}\ X=[x_1\cdots x_n],\ x_i\in\mathbb{R}^m\)</span></td>
-<td><tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">elasticNet(m,</span> <span class="pre">r)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">elasticNet(m,</span> <span class="pre">r)</span></code></td>
 <td><span class="math">\(m\|x\|_1 + \tfrac{r}{2}\|x\|_2^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">m=1</span></tt>, <tt class="docutils literal"><span class="pre">r=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">m=1</span></code>, <code class="docutils literal"><span class="pre">r=1</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -281,29 +289,29 @@ help file of any of these function directly from MATLAB with:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">quadratic(Q,</span> <span class="pre">q)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadratic(Q,</span> <span class="pre">q)</span></code></td>
 <td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle\)</span></td>
-<td><tt class="docutils literal"><span class="pre">Q=1</span></tt>, <tt class="docutils literal"><span class="pre">q=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">Q=1</span></code>, <code class="docutils literal"><span class="pre">q=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">quadraticOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">Q,</span> <span class="pre">q)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadraticOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">Q,</span> <span class="pre">q)</span></code></td>
 <td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">Q=1</span></tt>, <tt class="docutils literal"><span class="pre">q=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">Q=1</span></code>, <code class="docutils literal"><span class="pre">q=0</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">quadLoss(w,</span> <span class="pre">p)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadLoss(w,</span> <span class="pre">p)</span></code></td>
 <td><span class="math">\(\sum_i w_i(x_i-p_i)^2\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">p=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">p=0</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">quadLossOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">w,</span> <span class="pre">p)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadLossOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">w,</span> <span class="pre">p)</span></code></td>
 <td><span class="math">\(\sum_i w_i(x_i-p_i)^2 + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
-<td><tt class="docutils literal"><span class="pre">w=1</span></tt>, <tt class="docutils literal"><span class="pre">p=0</span></tt></td>
+<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">p=0</span></code></td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">logLoss(m)</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">logLoss(m)</span></code></td>
 <td><span class="math">\(m \sum_i \log(1+\exp\{-x_i\})\)</span></td>
-<td><tt class="docutils literal"><span class="pre">m=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">m=1</span></code></td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">powabs(p,</span> <span class="pre">c)</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">powabs(p,</span> <span class="pre">c)</span></code></td>
 <td><span class="math">\(c|x|^p\)</span></td>
-<td><tt class="docutils literal"><span class="pre">p=1</span></tt>, <tt class="docutils literal"><span class="pre">c=1</span></tt></td>
+<td><code class="docutils literal"><span class="pre">p=1</span></code>, <code class="docutils literal"><span class="pre">c=1</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -315,6 +323,7 @@ help file of any of these function directly from MATLAB with:</p>
 </div>
 
 
+           </div>
           </div>
           <footer>
   
@@ -332,10 +341,11 @@ help file of any of these function directly from MATLAB with:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Lorenzo Stella, Panagiotis Patrinos.
+        &copy; Copyright 2016, Lorenzo Stella, Panagiotis Patrinos.
+
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -362,7 +372,7 @@ help file of any of these function directly from MATLAB with:</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
@@ -378,10 +388,7 @@ help file of any of these function directly from MATLAB with:</p>
           SphinxRtdTheme.StickyNav.enable();
       });
   </script>
-  
-<!--  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a> -->
    
-
 
 </body>
 </html>

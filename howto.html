@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -46,17 +45,27 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-nav-search">
-        
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
 
-        
-          <a href="index.html" class="icon icon-home"> ForBES
-        
+          
+            <a href="index.html" class="icon icon-home"> ForBES
+          
 
-        
-        </a>
+          
+          </a>
 
-        
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -65,42 +74,31 @@
   </form>
 </div>
 
-        
-      </div>
+          
+        </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
-          
-              <ul class="current">
+            
+            
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">How to use it</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#problem-structure">Problem structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <tt class="docutils literal"><span class="pre">forbes</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <code class="docutils literal"><span class="pre">forbes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="library.html">Library of functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="library.html#distances">Distances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="library.html#indicator-functions">Indicator functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="library.html#norms-and-regularization-functions">Norms and regularization functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="library.html#other-functions">Other functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="library.html#linear-mappings">Linear mappings</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="library.html">Library of functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#support-vector-machines">Support vector machines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#sparse-logistic-regression">Sparse logistic regression</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
+            
           
-        
+        </div>
       </div>
-      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -115,7 +113,13 @@
       
       <div class="wy-nav-content">
         <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
@@ -123,20 +127,23 @@
       <li class="wy-breadcrumbs-aside">
         
           
+            <a href="_sources/howto.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
   </ul>
   <hr/>
 </div>
-          <div role="main" class="document">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="how-to-use-it">
 <span id="howto-rst"></span><h1>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this headline">¶</a></h1>
-<p>ForBES consist of the MATLAB routine <tt class="docutils literal"><span class="pre">forbes</span></tt> taking a problem description
+<p>ForBES consist of the MATLAB routine <code class="docutils literal"><span class="pre">forbes</span></code> taking a problem description
 and (optionally) some options, and returning the results of the optimization
 process. We will now describe the structure of the problems that ForBES solves,
-and how to specify it to the <tt class="docutils literal"><span class="pre">forbes</span></tt> routine.</p>
-<p>Examples on how to use forbes can be found in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/demos">demos folder</a>.</p>
+and how to specify it to the <code class="docutils literal"><span class="pre">forbes</span></code> routine.</p>
+<p>Examples on how to use forbes can be found in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/demos">demos folder</a>.</p>
 <p>You can access the help file of the solver directly from MATLAB in any moment with:</p>
 <div class="highlight-python"><div class="highlight"><pre>help forbes
 </pre></div>
@@ -165,49 +172,49 @@ in the interior of its domain, while g is proper, closed and convex. Linear oper
 <span class="math">\(A,B\)</span> are of appropriate dimension along with vector <span class="math">\(b\)</span> in the constraints.</p>
 </div>
 <div class="section" id="calling-forbes">
-<h2>Calling <tt class="docutils literal"><span class="pre">forbes</span></tt><a class="headerlink" href="#calling-forbes" title="Permalink to this headline">¶</a></h2>
-<p>The most generic call to <tt class="docutils literal"><span class="pre">forbes</span></tt> is as follows:</p>
+<h2>Calling <code class="docutils literal"><span class="pre">forbes</span></code><a class="headerlink" href="#calling-forbes" title="Permalink to this headline">¶</a></h2>
+<p>The most generic call to <code class="docutils literal"><span class="pre">forbes</span></code> is as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">out</span> <span class="o">=</span> <span class="n">forbes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">aff</span><span class="p">,</span> <span class="n">constr</span><span class="p">,</span> <span class="n">opt</span><span class="p">);</span>
 </pre></div>
 </div>
 <ul>
-<li><p class="first"><tt class="docutils literal"><span class="pre">f</span></tt> and <tt class="docutils literal"><span class="pre">g</span></tt> contain the objective terms of the problem (see section <a class="reference internal" href="#functions"><em>Functions</em></a> below on how to select them).</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">f</span></code> and <code class="docutils literal"><span class="pre">g</span></code> contain the objective terms of the problem (see section <a class="reference internal" href="#functions"><span>Functions</span></a> below on how to select them).</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">init</span></tt> is the initial value of <span class="math">\(x\)</span> if there are no equality constraints,
+<li><p class="first"><code class="docutils literal"><span class="pre">init</span></code> is the initial value of <span class="math">\(x\)</span> if there are no equality constraints,
 or the initial dual variable associated with the constraint <span class="math">\(Ax+Bz=b\)</span> otherwise.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">aff</span></tt> is a cell array describing the affine terms composed with <span class="math">\(f\)</span>:</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">aff</span></code> is a cell array describing the affine terms composed with <span class="math">\(f\)</span>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">aff</span> <span class="o">=</span> <span class="p">{</span><span class="n">C</span><span class="p">,</span> <span class="n">d</span><span class="p">};</span>
 </pre></div>
 </div>
-<p>If omitted or empty, that is <tt class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">{}</span></tt>, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>.</p>
+<p>If omitted or empty, that is <code class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">[]</span></code> or <code class="docutils literal"><span class="pre">aff</span> <span class="pre">=</span> <span class="pre">{}</span></code>, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">constr</span></tt> is a cell array describing the linear equality constraints:</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">constr</span></code> is a cell array describing the linear equality constraints:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">constr</span> <span class="o">=</span> <span class="p">{</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">b</span><span class="p">};</span>
 </pre></div>
 </div>
-<p>If omitted or empty, that is <tt class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">[]</span></tt> or <tt class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">{}</span></tt>, then <span class="math">\(A=I\)</span>, <span class="math">\(B=-I\)</span> and <span class="math">\(b=0\)</span>.</p>
+<p>If omitted or empty, that is <code class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">[]</span></code> or <code class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">{}</span></code>, then <span class="math">\(A=I\)</span>, <span class="math">\(B=-I\)</span> and <span class="math">\(b=0\)</span>.</p>
 </li>
-<li><p class="first"><tt class="docutils literal"><span class="pre">opt</span></tt> describes, e.g., details on the algorithm to use, termination criteria,
-the level of verbosity, and so on. More on this in the <a class="reference internal" href="#options"><em>Options</em></a> section below.</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">opt</span></code> describes, e.g., details on the algorithm to use, termination criteria,
+the level of verbosity, and so on. More on this in the <a class="reference internal" href="#options"><span>Options</span></a> section below.</p>
 </li>
 </ul>
-<p>Output <tt class="docutils literal"><span class="pre">out</span></tt> will contain the results of the optimization process.</p>
+<p>Output <code class="docutils literal"><span class="pre">out</span></code> will contain the results of the optimization process.</p>
 </div>
 <div class="section" id="functions">
 <span id="id2"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <p>All the functions involved in the problem can be picked from a library of
-functions available in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a>: this contains procedures returning
+functions available in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>: this contains procedures returning
 commonly used functions, specified by a list of parameters if needed. The return
-object can directly be fed to <tt class="docutils literal"><span class="pre">forbes</span></tt> to describe the problem. For example:</p>
+object can directly be fed to <code class="docutils literal"><span class="pre">forbes</span></code> to describe the problem. For example:</p>
 <div class="highlight-python"><div class="highlight"><pre>f = logLoss(m); % f is the log-logistic function times a coefficient m
 g = indPos(); % g is the indicator function of the nonnegative orthant
 out = forbes(f, g);
 </pre></div>
 </div>
-<p>Check out the <a class="reference internal" href="library.html#library-rst"><em>Library of functions</em></a> section for more information on the available
+<p>Check out the <a class="reference internal" href="library.html#library-rst"><span>Library of functions</span></a> section for more information on the available
 functions and how to use them and the parameters they require, or the documentation
-of each of the functions in the <a class="reference external" href="https://github.com/lostella/ForBES/tree/master/library">library folder</a>.</p>
+of each of the functions in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>.</p>
 </div>
 <div class="section" id="options">
 <span id="id3"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
@@ -224,40 +231,40 @@ of each of the functions in the <a class="reference external" href="https://gith
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">opt.tol</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.tol</span></code></td>
 <td>real</td>
 <td>Tolerance for optimality</td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">opt.maxit</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">opt.maxit</span></code></td>
 <td>integer</td>
 <td>Maximum number of iterations</td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">opt.method</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.method</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><tt class="docutils literal"><span class="pre">'sd'</span></tt>: steepest descent</li>
-<li><tt class="docutils literal"><span class="pre">'cg-desc'</span></tt>, <tt class="docutils literal"><span class="pre">'cg-prp'</span></tt>, <tt class="docutils literal"><span class="pre">'cg-dyhs'</span></tt>: nonliner CG</li>
-<li><tt class="docutils literal"><span class="pre">'lbfgs'</span></tt>: L-BFGS</li>
+<li><code class="docutils literal"><span class="pre">'sd'</span></code>: steepest descent</li>
+<li><code class="docutils literal"><span class="pre">'cg-desc'</span></code>, <code class="docutils literal"><span class="pre">'cg-prp'</span></code>, <code class="docutils literal"><span class="pre">'cg-dyhs'</span></code>: nonliner CG</li>
+<li><code class="docutils literal"><span class="pre">'lbfgs'</span></code>: L-BFGS</li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">opt.variant</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">opt.variant</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><tt class="docutils literal"><span class="pre">'basic'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'global'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'fast'</span></tt></li>
+<li><code class="docutils literal"><span class="pre">'basic'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'global'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'fast'</span></code></li>
 </ul>
 </td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">opt.linesearch</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.linesearch</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><tt class="docutils literal"><span class="pre">'armijo'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'hager-zhang'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'lemarechal'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'fletcher'</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">'more-thuente'</span></tt></li>
+<li><code class="docutils literal"><span class="pre">'armijo'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'hager-zhang'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'lemarechal'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'fletcher'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'more-thuente'</span></code></li>
 </ul>
 </td>
 </tr>
@@ -267,6 +274,7 @@ of each of the functions in the <a class="reference external" href="https://gith
 </div>
 
 
+           </div>
           </div>
           <footer>
   
@@ -284,10 +292,11 @@ of each of the functions in the <a class="reference external" href="https://gith
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Lorenzo Stella, Panagiotis Patrinos.
+        &copy; Copyright 2016, Lorenzo Stella, Panagiotis Patrinos.
+
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -314,7 +323,7 @@ of each of the functions in the <a class="reference external" href="https://gith
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
@@ -330,10 +339,7 @@ of each of the functions in the <a class="reference external" href="https://gith
           SphinxRtdTheme.StickyNav.enable();
       });
   </script>
-  
-<!--  <a href="https://github.com/lostella/ForBES"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a> -->
    
-
 
 </body>
 </html>
