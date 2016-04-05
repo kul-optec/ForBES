@@ -1,6 +1,6 @@
 %FORBES_ALM Solver for nonsmooth optimization problems.
 %
-%   FORBES_ALM(f, g, h, F, init, opt, inn_opt) solves problems of the form
+%   FORBES_ALM(f, g, h, F, init, opt, inn_init, inn_opt) solves problems of the form
 %
 %       minimize f(x) + g(x) + h(F(x))
 %
@@ -33,10 +33,12 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function out = forbes_alm(f, g, h, F, init, opt, inn_opt)
+function out = forbes_alm(f, g, h, F, init, opt, inn_init, inn_opt)
 
+if nargin < 5 || isempty(init), init = zeros(F.m, 1); end
 if nargin < 6, opt = []; end
-if nargin < 7, inn_opt = []; end
+if nargin < 7 || isempty(inn_init), inn_init = zeros(F.n,1); end
+if nargin < 8, inn_opt = []; end
 
 % fill-in missing options with defaults
 opt = default_opt(opt);
@@ -47,7 +49,7 @@ if opt.display >= 2
 end
 
 y = init;
-x = zeros(F.n,1);
+x = inn_init;
 res = zeros(1,opt.maxit);
 callF = F.makeop();
 
@@ -78,7 +80,7 @@ for it = 1:opt.maxit
     hgamma = moreauEnvelope(h, 1/r);
     inn_f = separableSum({hgamma, f}, [F.m, F.n]);
     inn_aff = {inn_linop, [y/r; zeros(F.n, 1)]};
-    inn_opt.Lf = sqnorm_linop*inn_f.L;
+    if isfield(f, 'L'), inn_opt.Lf = f.L + sqnorm_linop*r; end
 
     % solve subproblem (warm start)
     inn_out = forbes(inn_f, g, x, inn_aff, [], inn_opt);
@@ -140,3 +142,5 @@ function opt = default_inner_opt(opt)
 if ~isfield(opt, 'display'), opt.display = 0; end
 if ~isfield(opt, 'tol'), opt.tol = 1e-6; end
 if ~isfield(opt, 'method'), opt.method = 'lbfgs-fpr'; end
+% make sure the Lipschitz constant is not set (it cannot be known)
+if isfield(opt, 'Lf'), opt = rmfield(opt, 'Lf'); end
