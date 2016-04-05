@@ -32,6 +32,16 @@ function obj = separableSum(objs, sizes, idx)
     if nargin < 3
         idx = 1:l;
     end
+    % determine Lipschitz constant (if possible)
+    maxL = -1;
+    noL = 0;
+    for i = 1:length(objs)
+        if ~isfield(objs{i}, 'L'), noL = 1; break; end
+        if objs{i}.L > maxL, maxL = objs{i}.L; end
+    end
+    if noL == 0
+        obj.L = maxL;
+    end
     obj.makeprox = @() make_separableSum_prox(objs, idx, sizes);
     obj.makef = @() make_separableSum_callf(objs, idx, sizes);
 end

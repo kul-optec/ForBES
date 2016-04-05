@@ -32,6 +32,7 @@ function obj = moreauEnvelope(obj1, gam)
         error('second argument must be a positive real number');
     end
     proxf1 = obj1.makeprox();
+    obj.L = 1/gam;
     obj.makef = @() @(x) call_moreauEnvelope_f1(x, proxf1, gam);
 end
 

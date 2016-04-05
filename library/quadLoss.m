@@ -39,6 +39,7 @@ function obj = quadLoss(w, p)
     end
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;
+    obj.L = max(w);
     if all(w > 0)
         obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, w, p);
     end
