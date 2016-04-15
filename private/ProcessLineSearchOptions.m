@@ -21,7 +21,8 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
     lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
     % Wolfe line search parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
-    lsopt.delta = 0.1;
+    if isfield(opt, 'c1'), lsopt.delta = opt.c1;
+    else lsopt.delta = 0.1; end
     lsopt.testGamma = prob.unknownLf || opt.adaptive;
     switch opt.linesearch
         case 1 % armijo backtracking
@@ -101,6 +102,9 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
             lsopt.progTol = 0;
             % estimate of minimum value of the function
             lsopt.fmin = -inf;
+        case 7 % armijo backtracking
+            lsopt.progTol = 0;
+            lsopt.nLS = 50;
     end
 
     % if method is not L-BFGS then initial stepsize is selected

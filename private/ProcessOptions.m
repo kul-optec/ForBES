@@ -109,6 +109,8 @@ function opt = ProcessOptions(opt)
             opt.linesearch = 5;
         case 'fletcher'
             opt.linesearch = 6;
+        case 'backtracking'
+            opt.linesearch = 7;
         case 'none'
             opt.linesearch = 0;
         otherwise

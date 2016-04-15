@@ -186,14 +186,24 @@ for it = 1:opt.maxit
 %                 Sk = cache_tau.x - cache_previous.x;
 %                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                 YSk = Yk'*Sk;
+%                 Bs = R'*(R*Sk);
+%                 sBs = Sk'*Bs;
+%                 if YSk > 0
+%                     R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
+%                 else
+%                     skipCount = skipCount+1;
+%                 end
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
                 sBs = Sk'*Bs;
-                if YSk > 0
-                    R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
+                if YSk >= 0.2*sBs
+                    theta = 1;
                 else
-                    skipCount = skipCount+1;
+                    theta = (0.8*sBs)/(sBs-YSk);
                 end
+                r = theta*Yk + (1-theta)*Bs;
+                R = cholupdate(cholupdate(R,r/sqrt(Sk'*r)),Bs/sqrt(sBs),'-');
                 dir = -linsolve(R,linsolve(R,cache_current.gradFBE,opt.optsL),opt.optsU);
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
@@ -298,10 +308,12 @@ for it = 1:opt.maxit
             [cache_tau, ops1] = CacheFBE(prob, gam, cache_current.x+dir);
             tau = 1.0;
             info = 0;
-        case 1 % BACKTRACKING (ARMIJO COND.)
+        case 1 % ARMIJO LINE SEARCH WITH CUBIC INTERPOLATION
             [tau, cache_tau, cache_tau1, ops1, info] = ArmijoLS(cache_current, slope, tau0, lsopt);
-        case 3 % LEMARECHAL (ARMIJO + WOLF COND.)
+        case 3 % LEMARECHAL (WOLF CONDITIONS)
             [tau, cache_tau, cache_tau1, ops1, info] = LemarechalLS(cache_current, slope, tau0, lsopt);
+        case 7 % SIMPLE BACKTRACKING (NON-INCREASING LINE-SEARCH)
+            [tau, cache_tau, cache_tau1, ops1, info] = BacktrackingLS(cache_current, tau0, lsopt);
         otherwise
             error('line search not implemented')
     end
