@@ -88,7 +88,7 @@ for it = 1:opt.maxit
 
     % trace stuff
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf');
+    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
@@ -132,6 +132,7 @@ for it = 1:opt.maxit
             dir = -cache_current.gradFBE;
         case 2 % L-BFGS
             if it == 1 || flagChangedGamma
+                alphaC = 0.01;
                 dir = -cache_current.gradFBE; % use steepest descent direction initially
                 LBFGS_col = 0; % last column of Sk, Yk that was filled in
                 LBFGS_mem = 0; % current memory of the method
@@ -147,7 +148,10 @@ for it = 1:opt.maxit
 %                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
-                if YSk > 0;
+                if cache_current.normdiff<1
+                    alphaC = 3;
+                end
+                if YSk/(Sk'*Sk) > 1e-6*cache_current.normdiff^alphaC
                     LBFGS_col = 1+mod(LBFGS_col, opt.memory);
                     LBFGS_mem = min(LBFGS_mem+1, opt.memory);
                     S(:,LBFGS_col) = Sk;
