@@ -100,7 +100,7 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if cache_current.normdiff/(1+norm(cache_current.x)) <= 100*eps
+    if residual(1, it) <= 100*eps % cache_current.normdiff/(1+norm(cache_current.x)) <= 100*eps
         msgTerm = 'reached optimum (fpr close to eps)';
         flagTerm = 0;
         break;
@@ -151,6 +151,7 @@ for it = 1:opt.maxit
                 if cache_current.normdiff<1
                     alphaC = 3;
                 end
+%                 if YSk > 0
                 if YSk/(Sk'*Sk) > 1e-6*cache_current.normdiff^alphaC
                     LBFGS_col = 1+mod(LBFGS_col, opt.memory);
                     LBFGS_mem = min(LBFGS_mem+1, opt.memory);
@@ -190,24 +191,24 @@ for it = 1:opt.maxit
 %                 Sk = cache_tau.x - cache_previous.x;
 %                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 YSk = Yk'*Sk;
-%                 Bs = R'*(R*Sk);
-%                 sBs = Sk'*Bs;
-%                 if YSk > 0
-%                     R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
-%                 else
-%                     skipCount = skipCount+1;
-%                 end
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
                 sBs = Sk'*Bs;
-                if YSk >= 0.2*sBs
-                    theta = 1;
+                if YSk > 0
+                    R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
                 else
-                    theta = (0.8*sBs)/(sBs-YSk);
+                    skipCount = skipCount+1;
                 end
-                r = theta*Yk + (1-theta)*Bs;
-                R = cholupdate(cholupdate(R,r/sqrt(Sk'*r)),Bs/sqrt(sBs),'-');
+%                 YSk = Yk'*Sk;
+%                 Bs = R'*(R*Sk);
+%                 sBs = Sk'*Bs;
+%                 if YSk >= 0.2*sBs
+%                     theta = 1;
+%                 else
+%                     theta = (0.8*sBs)/(sBs-YSk);
+%                 end
+%                 r = theta*Yk + (1-theta)*Bs;
+%                 R = cholupdate(cholupdate(R,r/sqrt(Sk'*r)),Bs/sqrt(sBs),'-');
                 dir = -linsolve(R,linsolve(R,cache_current.gradFBE,opt.optsL),opt.optsU);
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
