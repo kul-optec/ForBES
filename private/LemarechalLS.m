@@ -63,7 +63,8 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
             ops = OpsSum(ops, ops1);
             fz = cachet1.fx;
             % check whether gam is small enough
-            if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
+            if fz + cachet.gz + lsopt.beta/(2*gam)*cachet.normdiff^2 > cachet.FBE
+%             if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
                 exitflag = -1;
                 break;
             end
@@ -139,7 +140,8 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
         ops = OpsSum(ops, ops1);
         fz = cachet1.fx;
         % check whether gam is small enough
-        if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
+        if fz + cachet.gz + lsopt.beta/(2*gam)*cachet.normdiff^2 > cachet.FBE
+%         if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
             exitflag = -1;
         end
     end

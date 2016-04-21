@@ -31,7 +31,7 @@ ops = OpsInit();
 % initialize stuff
 x = prob.x0;
 y = x;
-gam = SelectGamma(prob, opt);
+gam = (1-opt.beta)/prob.Lf;
 solution = x;
 
 % initialize specific stuff for the methods
@@ -88,7 +88,7 @@ for it = 1:opt.maxit
 
     % trace stuff
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_current.diff, 'inf');
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
@@ -266,7 +266,7 @@ for it = 1:opt.maxit
 
     % set initial guess for the step length
     switch opt.method
-        case {2, 7} % L-BFGS
+        case {2, 7} % (L-)BFGS
             tau0 = 1.0;
         case 6 % BARZILAI-BORWEIN
             if it == 1 || flagChangedGamma
@@ -334,8 +334,7 @@ for it = 1:opt.maxit
     flagChangedGamma = 0;
     if info == -1 % gam was too large
         cache_previous = cache_current;
-        prob.Lf = prob.Lf*2;
-        gam = SelectGamma(prob, opt);
+        prob.Lf = prob.Lf*2; gam = gam/2;
         flagChangedGamma = 1;
     elseif info > 0 % line-search failed
         cache_previous = cache_current;
@@ -398,8 +397,4 @@ if opt.toRecord
     out.record = record;
 end
 out.skip = skipCount;
-
-function gam = SelectGamma(prob, opt)
-
-gam = 0.95/prob.Lf;
 

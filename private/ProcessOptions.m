@@ -23,6 +23,7 @@ function opt = ProcessOptions(opt)
     if ~isfield(opt, 'record'), opt.toRecord = false;
     else opt.toRecord = true; end
     if ~isfield(opt, 'maxit'), opt.maxit = 10000; end
+    if ~isfield(opt, 'beta'), opt.beta = 0.05; end
     if ~isfield(opt, 'method'), opt.method = 'lbfgs'; end
     
     if ~isfield(opt, 'linesearch')

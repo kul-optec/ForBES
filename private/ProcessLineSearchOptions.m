@@ -24,6 +24,7 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
     if isfield(opt, 'c1'), lsopt.delta = opt.c1;
     else lsopt.delta = 0.1; end
     lsopt.testGamma = prob.unknownLf || opt.adaptive;
+    lsopt.beta = opt.beta;
     switch opt.linesearch
         case 1 % armijo backtracking
             lsopt.progTol = 0;
