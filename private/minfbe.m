@@ -32,7 +32,6 @@ ops = OpsInit();
 x = prob.x0;
 y = x;
 gam = (1-opt.beta)/prob.Lf;
-solution = x;
 
 % initialize specific stuff for the methods
 if opt.method == 2
@@ -42,10 +41,6 @@ if opt.method == 2
     LBFGS_col = 1;
     LBFGS_mem = 0;
 end
-if opt.linesearch == 2 % nonmonotone Armijo
-    FBErefs = -inf*ones(lsopt.M, 1);
-end
-Q = 0; C = 0; % parameters for Hager-Zhang line search
 
 % display header
 if opt.display >= 2
@@ -57,7 +52,6 @@ if opt.toRecord
 end
 
 skipCount = 0;
-rejCount = 0;
 flagChangedGamma = 0;
 
 cache_current = CacheInit(prob, y, gam);
@@ -65,21 +59,28 @@ cache_current = CacheInit(prob, y, gam);
 t0 = tic();
 
 for it = 1:opt.maxit
-
+    
     % compute FBE
     [cache_current, ops1] = CacheFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
-    z = cache_current.z;
-    % enforce monotonicity in the fast-monotone case
-    if opt.fast && it > 1 && opt.monotone > 0 && ~flagChangedGamma
-        if cache_current.FBE > cache_tau.FBE
-            y = cache_tau.z;
-            cache_current = CacheInit(prob, y, gam);
-            [cache_current, ops1] = CacheFBE(cache_current, gam);
-            ops = OpsSum(ops, ops1);
-            rejCount = rejCount+1;
-        end
-    end
+    
+%     % backtracking on gamma
+%     cache_z = CacheInit(prob, cache_current.z, gam);
+%     if prob.unknownLf || opt.adaptive
+%         [cache_z, ops1] = CacheEvalf(cache_z);
+%         ops = OpsSum(ops, ops1);
+%         fz = cache_z.fx;
+%         while fz + cache_current.gz + lsopt.beta/(2*gam)*cache_current.normdiff^2 > cache_current.FBE
+%             prob.Lf = 2*prob.Lf; gam = gam/2;
+%             flagChangedGamma = 1;
+%             [cache_current, ops1] = CacheFBE(cache_current, gam);
+%             ops = OpsSum(ops, ops1);
+%             cache_z = CacheInit(prob, cache_current.z, gam);
+%             [cache_z, ops1] = CacheEvalf(cache_z);
+%             ops = OpsSum(ops, ops1);
+%             fz = cache_z.fx;
+%         end
+%     end
 
     % store initial cache
     if it == 1
@@ -88,7 +89,7 @@ for it = 1:opt.maxit
 
     % trace stuff
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf');
+    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
@@ -132,7 +133,6 @@ for it = 1:opt.maxit
             dir = -cache_current.gradFBE;
         case 2 % L-BFGS
             if it == 1 || flagChangedGamma
-%                 alphaC = 0.01;
                 dir = -cache_current.gradFBE; % use steepest descent direction initially
                 LBFGS_col = 0; % last column of Sk, Yk that was filled in
                 LBFGS_mem = 0; % current memory of the method
@@ -140,19 +140,8 @@ for it = 1:opt.maxit
                 %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 Sk = cache_current.x - cache_previous.x;
                 Yk = cache_current.gradFBE - cache_previous.gradFBE;
-                %%% other options (is this additional gradient eval needed?)
-%                 [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
-%                 ops = OpsSum(ops, ops1);
-                %%% w - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 Sk = cache_tau.x - cache_previous.x;
-%                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
-%                 if cache_current.normdiff<1
-%                     alphaC = 3;
-%                 end
                 if YSk > 0
-%                 if YSk/(Sk'*Sk) > 1e-6*cache_current.normdiff^alphaC
                     LBFGS_col = 1+mod(LBFGS_col, opt.memory);
                     LBFGS_mem = min(LBFGS_mem+1, opt.memory);
                     S(:,LBFGS_col) = Sk;
@@ -172,25 +161,9 @@ for it = 1:opt.maxit
             if it == 1 || flagChangedGamma
                 dir = -cache_current.gradFBE;
                 R = eye(prob.n);
-%                elseif it == 2
-%                    % Compute difference vectors
-%                    Sk = cache_current.x - cache_previous.x;
-%                    Yk = cache_current.gradFBE - cache_previous.gradFBE;
-%                    YSk = Yk'*Sk;
-%                    R = sqrt((Yk'*Yk)/(YSk))*eye(prob.n);
-%                    %                     dir = -R\(R'\cache_current.gradFBE);
-%                    dir = -cache_current.gradFBE./(diag(R).^2);
             else
-                %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 Sk = cache_current.x - cache_previous.x;
                 Yk = cache_current.gradFBE - cache_previous.gradFBE;
-                %%% other options (is this additional gradient eval needed?)
-%                 [cache_tau, ops1] = CacheGradFBE(cache_tau, gam);
-%                 ops = OpsSum(ops, ops1);
-                %%% w - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 Sk = cache_tau.x - cache_previous.x;
-%                 Yk = cache_tau.gradFBE - cache_previous.gradFBE;
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 YSk = Yk'*Sk;
                 Bs = R'*(R*Sk);
                 sBs = Sk'*Bs;
@@ -199,18 +172,7 @@ for it = 1:opt.maxit
                 else
                     skipCount = skipCount+1;
                 end
-%                 YSk = Yk'*Sk;
-%                 Bs = R'*(R*Sk);
-%                 sBs = Sk'*Bs;
-%                 if YSk >= 0.2*sBs
-%                     theta = 1;
-%                 else
-%                     theta = (0.8*sBs)/(sBs-YSk);
-%                 end
-%                 r = theta*Yk + (1-theta)*Bs;
-%                 R = cholupdate(cholupdate(R,r/sqrt(Sk'*r)),Bs/sqrt(sBs),'-');
                 dir = -linsolve(R,linsolve(R,cache_current.gradFBE,opt.optsL),opt.optsU);
-                %                     dir = -R\(R'\cache_current.gradFBE);
             end
         case 3 % CG-DESCENT
             if it == 1 || flagChangedGamma
@@ -258,6 +220,7 @@ for it = 1:opt.maxit
         otherwise
             error('search direction not implemented')
     end
+    
     slope = cache_current.gradFBE'*dir;
 
     % precompute stuff for the line search
@@ -346,13 +309,6 @@ for it = 1:opt.maxit
         else
             cache_current = CacheInit(prob, cache_tau.z, gam);
         end
-    elseif opt.fast % accelerated O(1/k^2) line-search method
-        theta1 = 2/(it+1);
-        theta = 2/(it+2);
-        v = x + (1/theta1)*(z-x);
-        x = cache_tau.z;
-        cache_previous = cache_current;
-        cache_current = CacheInit(prob, theta*v + (1-theta)*x, gam);
     else % basic line-search method
         cache_previous = cache_current;
         cache_current = cache_tau;

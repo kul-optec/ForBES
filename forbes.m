@@ -107,14 +107,16 @@ function out = forbes(fs, gs, init, aff, constr, opt)
             preprocess = toc(t0);
             if opt.method == 0, out = fbs(prob, opt);
             elseif opt.method <= 10, out = minfbe(prob, opt);
-            else out = zerofpr(prob, opt);
+            elseif opt.method <= 20, out = zerofpr(prob, opt);
+            else out = minfbe2(prob, opt);
             end
         case 2
             [prob, dualprob] = ProcessSeparableProblem(prob, opt);
             preprocess = toc(t0);
             if opt.method == 0, dualout = fbs(dualprob, opt);
             elseif opt.method <= 10, dualout = minfbe(dualprob, opt);
-            else dualout = zerofpr(dualprob, opt);
+            elseif opt.method <= 20, dualout = zerofpr(dualprob, opt);
+            else dualout = minfbe2(prob, opt);
             end
             out = GetPrimalOutput(prob, dualprob, dualout);
     end

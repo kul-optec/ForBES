@@ -52,6 +52,10 @@ function opt = ProcessOptions(opt)
                 opt.linesearch = 'none';
             case 'lbroyden-fpr'
                 opt.linesearch = 'none';
+            case 'bfgs2'
+                opt.linesearch = 'backtracking';
+            case 'lbfgs2'
+                opt.linesearch = 'backtracking';
             otherwise
                 error('unknown method');
         end
@@ -93,6 +97,12 @@ function opt = ProcessOptions(opt)
             opt.method = 13;
         case 'lbroyden-fpr'
             opt.method = 14;
+        case 'bfgs2'
+            opt.method = 27;
+            opt.optsL.UT = true; opt.optsL.TRANSA = true;
+            opt.optsU.UT = true;
+        case 'lbfgs2'
+            opt.method = 22;
         otherwise
             error('unknown method');
     end

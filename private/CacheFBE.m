@@ -2,13 +2,14 @@ function [cache, ops] = CacheFBE(cache, gam)
 
 ops = OpsInit();
 
-if cache.flagProxGradStep == 0 || cache.gam ~= gam
+gam0 = cache.gam;
+
+if cache.flagProxGradStep == 0 || gam0 ~= gam
     [cache, ops] = CacheProxGradStep(cache, gam);
 end
 
-cache.diff = cache.z-cache.x;
-cache.normdiff = norm(cache.diff);
-cache.FBE = cache.fx + cache.gz + cache.gradfx'*cache.diff + (0.5/gam)*(cache.normdiff^2);
-cache.gam = gam;
-
-cache.flagFBE = 1;
+if cache.flagFBE == 0 || gam0 ~= gam
+    cache.FBE = cache.fx + cache.gz + cache.gradfx'*cache.diff + (0.5/gam)*(cache.normdiff^2);
+    cache.gam = gam;
+    cache.flagFBE = 1;
+end

@@ -28,7 +28,7 @@ msgTerm = '';
 ops = OpsInit();
 
 % initialize stuff
-gam = SelectGamma(prob, opt);
+gam = (1-opt.beta)/prob.Lf;
 
 % display header
 if opt.display >= 2
@@ -70,8 +70,7 @@ for it = 1:opt.maxit
                 + cache_current.gradfx'*cache_current.diff ...
                 + prob.Lf/2*cache_current.normdiff^2
             if prob.Lf >= MAXIMUM_Lf, break; end
-            prob.Lf = 2*prob.Lf;
-            gam = SelectGamma(prob, opt);
+            prob.Lf = 2*prob.Lf; gam = gam/2;
             flagGamma = 1;
             [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
             ops = OpsSum(ops, ops1);
@@ -94,7 +93,7 @@ for it = 1:opt.maxit
     % trace stuff
     
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf');
+    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
     end
@@ -315,10 +314,6 @@ out.tau = taus(1, 1:it-1);
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
-
-function gam = SelectGamma(prob, opt)
-
-gam = 0.95/prob.Lf;
 
 function sig = SelectSigma(prob, opt, gam)
 

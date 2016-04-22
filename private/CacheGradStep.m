@@ -1,23 +1,24 @@
 function [cache, ops] = CacheGradStep(cache, gam)
 
+ops = OpsInit();
+
 if nargin < 2
     gam = cache.gam;
 end
 
-if cache.flagEvalf == 0
-    [cache, ops] = CacheEvalf(cache);
-else
-    ops = OpsInit();
-end
-
-% if the gradient step was performed already, then compute it only
-% if gam (the stepsize) has changed, otherwise don't do anything
 if cache.flagGradStep == 1
     if cache.gam ~= gam
         cache.gam = gam;
         cache.y = cache.x - gam*cache.gradfx;
+        cache.flagProxGradStep = 0;
+        cache.flagFBE = 0;
+        cache.flagGradFBE = 0;
     end
     return;
+end
+
+if cache.flagEvalf == 0
+    [cache, ops] = CacheEvalf(cache);
 end
 
 cache.gam = gam;
