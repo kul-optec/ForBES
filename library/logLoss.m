@@ -2,9 +2,11 @@
 %
 %   LOGLOSS(mu) builds the log-logistic loss function
 %
-%       f(x) = mu*(sum_i log(1+exp(-x_i)))
+%       f(x) = (sum_i mu_i*log(1+exp(-x_i)))
 %
-
+%   If mu is a scalar then mu_i = mu for all i=1,...,n.
+%   If mu is not provided then mu = 1.
+%
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
@@ -23,25 +25,25 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = logLoss(mu)
-    if nargin < 1
-        mu = 1;
-    end
+    if nargin < 1, mu = 1; end
+    if mu < 0, error('first argument mu must be nonnegative'); end
     obj.makef = @() @(x) call_logLoss_f(x, mu);
-    obj.L = mu; % Lipschitz constant of the gradient of f
+    obj.L = max(mu); % Lipschitz constant of the gradient of f
     obj.hasHessian = 1;
+    obj.isConvex = 1;
 end
 
 function [val, grad, hess] = call_logLoss_f(x, mu)
   % value and gradient of f(x) = mu*sum(log(1+exp(-x)))
   emx = exp(-x);
   invpx = (1+emx);
-  val = sum(log(invpx))*mu;
+  val = sum(mu.*log(invpx));
   if nargout >= 2
     px = 1./invpx;
-    grad = (px-1)*mu;
+    grad = mu.*(px-1);
     if nargout >= 3
       h = px.*(1-px);
-      hess = mu*diag(sparse(h));
+      hess = diag(sparse(mu.*h));
     end
   end
 end

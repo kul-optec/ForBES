@@ -29,19 +29,14 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = distBox(lb, ub, weights)
-    if nargin < 3 || isempty(weights)
-        weights = 1;
-    end
-    if nargin < 2 || isempty(ub)
-        ub = +inf;
-    end
-    if nargin < 1 || isempty(lb)
-        lb = -inf;
-    end
+    if nargin < 3 || isempty(weights), weights = 1; end
+    if nargin < 2 || isempty(ub), ub = +inf; end
+    if nargin < 1 || isempty(lb), lb = -inf; end
     if any(weights < 0)
         error('all weights must be nonnegative');
     end
     obj.makeprox = @() @(x, gam) call_distBox_prox(x, gam, lb, ub, weights);
+    obj.isConvex = 1;
 end
 
 function [prox, val] = call_distBox_prox(x, gam, lb, ub, weights)

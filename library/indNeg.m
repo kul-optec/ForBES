@@ -31,6 +31,7 @@ function obj = indNeg(ub)
         ub = 0;
     end
     obj.makeprox = @() @(x, gam) call_indNeg_prox(x, ub);
+    obj.isConvex = 1;
 end
 
 function [prox, val] = call_indNeg_prox(x, ub)

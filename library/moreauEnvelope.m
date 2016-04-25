@@ -34,6 +34,9 @@ function obj = moreauEnvelope(obj1, gam)
     proxf1 = obj1.makeprox();
     obj.L = 1/gam;
     obj.makef = @() @(x) call_moreauEnvelope_f1(x, proxf1, gam);
+    if isfield(obj1, 'isConvex')
+        obj.isConvex = obj1.isConvex;
+    end
 end
 
 function [v, grad] = call_moreauEnvelope_f1(x, proxf1, gam)

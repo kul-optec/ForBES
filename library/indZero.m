@@ -24,6 +24,7 @@
 
 function obj = indZero()
     obj.makeprox = @() @(x, gam) call_indZero_proj(x);
+    obj.isConvex = 1;
 end
 
 function [prox, val] = call_indZero_proj(x)

@@ -15,6 +15,7 @@ function obj = matFac(A, r)
     end
     [n, m] = size(A);
     obj.makef = @() @(x) call_matrixFactorization_fun(x, A, n, r, m);
+    obj.isConvex = 0;
 end
 
 function [val, grad] = call_matrixFactorization_fun(x, A, n, r, m)

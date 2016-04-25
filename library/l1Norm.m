@@ -2,7 +2,10 @@
 %
 %   L1NORM(mu) builds the function
 %       
-%       g(x) = mu*||x||_1
+%       g(x) = sum_i mu_i*abs(x_i)
+%
+%   If mu is a scalar then mu_i = mu for all i = 1,...,n.
+%   If mu is not provided then mu = 1.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -22,17 +25,16 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = l1Norm(mu)
-    if nargin < 1
-        mu = 1;
-    end
+    if nargin < 1, mu = 1; end
+    if mu < 0, error('first argument mu must be nonnegative'); end
     obj.makeprox = @() @(x, gam) call_l1Norm_prox(x, gam, mu);
+    obj.isConvex = 1;
 end
 
 function [prox, g] = call_l1Norm_prox(x, gam, mu)
-% prox(x) and g(prox(x)) for function g(x) = mu*||x||_1
     uz = max(0, abs(x)-gam*mu);
     prox = sign(x).*uz;
     if nargout >= 2
-        g = mu*sum(uz);
+        g = sum(mu.*uz);
     end
 end

@@ -26,13 +26,11 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = l2NormSum(m, mu)
-    if nargin < 2
-        mu = 1;
-        if nargin < 1
-            m = 1;
-        end
-    end
+    if nargin < 1, m = 1; end
+    if nargin < 2, mu = 1; end
+    if any(mu < 0), error('second argument mu must be nonnegative'); end
     obj.makeprox = @() @(x, gam) call_l2NormSum_prox(x, gam, m, mu);
+    obj.isConvex = 1;
 end
 
 function [z, v] = call_l2NormSum_prox(x, gam, m, mu)

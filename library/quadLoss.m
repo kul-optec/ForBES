@@ -5,8 +5,8 @@
 %       f(x) = 0.5*sum_i w_i(x_i-p_i)^2
 %   
 %   Both arguments are required. If w is a positive scalar then w_i = w.
-%   Length of p must instead be compliant with the dimension of the domain
-%   of the function.
+%   Length of p must instead be the same as the dimension of the domain
+%   of f.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -43,6 +43,7 @@ function obj = quadLoss(w, p)
     if all(w > 0)
         obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, w, p);
     end
+    obj.isConvex = 1;
 end
 
 function [val, grad] = call_squaredWeightedDistance_conj(y, w, p)

@@ -29,16 +29,13 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = distNeg(weights, ub)
-    if nargin < 1 || isempty(weights)
-        weights = 1;
-    end
-    if nargin < 2 || isempty(ub)
-        ub = 0;
-    end
+    if nargin < 1 || isempty(weights), weights = 1; end
+    if nargin < 2 || isempty(ub), ub = 0; end
     if any(weights < 0)
         error('all weights must be nonnegative');
     end
     obj.makeprox = @() @(x, gam) call_distNeg_prox(x, gam, ub, weights);
+    obj.isConvex = 1;
 end
 
 function [prox, val] = call_distNeg_prox(x, gam, ub, weights)

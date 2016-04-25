@@ -17,20 +17,15 @@
 
 function obj = dist2Box(lb, ub, weights)
     % Function value and gradient of (w/2)*dist^2(x,C) where C is the box [lb,ub]
-    if nargin < 3 || isempty(weights)
-        weights = 1;
-    end
-    if nargin < 2 || isempty(ub)
-        ub = +inf;
-    end
-    if nargin < 1 || isempty(lb)
-        lb = -inf;
-    end
+    if nargin < 3 || isempty(weights), weights = 1; end
+    if nargin < 2 || isempty(ub), ub = +inf; end
+    if nargin < 1 || isempty(lb), lb = -inf; end
     if any(weights < 0)
         error('all weights must be nonnegative');
     end
     obj.makef = @() @(x) call_dist2Box_f(x, lb ,ub, weights);
     obj.L = max(weights);
+    obj.isConvex = 1;
 end
 
 function [val, grad] = call_dist2Box_f(x,lb ,ub, weights)

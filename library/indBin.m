@@ -24,6 +24,7 @@ function obj = indBin(v0, v1)
     if nargin < 1, v0 = 0; end
     if nargin < 2, v1 = 1; end
     obj.makeprox = @() @(x, gam) call_indBin_prox(x, v0, v1);
+    obj.isConvex = 1;
 end
 
 % TODO: implement faster solution for particular cases

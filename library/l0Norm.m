@@ -1,8 +1,14 @@
 %L0NORM Allocates the L0 norm function.
 %
-%   L0NORM(mu) builds the function
+%   L0NORM(mu) builds the weighted L0 norm function
 %       
+%       g(x) = sum_i mu_i*(x_i ~= 0)
+%
+%   If mu is a scalar then mu_i = mu for all i=1,...,n and
+%
 %       g(x) = mu*||x||_0 = mu*nnz(x)
+%
+%   If mu is not provided then mu = 1.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -22,10 +28,9 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = l0Norm(mu)
-    if nargin < 1
-        mu = 1;
-    end
+    if nargin < 1, mu = 1; end
     obj.makeprox = @() @(x, gam) call_l0Norm_prox(x, gam, mu);
+    obj.isConvex = 0;
 end
 
 function [prox, g] = call_l0Norm_prox(x, gam, mu)

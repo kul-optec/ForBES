@@ -1,8 +1,10 @@
 %HINGELOSS Allocates the hinge loss function.
 %
-%   HINGELOSS(mu, b) builds the function
+%   HINGELOSS(b, mu) builds the function
 %       
-%       g(x) = mu*sum(max(0, 1-b.*x))
+%       g(x) = sum(mu.*max(0, 1-b.*x))
+%
+%   If mu is not provided then mu = 1.
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -21,16 +23,19 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = hingeLoss(mu, b)
-    %
-    % Only the proximal mapping is available for this function
-    %
+function obj = hingeLoss(b, mu)
+    if nargin < 1 || isempty(b), error('first argument b is required'); end
+    if nargin < 2 || isempty(mu), mu = 1; end
+    if any(mu < 0)
+        error('second argument mu must be nonnegative');
+    end
     obj.makeprox = @() @(x, gam) call_hingeLoss_prox(x, gam, mu, b);
+    obj.isConvex = 1;
 end
 
 function [prox, g] = call_hingeLoss_prox(x, gam, mu, b)
     bx = b.*x; ind = bx < 1;
     prox(ind,1) = b(ind).*min(bx(ind)+gam*mu,1);
     prox(~ind,1) = x(~ind);
-    g = mu*sum(max(0,1-b.*prox));
+    g = sum(mu.*max(0,1-b.*prox));
 end
