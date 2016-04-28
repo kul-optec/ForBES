@@ -2,15 +2,12 @@
 %
 %   HUBERLOSS(del) builds the function
 %       
-%       f(x) = sum_i l_i(x_i)
+%       f(x) = sum_i l(x_i)
 %
 %   where
 %
-%       l_i(x_i) = (0.5/del_i)*x_i^2      if |x_i| <= del_i
-%                  |x_i|-0.5*del_i        otherwise 
-%
-%   If del is a scalar then del_i = del for i = 1,...,n.
-%   If del is not provided then del = 1.
+%       l(x_i) = 0.5/del*x_i^2      if |x_i| <= del
+%                |x_i|-0.5*del      otherwise 
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -30,25 +27,23 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = huberLoss(del)
-    if nargin < 1 || isempty(del), del = 1; end
-    if any(del <= 0)
-        error('first argument del must be positive');
-    end
+    %
+    % Only f available for this function
+    %
     obj.makef = @() @(x) call_huberLoss_f(x, del);
-    obj.L = 1/min(del);
-    obj.isConvex = 1;
+    obj.L = 1/del;
 end
 
 function [val, grad] = call_huberLoss_f(x, del)
     absx = abs(x);
     small = absx <= del;
     large = ~small;
-    sqx = (0.5./del).*(x(small).^2);
+    sqx = (0.5/del)*(x(small).^2);
     linx = absx(large)-0.5*del;
     val = sum(sqx)+sum(linx);
     if nargout >= 2
         grad = zeros(length(x),1);
-        grad(small) = x(small)./del(small);
+        grad(small) = x(small)/del;
         grad(large) = sign(x(large));
     end
 end

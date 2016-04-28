@@ -16,4 +16,3 @@ if mex('-outdir', private_path, LBFGS_path), error([error_msg, LBFGS_path]); end
 if mex('-outdir', library_path, Riccati_path), error([error_msg, Riccati_path]); end
 display('ForBES was succesfully configured and installed');
 display('Type ''help forbes'' to access the help file');
-

@@ -15,23 +15,24 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, t0, lsopt)
+function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, lsopt, ref)
 
-    ops = OpsInit();
+    if nargin < 4, ref = cache.FBE; end
+
+    [cache, ops] = CacheLineSearch(cache, dir);
+    
     cachet1 = [];
     
-    prob = cache.prob;
     gam = cache.gam;
     
     t = t0;
     exitflag = 1;
-    f0 = cache.FBE;
     
     for i = 1:lsopt.nLS
         [cachet, ops1] = DirFBE(cache, t, 1);
         ops = OpsSum(ops, ops1);
         ft = cachet.FBE;
-        if ft <= f0
+        if ft <= ref
             exitflag = 0;
             break;
         end
@@ -43,13 +44,8 @@ function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, t0, lsopt)
     end
     
     if exitflag == 0 && lsopt.testGamma
-        cachet1 = CacheInit(prob, cachet.z, gam);
-        [cachet1, ops1] = CacheEvalf(cachet1);
+        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
         ops = OpsSum(ops, ops1);
-        fz = cachet1.fx;
-        % check whether gam is small enough
-        if fz + cachet.gz + lsopt.beta/(2*gam)*cachet.normdiff^2 > cachet.FBE
-            exitflag = -1;
-        end
+        exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
     end
 end

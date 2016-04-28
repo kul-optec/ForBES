@@ -16,144 +16,124 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function opt = ProcessOptions(opt)
-    % fill in missing options with defaults
-    if ~isfield(opt, 'tol'), opt.tol = 1e-8; end
-    if ~isfield(opt, 'term'), opt.customTerm = false;
-    else opt.customTerm = true; end
-    if ~isfield(opt, 'record'), opt.toRecord = false;
-    else opt.toRecord = true; end
-    if ~isfield(opt, 'maxit'), opt.maxit = 10000; end
-    if ~isfield(opt, 'beta'), opt.beta = 0.05; end
-    if ~isfield(opt, 'method'), opt.method = 'lbfgs'; end
-    
-    if ~isfield(opt, 'linesearch')
-        switch opt.method
-            case 'sd'
-                opt.linesearch = 'armijo';
-            case 'lbfgs'
-                opt.linesearch = 'lemarechal';
-            case 'bfgs'
-                opt.linesearch = 'lemarechal';
-            case 'cg-desc'
-                opt.linesearch = 'lemarechal';
-            case 'cg-prp'
-                opt.linesearch = 'lemarechal';
-            case 'cg-dyhs'
-                opt.linesearch = 'lemarechal';
-            case 'bb'
-                opt.linesearch = 'nonmonotone-armijo';
-            case 'fbs'
-                opt.linesearch = 'none';
-            case 'broyden-fpr'
-                opt.linesearch = 'none';
-            case 'bfgs-fpr'
-                opt.linesearch = 'none';
-            case 'lbfgs-fpr'
-                opt.linesearch = 'none';
-            case 'lbroyden-fpr'
-                opt.linesearch = 'none';
-            case 'bfgs2'
-                opt.linesearch = 'backtracking';
-            case 'lbfgs2'
-                opt.linesearch = 'backtracking';
-            otherwise
-                error('unknown method');
-        end
-    end
-    
-    opt.name = strcat(opt.method, ', ', opt.linesearch);
-    
-    if ~isfield(opt, 'recache'), opt.recache = 100; end
-    if ~isfield(opt, 'memory'), opt.memory = 10; end
-    if ~isfield(opt, 'adaptive'), opt.adaptive = 0; end
-    if ~isfield(opt, 'display'), opt.display = 2; end
-    if ~isfield(opt, 'useHessian'), opt.useHessian = 0; end
-    
-    % translate labels into integer codes
-    switch opt.method
-        case 'sd'
-            opt.method = 1;
-        case 'lbfgs'
-            opt.method = 2;
-        case 'cg-desc'
-            opt.method = 3;
-        case 'cg-prp'
-            opt.method = 4;
-        case 'cg-dyhs'
-            opt.method = 5;
-        case 'bb'
-            opt.method = 6;
-        case 'bfgs'
-            opt.method = 7;
-            opt.optsL.UT = true; opt.optsL.TRANSA = true;
-            opt.optsU.UT = true;
-        case 'fbs'
-            opt.method = 0;
-        case 'broyden-fpr'
-            opt.method = 11;
-        case 'bfgs-fpr'
-            opt.method = 12;
-        case 'lbfgs-fpr'
-            opt.method = 13;
-        case 'lbroyden-fpr'
-            opt.method = 14;
-        case 'bfgs2'
-            opt.method = 27;
-            opt.optsL.UT = true; opt.optsL.TRANSA = true;
-            opt.optsU.UT = true;
-        case 'lbfgs2'
-            opt.method = 22;
-        otherwise
-            error('unknown method');
-    end
-    
-    switch opt.linesearch
-        case 'armijo'
-            opt.linesearch = 1;
-        case 'nonmonotone-armijo'
-            opt.linesearch = 2;
-        case 'lemarechal'
-            opt.linesearch = 3;
-        case 'hager-zhang'
-            opt.linesearch = 4;
-        case 'more-thuente'
-            opt.linesearch = 5;
-        case 'fletcher'
-            opt.linesearch = 6;
-        case 'backtracking'
-            opt.linesearch = 7;
-        case 'none'
-            opt.linesearch = 0;
-        otherwise
-            error('unknown line search');
-    end
-    
-    if ~isfield(opt, 'variant')
-        if opt.method == 0
-            opt.variant = 'basic';
-        elseif opt.method <= 10
-            opt.variant = 'global';
-        else
-            opt.variant = '';
-        end
-    end
-    
-    opt.name = strcat(opt.name, ',' , opt.variant);
-    
-    switch opt.variant
-        case 'basic'
-            opt.fast = 0;
-            opt.global = 0;
-            opt.monotone = 0;
-        case 'global'
-            opt.fast = 0;
-            opt.global = 1;
-            opt.monotone = 0;
-        case 'fast'
-            opt.fast = 1;
-            opt.global = 0;
-            opt.monotone = 1;
-    end
-    
-    opt.processed = true;
+
+% fill in missing options with defaults
+if ~isfield(opt, 'tol') || isempty(opt.tol), opt.tol = 1e-8; end
+if ~isfield(opt, 'term') || isempty(opt.term), opt.customTerm = false;
+else opt.customTerm = true; end
+if ~isfield(opt, 'record') || isempty(opt.record), opt.toRecord = false;
+else opt.toRecord = true; end
+if ~isfield(opt, 'maxit') || isempty(opt.maxit), opt.maxit = 10000; end
+if ~isfield(opt, 'beta') || isempty(opt.beta), opt.beta = 0.05; end
+if ~isfield(opt, 'solver') || isempty(opt.solver), opt.solver = 'minfbe'; end
+if ~isfield(opt, 'adaptive') || isempty(opt.adaptive), opt.adaptive = 0; end
+if ~isfield(opt, 'display') || isempty(opt.display), opt.display = 2; end
+if ~isfield(opt, 'useHessian') || isempty(opt.useHessian), opt.useHessian = 0; end
+
+opt.name = opt.solver;
+
+% translate labels into integer codes
+switch opt.solver
+    case 'fbs'
+        opt.solver = 1;
+    case 'minfbe'
+        opt.solver = 2;
+    case 'zerofpr'
+        opt.solver = 3;
+    case 'minfbe2'
+        opt.solver = 4;
+    otherwise
+        error('unknown solver');
 end
+
+solver2variant = {'fast', 'global', '', 'global'};
+if ~isfield(opt, 'variant') || isempty(opt.variant)
+    opt.variant = solver2variant{opt.solver};
+end
+
+opt.name = strcat(opt.name, ',' , opt.variant);
+
+opt.fast = 0;
+opt.global = 0;
+switch opt.variant
+    case 'global'
+        opt.global = 1;
+    case 'fast'
+        opt.fast = 1;
+end
+
+solver2method = {'none', 'lbfgs', 'lbfgs', 'lbfgs'};
+if ~isfield(opt, 'method') || isempty(opt.method)
+    opt.method = solver2method{opt.solver};
+end
+
+opt.name = strcat(opt.name, ', ', opt.method);
+
+switch opt.method
+    case 'none'
+        opt.method = 0;
+    case 'sd'
+        opt.method = 1;
+    case 'bfgs'
+        opt.method = 2;
+    case 'lbfgs'
+        opt.method = 3;
+        opt.memory = 10;
+    case 'cg-desc'
+        opt.method = 4;
+    case 'cg-prp'
+        opt.method = 5;
+    case 'cg-dyhs'
+        opt.method = 6;
+    case 'bb'
+        opt.method = 7;
+    case 'broyden'
+        opt.method = 8;
+    case 'lbroyden'
+        opt.method = 9;
+    otherwise
+        error('unknown method');
+end
+
+% the default line-search depends on solver, method and variant
+if opt.method > 0 && (~isfield(opt, 'linesearch') || isempty(opt.linesearch))
+    if (opt.solver == 2 || opt.solver == 4) && opt.global == 0 % minfbe/minfbe2, classical line search method
+        method2linesearch = {'armijo', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'nonmonotone-armijo', 'lemarechal', 'lemarechal'};
+        opt.linesearch = method2linesearch{opt.method};
+    elseif (opt.solver == 2 || opt.solver == 4) && opt.global == 1 % minfbe/minfbe2, classical line search method
+        method2linesearch = repmat({'backtracking'}, 1, 9);
+        opt.linesearch = method2linesearch{opt.method};
+    elseif (opt.solver == 3)
+        method2linesearch = repmat({'backtracking'}, 1, 9);
+        opt.linesearch = method2linesearch{opt.method};
+    else
+        opt.linesearch = 'none';
+    end
+elseif opt.method == 0
+    opt.linesearch = 'none';
+end
+
+opt.name = strcat(opt.name, ', ', opt.linesearch);
+
+switch opt.linesearch
+    case 'none'
+        opt.linesearch = 0;
+    case 'backtracking'
+        opt.linesearch = 1;
+    case 'armijo'
+        opt.linesearch = 2;
+    case 'nonmonotone-armijo'
+        opt.linesearch = 3;
+    case 'lemarechal'
+        opt.linesearch = 4;
+    case 'hager-zhang'
+        opt.linesearch = 5;
+    case 'more-thuente'
+        opt.linesearch = 6;
+    case 'fletcher'
+        opt.linesearch = 7;
+    otherwise
+        error('unknown line search');
+end
+
+opt.processed = true;

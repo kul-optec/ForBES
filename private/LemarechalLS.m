@@ -15,7 +15,7 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, lsopt)
+function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, dir, slope, t0, lsopt)
 %LEMARECHALLS - computes a steplength t > 0 so that it satisfies the (weak) Wolfe conditions
 %
 % f(t) <= f(0) + delta*f'(0)
@@ -38,10 +38,11 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
 % Convex Analysis and Minimization Algorithms, vol I.
 % Springer Verlag, Heidelberg, Algorithm 3.3.1 (Wolfe's line-search)
 
-    ops = OpsInit();
+    % precompute stuff for the line search
+    [cache, ops] = CacheLineSearch(cache, dir);
+    
     cachet1 = [];
     
-    prob = cache.prob;
     gam = cache.gam;
     
     t = t0;
@@ -58,16 +59,9 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
         [cachet, ops1] = DirFBE(cache, t, 1);
         ops = OpsSum(ops, ops1);
         if lsopt.testGamma && testGammaFlag
-            cachet1 = CacheInit(prob, cachet.z, gam);
-            [cachet1, ops1] = CacheEvalf(cachet1);
+            [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
             ops = OpsSum(ops, ops1);
-            fz = cachet1.fx;
-            % check whether gam is small enough
-            if fz + cachet.gz + lsopt.beta/(2*gam)*cachet.normdiff^2 > cachet.FBE
-%             if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
-                exitflag = -1;
-                break;
-            end
+            exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
         end
         testGammaFlag = 0;
         if cachet.FBE > cache.FBE + t*wolfe_hi
@@ -96,7 +90,7 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
                 a = t; fa = cachet.FBE; dfa = cachet.dFBE;
                 if b == inf
                     % extrapolate
-                    if lsopt.interp% we always have dfprev
+                    if lsopt.interp % we always have dfprev
                         tn = LemarechalCubInterp(tprev,fprev,dfprev,a,fa,dfa);
                         % safeguard
                         tn = max(tn,rho*tprev);
@@ -135,15 +129,9 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, slope, t0, ls
     end
     
     if exitflag == 0 && lsopt.testGamma
-        cachet1 = CacheInit(prob, cachet.z, gam);
-        [cachet1, ops1] = CacheEvalf(cachet1);
+        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
         ops = OpsSum(ops, ops1);
-        fz = cachet1.fx;
-        % check whether gam is small enough
-        if fz + cachet.gz + lsopt.beta/(2*gam)*cachet.normdiff^2 > cachet.FBE
-%         if fz + cachet.gz > cachet.FBE + 1e-14*(1+abs(cachet.FBE))
-            exitflag = -1;
-        end
+        exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
     end
 end
 

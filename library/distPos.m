@@ -29,13 +29,16 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = distPos(weights, lb)
-    if nargin < 1 || isempty(weights), weights = 1; end
-    if nargin < 2 || isempty(lb), lb = 0; end
+    if nargin < 1 || isempty(weights)
+        weights = 1;
+    end
+    if nargin < 2 || isempty(lb)
+        lb = 0;
+    end
     if any(weights < 0)
         error('all weights must be nonnegative');
     end
     obj.makeprox = @() @(x, gam) call_distPos_prox(x, gam, lb, weights);
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_distPos_prox(x, gam, lb, weights)

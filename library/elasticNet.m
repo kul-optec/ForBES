@@ -2,11 +2,7 @@
 %
 %   ELASTICNET(mu, lam) builds the function
 %       
-%       g(x) = sum_i mu_i*abs(x_i) + (lam_i/2)*x_i^2
-%
-%   If mu (or lam) is a scalar then mu_i = mu (or lam_i = lam) for all
-%   i = 1,...,n. If mu is not provided or is empty then mu = 1 (the same
-%   holds for lam).
+%       g(x) = mu*||x||_1 + (lam/2)*||x||^2
 %
 % Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
 %
@@ -26,18 +22,17 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = elasticNet(mu, lam)
-    if nargin < 1 || isempty(mu), mu = 1; end
-    if nargin < 2 || isempty(lam), lam = 1; end
-    if any(mu < 0), error('first argument mu must be nonnegative'); end
-    if any(lam < 0), error('second argument lam must be nonnegative'); end
+    if nargin < 2
+        lam = 1;
+        if nargin < 1, mu = 1; end
+    end
     obj.makeprox = @() @(x, gam) call_elasticNet_prox(x, gam, mu, lam);
-    obj.isConvex = 1;
 end
 
 function [prox, g] = call_elasticNet_prox(x, gam, mu, lam)
-    uz = max(0, abs(x)-gam*mu)./(1+lam*gam);
+    uz = max(0, abs(x)-gam*mu)/(1+lam*gam);
     prox = sign(x).*uz;
     if nargout >= 2
-        g = sum(mu.*uz)+0.5*(uz'*(lam.*uz));
+        g = mu*sum(uz)+(0.5*lam)*(uz'*uz);
     end
 end

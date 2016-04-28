@@ -28,7 +28,6 @@
 
 function obj = indBox(lower, upper)
     obj.makeprox = @() @(x, gam) call_indBox_prox(x, lower, upper);
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_indBox_prox(x, lower, upper)

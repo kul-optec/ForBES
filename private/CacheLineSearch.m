@@ -1,5 +1,12 @@
 function [cache, ops] = CacheLineSearch(cache, dir)
 
+if cache.flagLineSearch == 1
+    if norm(dir-cache.dir) == 0
+        ops = OpsInit();
+        return;
+    end
+end
+
 if cache.flagGradStep == 0
     [cache, ops] = CacheGradStep(cache, cache.gam);
 else

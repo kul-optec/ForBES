@@ -34,7 +34,6 @@ function obj = indRankBall(m, n, r, method)
         otherwise
             error('unknown method for computing SVDs');
     end
-    obj.isConvex = 0;
 end
 
 function [prox, val] = call_indRankBall_proj_svds(x, m, n, r)

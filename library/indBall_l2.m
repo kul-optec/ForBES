@@ -32,7 +32,6 @@ function obj = indBall_l2(rho, c)
         c = 0;
     end
     obj.makeprox = @() @(x, gam) call_indBall_l2_prox(x, rho, c);
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_indBall_l2_prox(x, rho, c)
