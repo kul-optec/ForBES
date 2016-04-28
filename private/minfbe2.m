@@ -118,7 +118,7 @@ for it = 1:opt.maxit
     end
 
     % compute search direction and slope
-    switch opt.method
+    switch opt.methodID
         case 2 % BFGS
             if flagChangedGamma || flagLS
                 direction = -cache_xnew.gradFBE;
@@ -169,7 +169,7 @@ for it = 1:opt.maxit
     slope = cache_xnew.gradFBE'*direction;
 
     % set initial guess for the step length
-    switch opt.method
+    switch opt.methodID
         case {2, 3} % (L-)BFGS
             tau0 = 1.0;
         otherwise

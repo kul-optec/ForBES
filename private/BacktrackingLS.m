@@ -17,7 +17,7 @@
 
 function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, lsopt, ref)
 
-    if nargin < 4, ref = cache.FBE; end
+    if nargin < 5, ref = cache.FBE; end
 
     [cache, ops] = CacheLineSearch(cache, dir);
     
@@ -44,7 +44,7 @@ function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, ls
     end
     
     if exitflag == 0 && lsopt.testGamma
-        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
+        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, lsopt.beta);
         ops = OpsSum(ops, ops1);
         exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
     end

@@ -35,20 +35,20 @@ opt.name = opt.solver;
 % translate labels into integer codes
 switch opt.solver
     case 'fbs'
-        opt.solver = 1;
+        opt.solverID = 1;
     case 'minfbe'
-        opt.solver = 2;
+        opt.solverID = 2;
     case 'zerofpr'
-        opt.solver = 3;
+        opt.solverID = 3;
     case 'minfbe2'
-        opt.solver = 4;
+        opt.solverID = 4;
     otherwise
         error('unknown solver');
 end
 
 solver2variant = {'fast', 'global', '', 'global'};
 if ~isfield(opt, 'variant') || isempty(opt.variant)
-    opt.variant = solver2variant{opt.solver};
+    opt.variant = solver2variant{opt.solverID};
 end
 
 opt.name = strcat(opt.name, ',' , opt.variant);
@@ -64,52 +64,55 @@ end
 
 solver2method = {'none', 'lbfgs', 'lbfgs', 'lbfgs'};
 if ~isfield(opt, 'method') || isempty(opt.method)
-    opt.method = solver2method{opt.solver};
+    opt.method = solver2method{opt.solverID};
 end
 
 opt.name = strcat(opt.name, ', ', opt.method);
 
 switch opt.method
     case 'none'
-        opt.method = 0;
+        opt.methodID = 0;
     case 'sd'
-        opt.method = 1;
+        opt.methodID = 1;
     case 'bfgs'
-        opt.method = 2;
+        opt.methodID = 2;
+        opt.optsL.UT = true;
+        opt.optsL.TRANSA = true;
+        opt.optsU.UT = true;
     case 'lbfgs'
-        opt.method = 3;
+        opt.methodID = 3;
         opt.memory = 10;
     case 'cg-desc'
-        opt.method = 4;
+        opt.methodID = 4;
     case 'cg-prp'
-        opt.method = 5;
+        opt.methodID = 5;
     case 'cg-dyhs'
-        opt.method = 6;
+        opt.methodID = 6;
     case 'bb'
-        opt.method = 7;
+        opt.methodID = 7;
     case 'broyden'
-        opt.method = 8;
+        opt.methodID = 8;
     case 'lbroyden'
-        opt.method = 9;
+        opt.methodID = 9;
     otherwise
         error('unknown method');
 end
 
 % the default line-search depends on solver, method and variant
-if opt.method > 0 && (~isfield(opt, 'linesearch') || isempty(opt.linesearch))
-    if (opt.solver == 2 || opt.solver == 4) && opt.global == 0 % minfbe/minfbe2, classical line search method
+if opt.methodID > 0 && (~isfield(opt, 'linesearch') || isempty(opt.linesearch))
+    if (opt.solverID == 2 || opt.solverID == 4) && opt.global == 0 % minfbe/minfbe2, classical line search method
         method2linesearch = {'armijo', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'nonmonotone-armijo', 'lemarechal', 'lemarechal'};
-        opt.linesearch = method2linesearch{opt.method};
-    elseif (opt.solver == 2 || opt.solver == 4) && opt.global == 1 % minfbe/minfbe2, classical line search method
+        opt.linesearch = method2linesearch{opt.methodID};
+    elseif (opt.solverID == 2 || opt.solverID == 4) && opt.global == 1 % minfbe/minfbe2, classical line search method
         method2linesearch = repmat({'backtracking'}, 1, 9);
-        opt.linesearch = method2linesearch{opt.method};
-    elseif (opt.solver == 3)
+        opt.linesearch = method2linesearch{opt.methodID};
+    elseif (opt.solverID == 3)
         method2linesearch = repmat({'backtracking'}, 1, 9);
-        opt.linesearch = method2linesearch{opt.method};
+        opt.linesearch = method2linesearch{opt.methodID};
     else
         opt.linesearch = 'none';
     end
-elseif opt.method == 0
+elseif opt.methodID == 0
     opt.linesearch = 'none';
 end
 
@@ -117,21 +120,21 @@ opt.name = strcat(opt.name, ', ', opt.linesearch);
 
 switch opt.linesearch
     case 'none'
-        opt.linesearch = 0;
+        opt.linesearchID = 0;
     case 'backtracking'
-        opt.linesearch = 1;
+        opt.linesearchID = 1;
     case 'armijo'
-        opt.linesearch = 2;
+        opt.linesearchID = 2;
     case 'nonmonotone-armijo'
-        opt.linesearch = 3;
+        opt.linesearchID = 3;
     case 'lemarechal'
-        opt.linesearch = 4;
+        opt.linesearchID = 4;
     case 'hager-zhang'
-        opt.linesearch = 5;
+        opt.linesearchID = 5;
     case 'more-thuente'
-        opt.linesearch = 6;
+        opt.linesearchID = 6;
     case 'fletcher'
-        opt.linesearch = 7;
+        opt.linesearchID = 7;
     otherwise
         error('unknown line search');
 end

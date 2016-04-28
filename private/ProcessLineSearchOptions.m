@@ -25,7 +25,7 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
     else lsopt.delta = 0.1; end
     lsopt.testGamma = prob.unknownLf || opt.adaptive;
     lsopt.beta = opt.beta;
-    switch opt.linesearch
+    switch opt.linesearchID
         case 1 % backtracking
             lsopt.progTol = 0;
             lsopt.nLS = 50;

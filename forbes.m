@@ -106,26 +106,26 @@ function out = forbes(fs, gs, init, aff, constr, opt)
             prob = ProcessCompositeProblem(prob, opt);
             preprocess = toc(t0);
             switch opt.solver
-                case 1
+                case 'fbs'
                     out = fbs(prob, opt);
-                case 2
+                case 'minfbe'
                     out = minfbe(prob, opt);
-                case 3
+                case 'zerofpr'
                     out = zerofpr(prob, opt);
-                case 4
+                case 'minfbe2'
                     out = minfbe2(prob, opt);
             end
         case 2
             [prob, dualprob] = ProcessSeparableProblem(prob, opt);
             preprocess = toc(t0);
             switch opt.solver
-                case 1
+                case 'fbs'
                     dualout = fbs(dualprob, opt);
-                case 2
+                case 'minfbe'
                     dualout = minfbe(dualprob, opt);
-                case 3
+                case 'zerofpr'
                     dualout = zerofpr(dualprob, opt);
-                case 4
+                case 'minfbe2'
                     dualout = minfbe2(dualprob, opt);
             end
             out = GetPrimalOutput(prob, dualprob, dualout);

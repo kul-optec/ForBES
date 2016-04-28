@@ -97,7 +97,7 @@ for it = 1:opt.maxit
     ops = OpsSum(ops, ops1);
 
     % compute search direction and slope
-    switch opt.method
+    switch opt.methodID
         case {1, 7} % STEEPEST DESCENT and BARZILAI-BORWEIN
             dir = -cache_current.gradFBE;
         case 2 % BFGS
@@ -193,7 +193,7 @@ for it = 1:opt.maxit
     slope = cache_current.gradFBE'*dir;
 
     % set initial guess for the step length
-    switch opt.method
+    switch opt.methodID
         case {2, 3} % (L-)BFGS
             tau0 = 1.0;
         case 7 % BARZILAI-BORWEIN
@@ -236,17 +236,17 @@ for it = 1:opt.maxit
     end
 
     % perform line search
-    switch opt.linesearch
+    switch opt.linesearchID
         case 0 % NO LINE SEARCH - UNIT STEPSIZE
             [cache_tau, ops1] = CacheFBE(prob, gam, cache_current.x+dir);
             tau = 1.0;
             flagLS = 0;
         case 1 % SIMPLE BACKTRACKING (NON-INCREASING LINE-SEARCH)
-            [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, tau0, lsopt);
+            [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt);
         case 2 % ARMIJO LINE SEARCH WITH CUBIC INTERPOLATION
-            [tau, cache_tau, cache_tau1, ops1, flagLS] = ArmijoLS(cache_current, slope, tau0, lsopt);
+            [tau, cache_tau, cache_tau1, ops1, flagLS] = ArmijoLS(cache_current, dir, slope, tau0, lsopt);
         case 4 % LEMARECHAL (WOLFE CONDITIONS)
-            [tau, cache_tau, cache_tau1, ops1, flagLS] = LemarechalLS(cache_current, slope, tau0, lsopt);
+            [tau, cache_tau, cache_tau1, ops1, flagLS] = LemarechalLS(cache_current, dir, slope, tau0, lsopt);
         otherwise
             error('line search not implemented')
     end

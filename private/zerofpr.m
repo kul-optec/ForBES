@@ -69,6 +69,8 @@ for it = 1:opt.maxit
             [goodGamma, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
             ops = OpsSum(ops, ops1);
         end
+    else
+        cache_z = CacheInit(prob, cache_current.z, gam);
     end
     
     % adjust sigma
@@ -117,7 +119,7 @@ for it = 1:opt.maxit
     [cache_z, ops1] = CacheProxGradStep(cache_z, gam);
     ops = OpsSum(ops, ops1);
     
-    switch opt.method
+    switch opt.methodID
         case 2 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
             opt.optsU.UT = true;
@@ -246,7 +248,7 @@ for it = 1:opt.maxit
     end
     
     % perform line search
-    switch opt.linesearch
+    switch opt.linesearchID
         case 1 % simple backtracking
             ref = cache_current.FBE - sig*cache_current.normdiff^2;
             [t, cachet, ~, ops1, flagLS] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
