@@ -101,7 +101,7 @@ for it = 1:opt.maxit
     end
 
     if res(1,it) <= eta
-        if res(1,it) <= opt.tol && inn_out.residual(end)<=opt.tol
+        if res(1,it) <= opt.tol && inn_out.residual(end) <= opt.tol
             break
         else
             y = y1;

@@ -39,9 +39,9 @@ function obj = separableSum(objs, sizes, idx)
     for i = 1:length(objs)
         if ~isfield(objs{i}, 'L'), noL = 1; break; end
         if objs{i}.L > maxL, maxL = objs{i}.L; end
-            if ~isfield(objs{i}, 'isConvex') || objs{i}.isConvex == 0
-                obj.isConvex = 0;
-            end
+        if ~isfield(objs{i}, 'isConvex') || objs{i}.isConvex == 0
+            obj.isConvex = 0;
+        end
     end
     if noL == 0
         obj.L = maxL;
