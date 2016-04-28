@@ -59,7 +59,7 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, dir, slope, t
         [cachet, ops1] = DirFBE(cache, t, 1);
         ops = OpsSum(ops, ops1);
         if lsopt.testGamma && testGammaFlag
-            [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
+            [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, lsopt.beta);
             ops = OpsSum(ops, ops1);
             exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
         end
@@ -129,7 +129,7 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, dir, slope, t
     end
     
     if exitflag == 0 && lsopt.testGamma
-        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, beta);
+        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, lsopt.beta);
         ops = OpsSum(ops, ops1);
         exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
     end
