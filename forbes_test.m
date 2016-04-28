@@ -6,5 +6,6 @@ addpath(tests_path);
 
 fprintf('%25s', 'CheckGamma... '); test_CheckGamma; fprintf('OK\n');
 fprintf('%25s', 'SolveLasso... '); test_SolveLasso; fprintf('OK\n');
+fprintf('%25s', 'SolveSparseLogReg... '); test_SolveSparseLogReg; fprintf('OK\n');
 
 rmpath(tests_path);
