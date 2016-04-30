@@ -32,6 +32,7 @@ ops = OpsInit();
 
 % initialize stuff
 gam = (1-opt.beta)/prob.Lf;
+sig = (1-gam*prob.Lf)/(4*gam);
 
 % display header
 if opt.display >= 2
@@ -64,7 +65,7 @@ for it = 1:opt.maxit
         [goodGamma, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
         ops = OpsSum(ops, ops1);
         while ~goodGamma
-            prob.Lf = 2*prob.Lf; gam = gam/2;
+            prob.Lf = 2*prob.Lf; gam = gam/2; sig = 2*sig;
             flagChangedGamma = 1;
             [goodGamma, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
             ops = OpsSum(ops, ops1);
@@ -72,10 +73,6 @@ for it = 1:opt.maxit
     else
         cache_z = CacheInit(prob, cache_current.z, gam);
     end
-    
-    % adjust sigma
-    
-    sig = SelectSigma(prob, opt, gam);
     
     if prob.Lf >= MAXIMUM_Lf
         msgTerm = ['estimate for Lf became too large: ', num2str(prob.Lf)];
@@ -248,21 +245,27 @@ for it = 1:opt.maxit
     end
     
     % perform line search
+    
     switch opt.linesearchID
-        case 1 % simple backtracking
+        case 1 % backtracking
             ref = cache_current.FBE - sig*cache_current.normdiff^2;
-            [t, cachet, ~, ops1, flagLS] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
-        case 8 % Hager-Zhang-type nonmonotone line search
+            [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
+        case 2 % backtracking (nonmonotone)
             if it == 1
                 Q = 1;
                 C = cache_current.FBE;
             else
-                Q = etak*Q+1;
-                etak = 0.5*(lsopt.etamin+lsopt.etamax);
-                C = (etak*Q*C + cache_current.FBE)/Q;
+                Q = lsopt.eta*Q+1;
+                C = (lsopt.eta*Q*C + cache_current.FBE)/Q;
             end
             ref = C - sig*cache_current.normdiff^2;
-            [t, cachet, ~, ops1, flagLS] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
+            [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
+        otherwise
+            error('line search not implemented')
+    end
+    
+    if tau < 1e-14
+        warning('diogatto');
     end
     
     % update iterates
@@ -308,7 +311,3 @@ out.record = record;
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
-
-function sig = SelectSigma(prob, opt, gam)
-
-sig = (1-gam*prob.Lf)/(4*gam);

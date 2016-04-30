@@ -123,9 +123,9 @@ switch opt.linesearch
         opt.linesearchID = 0;
     case 'backtracking'
         opt.linesearchID = 1;
-    case 'armijo'
+    case 'backtracking-nm'
         opt.linesearchID = 2;
-    case 'nonmonotone-armijo'
+    case 'backtracking-armijo'
         opt.linesearchID = 3;
     case 'lemarechal'
         opt.linesearchID = 4;

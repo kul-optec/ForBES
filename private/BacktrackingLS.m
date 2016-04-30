@@ -15,9 +15,10 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, lsopt, ref)
+function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, lsopt, ref, lin)
 
     if nargin < 5, ref = cache.FBE; end
+    if nargin < 6, lin = 0; end
 
     [cache, ops] = CacheLineSearch(cache, dir);
     
@@ -32,7 +33,7 @@ function [t, cachet, cachet1, ops, exitflag] = BacktrackingLS(cache, dir, t0, ls
         [cachet, ops1] = DirFBE(cache, t, 1);
         ops = OpsSum(ops, ops1);
         ft = cachet.FBE;
-        if ft <= ref
+        if ft <= ref + t*lin
             exitflag = 0;
             break;
         end

@@ -16,12 +16,12 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function lsopt = ProcessLineSearchOptions(prob, opt)
-    %  factor in [0, 1] used to compute average cost magnitude C_k as follows:
-    % Q_k = 1 + (Delta)Q_k-1, Q_0 = 0,  C_k = C_k-1 + (|f_k| - C_k-1)/Q_k
-    lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
-    % Wolfe line search parameter delta, range [0, .5]
+%     %  factor in [0, 1] used to compute average cost magnitude C_k as follows:
+%     % Q_k = 1 + (Delta)Q_k-1, Q_0 = 0,  C_k = C_k-1 + (|f_k| - C_k-1)/Q_k
+%     lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
+    % Armijo condition parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
-    if isfield(opt, 'c1'), lsopt.delta = opt.c1;
+    if isfield(opt, 'delta'), lsopt.delta = opt.delta;
     else lsopt.delta = 0.1; end
     lsopt.testGamma = prob.unknownLf || opt.adaptive;
     lsopt.beta = opt.beta;
@@ -29,13 +29,13 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
         case 1 % backtracking
             lsopt.progTol = 0;
             lsopt.nLS = 50;
-        case 2 % armijo backtracking
+        case 2 % nonmonotone backtracking (Hager-Zhang)
+            lsopt.eta = 0.85;
             lsopt.progTol = 0;
             lsopt.nLS = 50;
-        case 3 % Nonmonotone Armijo
+        case 3 % Armijo backtracking
             lsopt.progTol = 0;
             lsopt.nLS = 50;
-            lsopt.M = 5;
         case 4 % Lemarechal line search
             lsopt.sigma = 0.9;
             % maximum number of iterations
@@ -106,9 +106,6 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
             lsopt.progTol = 0;
             % estimate of minimum value of the function
             lsopt.fmin = -inf;
-        case 8 % Hager-Zhang nonmonotone
-            lsopt.etamin = 0;
-            lsopt.etamax = 1;
     end
 
     % if method is not L-BFGS then initial stepsize is selected

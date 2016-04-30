@@ -237,15 +237,22 @@ for it = 1:opt.maxit
 
     % perform line search
     switch opt.linesearchID
-        case 0 % NO LINE SEARCH - UNIT STEPSIZE
-            [cache_tau, ops1] = CacheFBE(prob, gam, cache_current.x+dir);
-            tau = 1.0;
-            flagLS = 0;
-        case 1 % SIMPLE BACKTRACKING (NON-INCREASING LINE-SEARCH)
+        case 1 % backtracking
             [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt);
-        case 2 % ARMIJO LINE SEARCH WITH CUBIC INTERPOLATION
-            [tau, cache_tau, cache_tau1, ops1, flagLS] = ArmijoLS(cache_current, dir, slope, tau0, lsopt);
-        case 4 % LEMARECHAL (WOLFE CONDITIONS)
+        case 2 % backtracking (nonmonotone)
+            if it == 1
+                Q = 1;
+                C = cache_current.FBE;
+            else
+                Q = lsopt.eta*Q+1;
+                C = (lsopt.eta*Q*C + cache_current.FBE)/Q;
+            end
+            [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt, C);
+        case 3 % backtracking (Armijo condition)
+            ref = cache_current.FBE; % f(0)
+            lin = lsopt.delta*slope; % delta f'(0)
+            [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt, ref, lin);
+        case 4 % Lemarechal (Wolfe conditions)
             [tau, cache_tau, cache_tau1, ops1, flagLS] = LemarechalLS(cache_current, dir, slope, tau0, lsopt);
         otherwise
             error('line search not implemented')
