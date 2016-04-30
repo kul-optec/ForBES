@@ -265,10 +265,6 @@ for it = 1:opt.maxit
             error('line search not implemented')
     end
     
-    if tau < 1e-14
-        warning('diogatto');
-    end
-    
     % update iterates
     
     cache_previous = cache_z;
