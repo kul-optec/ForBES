@@ -18,7 +18,7 @@ f = quadLoss(P(:), B(:));
 g = indRankBall(m, n, r);
 x0 = zeros(m*n, 1);
 
-ASSERT_TOL = 1e-8;
+ASSERT_TOL = 1e-10;
 
 %% run methods
 
@@ -33,7 +33,13 @@ out_fbs = forbes(f, g, x0, [], [], opt_fbs);
 
 assert(out_fbs.iterations < baseopt.maxit);
 
-opt_zerofpr_lbfgs = baseopt; opt_zerofpr_lbfgs.solver = 'zerofpr'; opt_zerofpr_lbfgs.method = 'lbfgs';
-out_zerofpr_lbfgs = forbes(f, g, x0, [], [], opt_zerofpr_lbfgs);
+opts = {};
+outs = {};
 
-assert(norm(out_fbs.x - out_zerofpr_lbfgs.x, 'inf') <= ASSERT_TOL);
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
+
+for i = 1:length(opts)
+    outs{end+1} = forbes(f, g, x0, [], [], opts{i});
+    assert(outs{i}.iterations < opts{i}.maxit);
+    assert(norm(outs{i}.residual(end), 'inf') <= ASSERT_TOL);
+end

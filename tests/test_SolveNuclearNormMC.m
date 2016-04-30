@@ -34,22 +34,17 @@ out_fbs = forbes(f, g, x0, [], [], opt_fbs);
 
 assert(out_fbs.iterations < baseopt.maxit);
 
-opt_afbs = baseopt; opt_afbs.solver = 'fbs'; opt_afbs.variant = 'fast';
-out_afbs = forbes(f, g, x0, [], [], opt_afbs);
+opts = {};
+outs = {};
 
-assert(norm(out_fbs.x - out_afbs.x) <= ASSERT_TOL);
+opts{end+1} = baseopt; opts{end}.solver = 'fbs'; opts{end}.variant = 'fast';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking-armijo';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.variant = 'basic';
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
 
-opt_minfbe_g_lbfgs = baseopt; opt_minfbe_g_lbfgs.solver = 'minfbe'; opt_minfbe_g_lbfgs.method = 'lbfgs';
-out_minfbe_g_lbfgs = forbes(f, g, x0, [], [], opt_minfbe_g_lbfgs);
-
-assert(norm(out_fbs.x - out_minfbe_g_lbfgs.x) <= ASSERT_TOL);
-
-opt_zerofpr_lbfgs = baseopt; opt_zerofpr_lbfgs.solver = 'zerofpr'; opt_zerofpr_lbfgs.method = 'lbfgs';
-out_zerofpr_lbfgs = forbes(f, g, x0, [], [], opt_zerofpr_lbfgs);
-
-assert(norm(out_fbs.x - out_zerofpr_lbfgs.x) <= ASSERT_TOL);
-
-opt_minfbe_b_lbfgs = baseopt; opt_minfbe_b_lbfgs.solver = 'minfbe'; opt_minfbe_b_lbfgs.variant = 'basic'; opt_minfbe_b_lbfgs.method = 'lbfgs';
-out_minfbe_b_lbfgs = forbes(f, g, x0, [], [], opt_minfbe_b_lbfgs);
-
-assert(norm(out_fbs.x - out_minfbe_b_lbfgs.x) <= ASSERT_TOL);
+for i = 1:length(opts)
+    outs{end+1} = forbes(f, g, x0, [], [], opts{i});
+    assert(outs{i}.iterations < opts{i}.maxit);
+    assert(norm(outs{i}.x - out_fbs.x, 'inf') <= ASSERT_TOL);
+end

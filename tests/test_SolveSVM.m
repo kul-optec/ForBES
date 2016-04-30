@@ -38,37 +38,21 @@ out_fbs = forbes(f, g, y0, [], constr, opt_fbs);
 
 assert(out_fbs.iterations < baseopt.maxit);
 
-opt_afbs = baseopt; opt_afbs.solver = 'fbs'; opt_afbs.variant = 'fast';
-out_afbs = forbes(f, g, y0, [], constr, opt_afbs);
+opts = {};
+outs = {};
 
-assert(norm(out_fbs.y - out_afbs.y, 'inf') <= ASSERT_TOL);
+opts{end+1} = baseopt; opts{end}.solver = 'fbs'; opts{end}.variant = 'fast';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'bfgs';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking-armijo';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking-armijo';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'bfgs'; opts{end}.variant = 'basic';
+opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.variant = 'basic';
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'bfgs';
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
 
-opt_minfbe_g_bfgs = baseopt; opt_minfbe_g_bfgs.solver = 'minfbe'; opt_minfbe_g_bfgs.method = 'bfgs';
-out_minfbe_g_bfgs = forbes(f, g, y0, [], constr, opt_minfbe_g_bfgs);
-
-assert(norm(out_fbs.y - out_minfbe_g_bfgs.y, 'inf') <= ASSERT_TOL);
-
-opt_minfbe_g_lbfgs = baseopt; opt_minfbe_g_lbfgs.solver = 'minfbe'; opt_minfbe_g_lbfgs.method = 'lbfgs';
-out_minfbe_g_lbfgs = forbes(f, g, y0, [], constr, opt_minfbe_g_lbfgs);
-
-assert(norm(out_fbs.y - out_minfbe_g_lbfgs.y, 'inf') <= ASSERT_TOL);
-
-opt_zerofpr_bfgs = baseopt; opt_zerofpr_bfgs.solver = 'zerofpr'; opt_zerofpr_bfgs.method = 'bfgs';
-out_zerofpr_bfgs = forbes(f, g, y0, [], constr, opt_zerofpr_bfgs);
-
-assert(norm(out_fbs.y - out_zerofpr_bfgs.y, 'inf') <= ASSERT_TOL);
-
-opt_zerofpr_lbfgs = baseopt; opt_zerofpr_lbfgs.solver = 'zerofpr'; opt_zerofpr_lbfgs.method = 'lbfgs';
-out_zerofpr_lbfgs = forbes(f, g, y0, [], constr, opt_zerofpr_lbfgs);
-
-assert(norm(out_fbs.y - out_zerofpr_lbfgs.y, 'inf') <= ASSERT_TOL);
-
-opt_minfbe_b_bfgs = baseopt; opt_minfbe_b_bfgs.solver = 'minfbe'; opt_minfbe_b_bfgs.variant = 'basic'; opt_minfbe_b_bfgs.method = 'bfgs';
-out_minfbe_b_bfgs = forbes(f, g, y0, [], constr, opt_minfbe_b_bfgs);
-
-assert(norm(out_fbs.y - out_minfbe_b_bfgs.y, 'inf') <= ASSERT_TOL);
-
-opt_minfbe_b_lbfgs = baseopt; opt_minfbe_b_lbfgs.solver = 'minfbe'; opt_minfbe_b_lbfgs.variant = 'basic'; opt_minfbe_b_lbfgs.method = 'lbfgs';
-out_minfbe_b_lbfgs = forbes(f, g, y0, [], constr, opt_minfbe_b_lbfgs);
-
-assert(norm(out_fbs.y - out_minfbe_b_lbfgs.y, 'inf') <= ASSERT_TOL);
+for i = 1:length(opts)
+    outs{end+1} = forbes(f, g, y0, [], constr, opts{i});
+    assert(outs{i}.iterations < opts{i}.maxit);
+    assert(norm(outs{i}.y - out_fbs.y, 'inf') <= ASSERT_TOL);
+end
