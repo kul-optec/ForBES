@@ -244,8 +244,9 @@ for it = 1:opt.maxit
                 Q = 1;
                 C = cache_current.FBE;
             else
-                Q = lsopt.eta*Q+1;
-                C = (lsopt.eta*Q*C + cache_current.FBE)/Q;
+                newQ = lsopt.eta*Q+1;
+                C = (lsopt.eta*Q*C + cache_current.FBE)/newQ;
+                Q = newQ;
             end
             [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt, C);
         case 3 % backtracking (Armijo condition)

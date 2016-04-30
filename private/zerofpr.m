@@ -255,8 +255,9 @@ for it = 1:opt.maxit
                 Q = 1;
                 C = cache_current.FBE;
             else
-                Q = lsopt.eta*Q+1;
-                C = (lsopt.eta*Q*C + cache_current.FBE)/Q;
+                newQ = lsopt.eta*Q+1;
+                C = (lsopt.eta*Q*C + cache_current.FBE)/newQ;
+                Q = newQ;
             end
             ref = C - sig*cache_current.normdiff^2;
             [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
