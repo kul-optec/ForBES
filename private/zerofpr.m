@@ -57,17 +57,17 @@ cache_0 = cache_current;
 
 for it = 1:opt.maxit
     
-    flagChangedGamma = 0;
+    hasGammaChanged = 0;
     
     % backtracking on gamma
     
     if prob.unknownLf || opt.adaptive
-        [goodGamma, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
+        [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
         ops = OpsSum(ops, ops1);
-        while ~goodGamma
+        while ~isGammaOK
             prob.Lf = 2*prob.Lf; gam = gam/2; sig = 2*sig;
-            flagChangedGamma = 1;
-            [goodGamma, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
+            hasGammaChanged = 1;
+            [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
             ops = OpsSum(ops, ops1);
         end
     else
@@ -103,7 +103,7 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if ~flagChangedGamma
+    if ~hasGammaChanged
         if StoppingCriterion(cache_current, opt.tol)
             msgTerm = 'reached optimum (up to tolerance)';
             flagTerm = 0;
@@ -120,7 +120,7 @@ for it = 1:opt.maxit
         case 2 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
             opt.optsU.UT = true;
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 d = cache_z.diff;
                 R = eye(prob.n);
             else
@@ -147,7 +147,7 @@ for it = 1:opt.maxit
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
         case 3 % L-BFGS
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 alphaC = 0.01;
                 d = cache_z.diff;
                 skipCount = 0;
@@ -179,7 +179,7 @@ for it = 1:opt.maxit
                 end
             end
         case 8 % Broyden
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 R = eye(prob.n);
                 d = cache_z.diff;
             else
@@ -190,11 +190,11 @@ for it = 1:opt.maxit
                 if abs(lambda) >= thetabar, theta = 1.0;
                 else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
                 v = R*y-s;
-                R = R - (theta/(sts+theta*(v'*s)))*(v*(s'*R));
+                R = R - (theta/(sts+theta*(v'*s)))*(v*(hasGammaChangeds'*R));
                 d = R*cache_z.diff;
             end
         case 9
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 d = cache_z.diff;
                 skipCount = 0;
                 LB_col = 0;
@@ -251,7 +251,7 @@ for it = 1:opt.maxit
             ref = cache_current.FBE - sig*cache_current.normdiff^2;
             [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
         case 2 % backtracking (nonmonotone)
-            if it == 1
+            if it == 1 || hasGammaChanged
                 Q = 1;
                 C = cache_current.FBE;
             else

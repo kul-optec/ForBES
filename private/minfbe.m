@@ -38,8 +38,7 @@ if opt.display >= 2
 end
 
 cntSkip = 0;
-flagLS = 0;
-flagChangedGamma = 0;
+hasGammaChanged = 0;
 
 cache_current = CacheInit(prob, prob.x0, gam);
 
@@ -75,7 +74,7 @@ for it = 1:opt.maxit
         flagTerm = 0;
         break;
     end
-    if ~flagChangedGamma
+    if ~hasGammaChanged
         if ~opt.customTerm
             if StoppingCriterion(cache_current, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
@@ -101,7 +100,7 @@ for it = 1:opt.maxit
         case {1, 7} % STEEPEST DESCENT and BARZILAI-BORWEIN
             dir = -cache_current.gradFBE;
         case 2 % BFGS
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 dir = -cache_current.gradFBE;
                 R = eye(prob.n);
             else
@@ -118,7 +117,7 @@ for it = 1:opt.maxit
                 dir = -linsolve(R,linsolve(R,cache_current.gradFBE,opt.optsL),opt.optsU);
             end
         case 3 % L-BFGS
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 dir = -cache_current.gradFBE; % use steepest descent direction initially
                 LBFGS_col = 0; % last column of Sk, Yk that was filled in
                 LBFGS_mem = 0; % current memory of the method
@@ -197,7 +196,7 @@ for it = 1:opt.maxit
         case {2, 3} % (L-)BFGS
             tau0 = 1.0;
         case 7 % BARZILAI-BORWEIN
-            if it == 1 || flagChangedGamma
+            if it == 1 || hasGammaChanged
                 tau0 = 1.0/norm(cache_current.gradFBE, inf);
             else
                 Sk = cache_current.x-cache_previous.x;
@@ -240,7 +239,7 @@ for it = 1:opt.maxit
         case 1 % backtracking
             [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt);
         case 2 % backtracking (nonmonotone)
-            if it == 1
+            if it == 1 || hasGammaChanged
                 Q = 1;
                 C = cache_current.FBE;
             else
@@ -267,11 +266,11 @@ for it = 1:opt.maxit
     end
 
     % prepare next iteration, store current solution
-    flagChangedGamma = 0;
+    hasGammaChanged = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
         prob.Lf = prob.Lf*2; gam = gam/2;
-        flagChangedGamma = 1;
+        hasGammaChanged = 1;
     elseif flagLS > 0 % line-search failed
         cache_previous = cache_current;
         cache_current = CacheInit(prob, cache_current.z, gam);

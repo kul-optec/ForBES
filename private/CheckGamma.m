@@ -5,7 +5,7 @@ cache_z = CacheInit(cache.prob, cache.z, gam);
 [cache_z, ops1] = CacheEvalf(cache_z);
 ops = OpsSum(ops, ops1);
 fz = cache_z.fx;
-if fz <= cache.fx + cache.gradfx'*cache.diff + (1-bet)/(2*gam)*(cache.normdiff^2) + 5e-14*abs(fz)
+if fz <= cache.fx + cache.gradfx'*cache.diff + (1-bet)/(2*gam)*(cache.normdiff^2) + 1e-14*abs(cache.fx)
     flag = 1;
 else
     flag = 0;
