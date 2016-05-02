@@ -36,7 +36,8 @@ assert(out_fbs.iterations < baseopt.maxit);
 opts = {};
 outs = {};
 
-opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking-nm';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, [], [], opts{i});
