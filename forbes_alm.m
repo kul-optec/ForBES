@@ -141,6 +141,7 @@ function opt = default_inner_opt(opt)
 
 if ~isfield(opt, 'display'), opt.display = 0; end
 if ~isfield(opt, 'tol'), opt.tol = 1e-6; end
-if ~isfield(opt, 'method'), opt.method = 'lbfgs-fpr'; end
+if ~isfield(opt, 'solver'), opt.solver = 'zerofpr'; end
+if ~isfield(opt, 'method'), opt.method = 'lbfgs'; end
 % make sure the Lipschitz constant is not set (it cannot be known)
 if isfield(opt, 'Lf'), opt = rmfield(opt, 'Lf'); end
