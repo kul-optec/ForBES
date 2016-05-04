@@ -35,7 +35,7 @@ function [t, cachet, cachet1, ops, exitflag] = ArmijoLS(cache, dir, slope, t0, l
     arm_hi = lsopt.delta*slope;
     t = t0;
     exitflag = 1;
-    if nargin >= 6
+    if nargin >= 5
         f0 = ref;
     else
         f0 = cache.FBE;
@@ -65,7 +65,7 @@ function [t, cachet, cachet1, ops, exitflag] = ArmijoLS(cache, dir, slope, t0, l
         end
     end
     if exitflag == 0 && lsopt.testGamma
-        [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, lsopt.beta);
+        [flagGamma, cachet1, ops1] = CheckGamma(cachet, gam, beta);
         ops = OpsSum(ops, ops1);
         exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
     end

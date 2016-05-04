@@ -15,16 +15,19 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = distBall_l2(rho, c, weight)
+function obj = distBall_l2(rho,c,weight)
     % Proximal mapping of w*dist(x,C) where C is the l2 ball ||x-c||<=rho
-    if nargin < 3 || isempty(weight), weight = 1; end
-    if nargin < 2 || isempty(c), c = 0; end
-    if nargin < 1 || isempty(rho), rho = 1; end
-    if ~isscalar(weight) ||  weight < 0
-        error('third argument (weight) must be a nonnegative scalar');
+    if nargin<3 || isempty(weight)
+        weight = 1;
     end
+    if nargin<2 || isempty(c)
+        c = 0;
+    end
+    if nargin<1 || isempty(rho)
+        rho = 1;
+    end
+
     obj.makeprox = @() @(x, gam) call_distBall_l2_prox(x, gam, rho, c, weight);
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_distBall_l2_prox(x, gam, rho, c, weight)

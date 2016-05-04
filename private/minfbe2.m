@@ -102,7 +102,7 @@ for it = 1:opt.maxit
     % stopping criterion
     if ~flagChangedGamma
         if ~opt.customTerm
-            if residual(it) <= opt.tol
+            if StoppingCriterion(cache_xnew, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
@@ -118,8 +118,25 @@ for it = 1:opt.maxit
     end
 
     % compute search direction and slope
-    switch opt.method
-        case 22 % L-BFGS
+    switch opt.methodID
+        case 2 % BFGS
+            if flagChangedGamma || flagLS
+                direction = -cache_xnew.gradFBE;
+                R = eye(prob.n);
+            else
+                Sk = cache_xnew.x - cache_x.x;
+                Yk = cache_xnew.gradFBE - cache_x.gradFBE;
+                YSk = Yk'*Sk;
+                Bs = R'*(R*Sk);
+                sBs = Sk'*Bs;
+                if YSk > 0
+                    R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
+                else
+                    cntSkip = cntSkip+1;
+                end
+                direction = -linsolve(R,linsolve(R,cache_xnew.gradFBE,opt.optsL),opt.optsU);
+            end
+        case 3 % L-BFGS
             if flagChangedGamma || flagLS
                 direction = -cache_xnew.gradFBE; % use steepest descent direction initially
                 LBFGS_col = 0; % last column of Sk, Yk that was filled in
@@ -145,23 +162,6 @@ for it = 1:opt.maxit
                     direction = -cache_xnew.gradFBE;
                 end
             end
-        case 27 % BFGS
-            if flagChangedGamma || flagLS
-                direction = -cache_xnew.gradFBE;
-                R = eye(prob.n);
-            else
-                Sk = cache_xnew.x - cache_x.x;
-                Yk = cache_xnew.gradFBE - cache_x.gradFBE;
-                YSk = Yk'*Sk;
-                Bs = R'*(R*Sk);
-                sBs = Sk'*Bs;
-                if YSk > 0
-                    R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
-                else
-                    cntSkip = cntSkip+1;
-                end
-                direction = -linsolve(R,linsolve(R,cache_xnew.gradFBE,opt.optsL),opt.optsU);
-            end
         otherwise
             error('search direction not implemented');
     end
@@ -169,16 +169,16 @@ for it = 1:opt.maxit
     slope = cache_xnew.gradFBE'*direction;
 
     % set initial guess for the step length
-    switch opt.method
-        case {22, 27} % (L-)BFGS
+    switch opt.methodID
+        case {2, 3} % (L-)BFGS
             tau0 = 1.0;
         otherwise
             error('search direction not implemented');
     end
-
     
     % perform line search
-    [cache_xnew, ops] = CacheLineSearch(cache_xnew, direction);
+    [cache_xnew, ops1] = CacheLineSearch(cache_xnew, direction);
+    ops = OpsSum(ops, ops1);
     tau = tau0;
     flagLS = 1;
     f0 = cache_xnew.FBE;
@@ -232,4 +232,3 @@ out.prob = prob;
 out.opt = opt;
 out.gam = gam;
 out.skip = cntSkip;
-

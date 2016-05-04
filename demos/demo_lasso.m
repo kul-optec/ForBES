@@ -24,13 +24,12 @@ g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
 opt.tol = 1e-8;
-opt.linesearch = 'lemarechal';
 opt.adaptive = 1;
 opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
-opt_fbs.method = 'fbs'; opt_fbs.variant = 'fast';
+opt_fbs.solver = 'fbs';
 out_fbs = forbes(f, g, x0, aff, [], opt_fbs);
 fprintf('\n');
 fprintf('message    : %s\n', out_fbs.message);
@@ -42,7 +41,7 @@ fprintf('residual   : %7.4e\n', out_fbs.residual(end));
 
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
-opt_lbfgs.method = 'lbfgs'; opt_lbfgs.variant = 'global';
+opt_lbfgs.method = 'lbfgs';
 out_lbfgs = forbes(f, g, x0, aff, [], opt_lbfgs);
 fprintf('\n');
 fprintf('message    : %s\n', out_lbfgs.message);
@@ -54,7 +53,7 @@ fprintf('residual   : %7.4e\n', out_lbfgs.residual(end));
 
 fprintf('\nCG-DYHS\n');
 opt_cg = opt;
-opt_cg.method = 'cg-dyhs'; opt_cg.variant = 'global';
+opt_cg.method = 'cg-dyhs';
 out_cg = forbes(f, g, x0, aff, [], opt_cg);
 fprintf('\n');
 fprintf('message    : %s\n', out_cg.message);

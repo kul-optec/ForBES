@@ -5,14 +5,11 @@ residual = zeros(1, opt.maxit);
 ts = zeros(1, opt.maxit);
 objective = zeros(1, opt.maxit);
 msgTerm = '';
+record = [];
 
 % display stuff
 if opt.display >= 2
     fprintf('%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.');
-end
-
-if opt.toRecord
-    record = [];
 end
 
 % initialize operations counter
@@ -86,7 +83,7 @@ for it = 1:opt.maxit
     end
     if ~flagChangedGamma
         if ~opt.customTerm
-            if residual(1, it) <= opt.tol
+            if StoppingCriterion(cache_yk, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
@@ -128,15 +125,13 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.gam = gam;
 out.x = cache_yk.z;
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
 out.objective = objective(1, 1:it);
 out.ts = ts(1, 1:it);
+out.record = record;
 out.prob = prob;
 out.opt = opt;
-if opt.toRecord
-    out.record = record;
-end
+out.gam = gam;

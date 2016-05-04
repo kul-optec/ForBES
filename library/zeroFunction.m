@@ -26,7 +26,6 @@
 function obj = zeroFunction()
     obj.makef = @() @(x) call_zeroFunction_fun(x);
     obj.makeprox = @() @(x, gam) call_zeroFunction_prox(x);
-    obj.isConvex = 1;
 end
 
 function [val, grad] = call_zeroFunction_fun(x)

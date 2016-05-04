@@ -5,26 +5,26 @@ clear;
 
 rng(0, 'twister'); % uncomment this to control the random number generator
 
-m = 6000;
+m = 2000;
 n = 50000;
 x_orig = sprandn(n, 1, 20/n);
 A = sprandn(m, n, 500/n);
 b = 2*(rand(m,1) <= 1./(1+exp(-A*x_orig))) - 1;
 lam_max = norm(0.5*(A'*b),'inf')/m;
-lam = 0.5*lam_max;
+lam = 0.1*lam_max;
 
 f = logLoss(1/m);
 aff = {diag(sparse(b))*A};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
-opt.maxit = 1000;
+opt.maxit = 10000;
 opt.tol = 1e-6;
 opt.adaptive = 1;
 opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
-opt_fbs.method = 'fbs';
+opt_fbs.solver = 'fbs';
 opt_fbs.variant = 'fast';
 out_fbs = forbes(f, g, x0, aff, [], opt_fbs);
 fprintf('message    : %s\n', out_fbs.message);
@@ -40,7 +40,6 @@ fprintf('residual   : %7.4e\n', out_fbs.residual(end));
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
 opt_lbfgs.method = 'lbfgs';
-opt_lbfgs.linesearch = 'lemarechal';
 out_lbfgs = forbes(f, g, x0, aff, [], opt_lbfgs);
 fprintf('message    : %s\n', out_lbfgs.message);
 fprintf('iterations : %d\n', out_lbfgs.iterations);
@@ -55,7 +54,6 @@ fprintf('residual   : %7.4e\n', out_lbfgs.residual(end));
 fprintf('\nCG-DYHS\n');
 opt_cg1 = opt;
 opt_cg1.method = 'cg-dyhs';
-opt_cg1.linesearch = 'lemarechal';
 out_cg1 = forbes(f, g, x0, aff, [], opt_cg1);
 fprintf('message    : %s\n', out_cg1.message);
 fprintf('iterations : %d\n', out_cg1.iterations);
@@ -67,24 +65,3 @@ fprintf('prox       : %d\n', out_cg1.operations.proxg);
 fprintf('time       : %7.4e\n', out_cg1.ts(end));
 fprintf('residual   : %7.4e\n', out_cg1.residual(end));
 
-% fprintf('\nCG-PRP\n');
-% opt_cg2 = opt;
-% opt_cg2.method = 'cg-prp';
-% out = forbes(f, g, x0, aff, [], opt_cg2);
-% fprintf('message    : %s\n', out.message);
-% fprintf('iterations : %d\n', out.iterations);
-% fprintf('f evals    : %d\n', out.operations.f2);
-% fprintf('matvecs    : %d\n', out.operations.C2);
-% fprintf('time       : %7.4e\n', out.ts(end));
-% fprintf('residual   : %7.4e\n', out.residual(end));
-
-% fprintf('\nCG-DESCENT\n');
-% opt_cg3 = opt;
-% opt_cg3.method = 'cg-desc';
-% out = forbes(f, g, x0, aff, [], opt_cg3);
-% fprintf('message    : %s\n', out.message);
-% fprintf('iterations : %d\n', out.iterations);
-% fprintf('f evals    : %d\n', out.operations.f2);
-% fprintf('matvecs    : %d\n', out.operations.C2);
-% fprintf('time       : %7.4e\n', out.ts(end));
-% fprintf('residual   : %7.4e\n', out.residual(end));

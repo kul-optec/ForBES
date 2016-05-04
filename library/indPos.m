@@ -31,7 +31,6 @@ function obj = indPos(lb)
         lb = 0;
     end
     obj.makeprox = @() @(x, gam) call_indPos_prox(x, lb);
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_indPos_prox(x, lb)

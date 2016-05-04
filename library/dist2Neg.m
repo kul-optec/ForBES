@@ -15,16 +15,19 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = dist2Neg(weights, ub)
+function obj = dist2Neg(weights,ub)
     % Function value and gradient of (w/2)*dist^2(x,C) where C is the box [-infty,ub]
-    if nargin < 1 || isempty(weights), weights = 1; end
-    if nargin < 2 || isempty(ub), ub = 0; end
+    if nargin < 1 || isempty(weights)
+        weights = 1;
+    end
+    if nargin < 2 || isempty(ub)
+        ub = 0;
+    end
     if any(weights < 0)
         error('all weights must be nonnegative');
     end
     obj.makef = @() @(x) call_dist2Neg_f(x, ub, weights);
     obj.L = max(weights);
-    obj.isConvex = 1;
 end
 
 function [val, grad] = call_dist2Neg_f(x, ub, weights)

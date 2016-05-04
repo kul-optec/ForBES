@@ -27,7 +27,7 @@ opt.display = 1;
 
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
-opt_fbs.method = 'fbs';
+opt_fbs.solver = 'fbs';
 opt_fbs.variant = 'fast';
 out = forbes(f, g, x0, aff, [], opt_fbs);
 fprintf('message    : %s\n', out.message);
@@ -46,13 +46,4 @@ fprintf('matvecs    : %d\n', out.operations.C2);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
-fprintf('\nCG-DYHS\n');
-opt_cg = opt;
-opt_cg.method = 'cg-dyhs';
-out = forbes(f, g, x0, aff, [], opt_cg);
-fprintf('message    : %s\n', out.message);
-fprintf('iterations : %d\n', out.iterations);
-fprintf('matvecs    : %d\n', out.operations.C2);
-fprintf('time       : %7.4e\n', out.ts(end));
-fprintf('residual   : %7.4e\n', out.residual(end));
 

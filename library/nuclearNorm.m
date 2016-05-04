@@ -67,7 +67,6 @@ function obj = nuclearNorm(m, n, lam, mode, method)
                     error('unknown method for computing SVDs');
             end
     end
-    obj.isConvex = 1;
 end
 
 function [prox, val] = call_nuclearNorm_prox(x, gam, m, n, lam)

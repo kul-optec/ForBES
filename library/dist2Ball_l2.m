@@ -25,15 +25,20 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = dist2Ball_l2(rho, c, weight)
-    if nargin < 1 || isempty(rho), rho = 1; end
-    if nargin < 2 || isempty(c), c = 0; end
-    if nargin < 3 || isempty(weight), weight = 1; end
+    if nargin < 1 || isempty(rho)
+        rho = 1;
+    end
+    if nargin < 2 || isempty(c)
+        c = 0;
+    end
+    if nargin < 3 || isempty(weight)
+        weight = 1;
+    end
     if ~isscalar(weight) || weight <= 0
         error('third argument (weight) must be a positive scalar');
     end
     obj.makef = @() @(x) call_dist2Ball_l2_f(x, rho, c, weight);
     obj.L = weight;
-    obj.isConvex = 1;
 end
 
 function [val, grad] = call_dist2Ball_l2_f(x, rho, c, weight)

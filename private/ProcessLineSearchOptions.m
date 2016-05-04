@@ -16,24 +16,27 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function lsopt = ProcessLineSearchOptions(prob, opt)
-    %  factor in [0, 1] used to compute average cost magnitude C_k as follows:
-    % Q_k = 1 + (Delta)Q_k-1, Q_0 = 0,  C_k = C_k-1 + (|f_k| - C_k-1)/Q_k
-    lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
-    % Wolfe line search parameter delta, range [0, .5]
+%     %  factor in [0, 1] used to compute average cost magnitude C_k as follows:
+%     % Q_k = 1 + (Delta)Q_k-1, Q_0 = 0,  C_k = C_k-1 + (|f_k| - C_k-1)/Q_k
+%     lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
+    % Armijo condition parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
-    if isfield(opt, 'c1'), lsopt.delta = opt.c1;
+    if isfield(opt, 'delta'), lsopt.delta = opt.delta;
     else lsopt.delta = 0.1; end
     lsopt.testGamma = prob.unknownLf || opt.adaptive;
     lsopt.beta = opt.beta;
-    switch opt.linesearch
-        case 1 % armijo backtracking
+    switch opt.linesearchID
+        case 1 % backtracking
             lsopt.progTol = 0;
             lsopt.nLS = 50;
-        case 2 % Nonmonotone Armijo
+        case 2 % nonmonotone backtracking (Hager-Zhang)
+            lsopt.eta = 0.85;
             lsopt.progTol = 0;
             lsopt.nLS = 50;
-            lsopt.M = 5;
-        case 3 % Lemarechal line search
+        case 3 % Armijo backtracking
+            lsopt.progTol = 0;
+            lsopt.nLS = 50;
+        case 4 % Lemarechal line search
             lsopt.sigma = 0.9;
             % maximum number of iterations
             lsopt.nbracket = 100;
@@ -47,7 +50,7 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
             lsopt.rho = 5;
             % parameter for safe-guarding (must be in (0,1/2])
             lsopt.theta = 0.49;
-        case 4 % HagerZhang
+        case 5 % HagerZhang
             lsopt.sigma = 0.9;
             %  maximum number of times the bracketing interval grows during expansion
             lsopt.nexpand = 50;
@@ -87,13 +90,13 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
             lsopt.rho = 5;
             % decay factor for bracket interval width in line search, range (0, 1)
             lsopt.gamma = 0.66;
-        case 5 % More Thuente
+        case 6 % More Thuente
             lsopt.sigma = 0.9;
             lsopt.progTol = 0;
             lsopt.tmin = 0;
             lsopt.tmax = 1e15;
             lsopt.maxfev = 100;
-        case 6 % Fletcher
+        case 7 % Fletcher
             lsopt.sigma = 0.9;
             %  maximum number of times the bracketing interval grows during expansion
             lsopt.nbracket = 50;
@@ -103,9 +106,6 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
             lsopt.progTol = 0;
             % estimate of minimum value of the function
             lsopt.fmin = -inf;
-        case 7 % armijo backtracking
-            lsopt.progTol = 0;
-            lsopt.nLS = 50;
     end
 
     % if method is not L-BFGS then initial stepsize is selected

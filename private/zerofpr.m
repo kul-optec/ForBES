@@ -17,26 +17,26 @@
 
 function out = zerofpr(prob, opt)
 
+lsopt = ProcessLineSearchOptions(prob, opt);
+lsopt.testGamma = 0;
+
 % initialize output stuff
 ts = zeros(1, opt.maxit);
-taus = zeros(1, opt.maxit);
 residual = zeros(1, opt.maxit);
 objective = zeros(1, opt.maxit);
 msgTerm = '';
+record = [];
 
 % initialize operations counter
 ops = OpsInit();
 
 % initialize stuff
 gam = (1-opt.beta)/prob.Lf;
+sig = (1-gam*prob.Lf)/(4*gam);
 
 % display header
 if opt.display >= 2
     fprintf('%6s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', 'tau');
-end
-
-if opt.toRecord
-    record = [];
 end
 
 alpha = 0.5;
@@ -57,32 +57,22 @@ cache_0 = cache_current;
 
 for it = 1:opt.maxit
     
-    flagGamma = 0;
+    hasGammaChanged = 0;
     
     % backtracking on gamma
     
-    cache_z = CacheInit(prob, cache_current.z, gam);
-    
     if prob.unknownLf || opt.adaptive
-        [cache_z, ops1] = CacheEvalf(cache_z);
+        [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
         ops = OpsSum(ops, ops1);
-        while cache_z.fx > cache_current.fx ...
-                + cache_current.gradfx'*cache_current.diff ...
-                + prob.Lf/2*cache_current.normdiff^2
-            if prob.Lf >= MAXIMUM_Lf, break; end
-            prob.Lf = 2*prob.Lf; gam = gam/2;
-            flagGamma = 1;
-            [cache_current, ops1] = CacheProxGradStep(cache_current, gam);
-            ops = OpsSum(ops, ops1);
-            cache_z = CacheInit(prob, cache_current.z, gam);
-            [cache_z, ops1] = CacheEvalf(cache_z);
+        while ~isGammaOK
+            prob.Lf = 2*prob.Lf; gam = gam/2; sig = 2*sig;
+            hasGammaChanged = 1;
+            [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
             ops = OpsSum(ops, ops1);
         end
+    else
+        cache_z = CacheInit(prob, cache_current.z, gam);
     end
-    
-    % adjust sigma
-    
-    sig = SelectSigma(prob, opt, gam);
     
     if prob.Lf >= MAXIMUM_Lf
         msgTerm = ['estimate for Lf became too large: ', num2str(prob.Lf)];
@@ -100,6 +90,7 @@ for it = 1:opt.maxit
     
     % compute FBE at current point
     % this should count zero operations if gamma hasn't changed
+    
     [cache_current, ops1] = CacheFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
     
@@ -112,8 +103,8 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if ~flagGamma
-        if residual(1, it) <= opt.tol
+    if ~hasGammaChanged
+        if StoppingCriterion(cache_current, opt.tol)
             msgTerm = 'reached optimum (up to tolerance)';
             flagTerm = 0;
             break;
@@ -125,26 +116,11 @@ for it = 1:opt.maxit
     [cache_z, ops1] = CacheProxGradStep(cache_z, gam);
     ops = OpsSum(ops, ops1);
     
-    switch opt.method
-        case 11 % Broyden
-            if it == 1 || flagGamma
-                R = eye(prob.n);
-                d = cache_z.diff;
-            else
-                s = cache_current.x - cache_previous.x;
-                y = cache_previous.diff-cache_current.diff;
-                sts = s'*s;
-                lambda = (R*y)'*s/sts;
-                if abs(lambda) >= thetabar, theta = 1.0;
-                else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
-                v = R*y-s;
-                R = R - (theta/(sts+theta*(v'*s)))*(v*(s'*R));
-                d = R*cache_z.diff;
-            end
-        case 12 % BFGS
+    switch opt.methodID
+        case 2 % BFGS
             opt.optsL.UT = true; opt.optsL.TRANSA = true;
             opt.optsU.UT = true;
-            if it == 1 || flagGamma
+            if it == 1 || hasGammaChanged
                 d = cache_z.diff;
                 R = eye(prob.n);
             else
@@ -170,8 +146,8 @@ for it = 1:opt.maxit
                 d = linsolve(R,linsolve(R,cache_z.diff,opt.optsL),opt.optsU);
                 %                     dir = -R\(R'\cache_current.gradFBE);
             end
-        case 13
-            if it == 1 || flagGamma
+        case 3 % L-BFGS
+            if it == 1 || hasGammaChanged
                 alphaC = 0.01;
                 d = cache_z.diff;
                 skipCount = 0;
@@ -202,8 +178,23 @@ for it = 1:opt.maxit
                     d = cache_z.diff;
                 end
             end
-        case 14
-            if it == 1 || flagGamma
+        case 8 % Broyden
+            if it == 1 || hasGammaChanged
+                R = eye(prob.n);
+                d = cache_z.diff;
+            else
+                s = cache_current.x - cache_previous.x;
+                y = cache_previous.diff-cache_current.diff;
+                sts = s'*s;
+                lambda = (R*y)'*s/sts;
+                if abs(lambda) >= thetabar, theta = 1.0;
+                else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
+                v = R*y-s;
+                R = R - (theta/(sts+theta*(v'*s)))*(v*(hasGammaChangeds'*R));
+                d = R*cache_z.diff;
+            end
+        case 9
+            if it == 1 || hasGammaChanged
                 d = cache_z.diff;
                 skipCount = 0;
                 LB_col = 0;
@@ -253,33 +244,39 @@ for it = 1:opt.maxit
         tau = 1.0;
     end
     
-    while 1
-        if tau ~= 0.0 && tau <= MINIMUM_tau
-            msgTerm = strcat('tau became too small: ', num2str(tau));
-            flagTerm = 1;
-            break;
-        end
-        % compute candidate next point
-        x = cache_current.z + tau*d;
-        [cache_z, ~] = CacheFBE(cache_z, gam);
-        % compute FBE at candidate next point
-        cache_next = CacheInit(prob, x, gam);
-        [cache_next, ops1] = CacheFBE(cache_next, gam);
-        ops = OpsSum(ops, ops1);
-        % check for sufficient decrease in the FBE
-        if cache_next.FBE <= cache_current.FBE - sig*cache_current.normdiff^2
-            cache_previous = cache_z;
-            cache_current = cache_next;
-            break;
-        end
-        tau = alpha*tau;
+    % perform line search
+    
+    switch opt.linesearchID
+        case 1 % backtracking
+            ref = cache_current.FBE - sig*cache_current.normdiff^2;
+            [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
+        case 2 % backtracking (nonmonotone)
+            if it == 1 || hasGammaChanged
+                Q = 1;
+                C = cache_current.FBE;
+            else
+                newQ = lsopt.eta*Q+1;
+                C = (lsopt.eta*Q*C + cache_current.FBE)/newQ;
+                Q = newQ;
+            end
+            ref = C - sig*cache_current.normdiff^2;
+            [tau, cachet, ~, ops1, ~] = BacktrackingLS(cache_z, d, tau, lsopt, ref);
+        otherwise
+            error('line search not implemented')
     end
-    taus(1,it) = tau;
+    
+    % update iterates
+    
+    cache_previous = cache_z;
+    cache_current = cachet;
+    ops = OpsSum(ops, ops1);
+
     if flagTerm == 1
         break;
     end
 
     % display stuff
+    
     if opt.display == 1
         PrintProgress(it);
     elseif opt.display >= 2
@@ -306,15 +303,8 @@ out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
 out.objective = objective(1, 1:it);
-if opt.toRecord
-    out.record = record(:, 1:it);
-end
 out.ts = ts(1, 1:it);
-out.tau = taus(1, 1:it-1);
+out.record = record;
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
-
-function sig = SelectSigma(prob, opt, gam)
-
-sig = (1-gam*prob.Lf)/(4*gam);
