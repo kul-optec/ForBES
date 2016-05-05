@@ -143,7 +143,7 @@ for it = 1:opt.maxit
                 end
             end
 %         case 4 % CG-DESCENT
-%             if it == 1 || flagChangedGamma
+%             if it == 1 || hasGammaChanged
 %                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
 %             else
 %                 yy = cache_current.gradFBE-cache_previous.gradFBE;
@@ -160,7 +160,7 @@ for it = 1:opt.maxit
 %                 end
 %             end
 %         case 5 % CG-PRP
-%             if it == 1 || flagChangedGamma
+%             if it == 1 || hasGammaChanged
 %                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
 %             else
 %                 yy = cache_current.gradFBE - cache_previous.gradFBE;
@@ -172,7 +172,7 @@ for it = 1:opt.maxit
 %                 end
 %             end
 %         case 6 % CG-DYHS
-%             if it == 1 || flagChangedGamma
+%             if it == 1 || hasGammaChanged
 %                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
 %             else
 %                 yy = cache_current.gradFBE - cache_previous.gradFBE;
@@ -204,7 +204,7 @@ for it = 1:opt.maxit
                 tau0 = (Sk'*Sk)/(Sk'*Yk);
             end
 %         otherwise
-%             if it == 1 || flagChangedGamma
+%             if it == 1 || hasGammaChanged
 %                 xinf = norm(cache_current.x,inf);
 %                 if xinf ~= 0
 %                     tau0 = lsopt.psi0*xinf/norm(cache_current.gradFBE, inf); % g is the gradient at x
@@ -221,6 +221,8 @@ for it = 1:opt.maxit
 %                 tau0 = -2*max(cache_previous.FBE-cache_current.FBE, 10*eps)/slope;% Fletcher, pp. 38
 %                 if lsopt.quadStep
 %                     tp = tau*lsopt.psi1;
+%                     [cache_current, ops1] = CacheLineSearch(cache_current, dir);
+%                     ops = OpsSum(ops, ops1);
 %                     [cache_tau, ops1] = DirFBE(cache_current, tp, 1);
 %                     ops = OpsSum(ops, ops1);
 %                     if cache_tau.FBE <= cache_current.FBE
@@ -260,9 +262,10 @@ for it = 1:opt.maxit
     ops = OpsSum(ops, ops1);
 
     % check for line search fails
-    if flagLS > 0 && ~opt.global && ~opt.fast
+    if flagLS > 0 && ~opt.global
         flagTerm = 2;
         msgTerm = strcat('line search failed at iteration', num2str(it));
+        break;
     end
 
     % prepare next iteration, store current solution

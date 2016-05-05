@@ -39,18 +39,9 @@ fprintf('residual   : %7.4e\n', out.residual(end));
 
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
+opt_lbfgs.solver = 'minfbe';
 opt_lbfgs.method = 'lbfgs';
 out = forbes(f, g, x0, [], [], opt_lbfgs);
-fprintf('\n');
-fprintf('iterations : %d\n', out.iterations);
-fprintf('SVDs       : %d\n', out.operations.proxg);
-fprintf('time       : %7.4e\n', out.ts(end));
-fprintf('residual   : %7.4e\n', out.residual(end));
-
-fprintf('\nCG-DYHS\n');
-opt_cg = opt;
-opt_cg.method = 'cg-dyhs';
-out = forbes(f, g, x0, [], [], opt_cg);
 fprintf('\n');
 fprintf('iterations : %d\n', out.iterations);
 fprintf('SVDs       : %d\n', out.operations.proxg);
