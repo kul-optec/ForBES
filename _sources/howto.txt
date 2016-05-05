@@ -17,8 +17,8 @@ You can access the help file of the solver directly from MATLAB in any moment wi
 
 .. _problem-structure:
 
-Problem structure
-=================
+General problem structure
+=========================
 
 The generic formulation of the problems we consider is the following:
 
@@ -26,16 +26,26 @@ The generic formulation of the problems we consider is the following:
     \mathrm{minimize}\ & f(Cx+d) + g(z)\\
     \mathrm{subject\ to}\ & Ax + Bz = b
 
-Not all the terms need to be present: if :math:`A, B, b` in the constraints are
-omitted, then it is assumed to be :math:`x=z` and the problem takes the
-unconstrained composite form
+Composite problems
+------------------
+
+Not all the terms need to be present in the above general structure: if :math:`A, B, b` in the constraint are
+omitted, then it is assumed to be :math:`x=z` and the problem takes the composite form
 
 .. math::
     \mathrm{minimize}\ & f(Cx+d) + g(x)
 
-Here :math:`f` is assumed to be convex, smooth (i.e. with Lipschitz continuous
+Here :math:`f` is assumed to be smooth (i.e. with Lipschitz continuous
 gradient) and twice continuously differentiable. Function :math:`g` is any
-closed, proper, convex function.
+closed, proper function for which the proximal mapping
+
+.. math::
+    \mathrm{prox}_{\gamma g}(x)\ &= \mathrm{argmin}_z \left\{g(z) + \tfrac{1}{2\gamma}\|z-x\|^2\right\}
+
+is efficiently computable (e.g. it has a closed form, or can be computed numerically).
+
+Separable problems
+------------------
 
 If :math:`A, B, b` are specified, then :math:`C=I` and :math:`d=0`, and the
 problem has the separable form
@@ -44,9 +54,10 @@ problem has the separable form
     \mathrm{minimize}\ & f(x) + g(z)\\
     \mathrm{subject\ to}\ & Ax + Bz = b
 
-Here :math:`f` (if present) is strongly convex and twice continuously differentiable
-in the interior of its domain, while g is proper, closed and convex. Linear operators
-:math:`A,B` are of appropriate dimension along with vector :math:`b` in the constraints.
+Here :math:`f` (if present) is strongly convex, while g is again proper, closed with easily 
+computable proximal mapping.
+Linear operators :math:`A,B` are of appropriate dimension along with vector :math:`b`
+in the constraint.
 
 Calling ``forbes``
 ==================
@@ -55,7 +66,7 @@ The most generic call to ``forbes`` is as follows::
 
     out = forbes(f, g, init, aff, constr, opt);
 
-- ``f`` and ``g`` contain the objective terms of the problem (see section :ref:`functions` below on how to select them).
+- ``f`` and ``g`` define the objective of the problem (see :ref:`functions` on how to construct them).
 - ``init`` is the initial value of :math:`x` if there are no equality constraints,
   or the initial dual variable associated with the constraint :math:`Ax+Bz=b` otherwise.
 - ``aff`` is a cell array describing the affine terms composed with :math:`f`::
@@ -68,7 +79,7 @@ The most generic call to ``forbes`` is as follows::
     constr = {A, B, b};
     
   If omitted or empty, that is ``constr = []`` or ``constr = {}``, then :math:`A=I`, :math:`B=-I` and :math:`b=0`.
-- ``opt`` describes, e.g., details on the algorithm to use, termination criteria,
+- ``opt`` is a structure containing options on the algorithm to use, termination criteria,
   the level of verbosity, and so on. More on this in the :ref:`options` section below.
 
 Output ``out`` will contain the results of the optimization process.
@@ -103,20 +114,17 @@ Options
 +--------------------+-----------------------+-----------------------------------------------------------+
 | ``opt.maxit``      | integer               | Maximum number of iterations                              |
 +--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.method``     | string                | - ``'sd'``: steepest descent                              |
-|                    |                       | - ``'cg-desc'``, ``'cg-prp'``, ``'cg-dyhs'``: nonliner CG |
-|                    |                       | - ``'lbfgs'``: L-BFGS                                     |
+| ``opt.solver``     | string                | - ``'minfbe'``: only handles cases where ``g`` is convex  |
+|                    |                       | - ``'zerofpr'``: can handle nonconvex ``g``               |
 +--------------------+-----------------------+-----------------------------------------------------------+
-|``opt.variant``     | string                | - ``'basic'``                                             |
-|                    |                       | - ``'global'``                                            |
-|                    |                       | - ``'fast'``                                              |
+| ``opt.method``     | string                | - ``'bfgs'``: BFGS quasi-Newton method                    |
+|                    |                       | - ``'lbfgs'``: Limited-memory BFGS                        |
 +--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.linesearch`` | string                | - ``'armijo'``                                            |
-|                    |                       | - ``'hager-zhang'``                                       |
+| ``opt.linesearch`` | string                | - ``'backtracking'``                                      |
+|                    |                       | - ``'backtracking-nm'``                                   |
+|                    |                       | - ``'backtracking-armijo'``                               |
 |                    |                       | - ``'lemarechal'``                                        |
-|                    |                       | - ``'fletcher'``                                          |
-|                    |                       | - ``'more-thuente'``                                      |
 +--------------------+-----------------------+-----------------------------------------------------------+
 
-.. _library folder: https://github.com/lostella/ForBES/tree/master/library
-.. _demos folder: https://github.com/lostella/ForBES/tree/master/demos
+.. _library folder: https://github.com/kul-forbes/ForBES/tree/master/library
+.. _demos folder: https://github.com/kul-forbes/ForBES/tree/master/demos

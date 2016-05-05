@@ -7,9 +7,15 @@ Installation
 Simply clone the `GitHub repository`_, or uncompress this `zip archive`_. Then move with the MATLAB
 command line to the directory of ForBES, and execute the following command::
 
-    setup_forbes
+    forbes_setup
 
 This will compile all the necessary source files and install the directory into MATLAB's path.
+If you whish to run the test routine, to make sure that all features work correctly, you
+can now input::
 
-.. _GitHub repository: https://github.com/lostella/ForBES
-.. _zip archive: https://github.com/lostella/ForBES/archive/master.zip
+	forbes_test
+
+in the MATLAB command line.
+
+.. _GitHub repository: https://github.com/kul-forbes/ForBES
+.. _zip archive: https://github.com/kul-forbes/ForBES/archive/master.zip
