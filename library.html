@@ -89,7 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#indicator-functions">Indicator functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#norms-and-regularization-functions">Norms and regularization functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#other-functions">Other functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#linear-mappings">Linear mappings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linear-operators">Linear operators</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
@@ -140,15 +140,14 @@
             
   <div class="section" id="library-of-functions">
 <span id="library-rst"></span><h1>Library of functions<a class="headerlink" href="#library-of-functions" title="Permalink to this headline">¶</a></h1>
-<p>In the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a> we provide a set of commonly used functions and linear
-operators that can be used to formulate problems (see section <a class="reference internal" href="howto.html#howto-rst"><span>How to use it</span></a> on how
+<p>In the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a> a set of commonly used functions and linear
+operators is provided. These can be used to formulate problems (see section <a class="reference internal" href="howto.html#howto-rst"><span>How to use it</span></a> on how
 to formulate a problem and invoke <code class="docutils literal"><span class="pre">forbes</span></code> to solve it). Each of these functions
 is provided as a constructor taking as input all the parameters that define the
 function, and returning an object: this will contain all the information
 needed to compute the value, the gradient or the proximal mapping of the
 correspondent function or its conjugate.</p>
-<p>We now describe each of these functions and their parameters. You can also access the
-help file of any of these function directly from MATLAB with:</p>
+<p>You can access the help file of each of these function directly from MATLAB with:</p>
 <div class="highlight-python"><div class="highlight"><pre>help &lt;function-name&gt;
 </pre></div>
 </div>
@@ -156,48 +155,38 @@ help file of any of these function directly from MATLAB with:</p>
 <h2>Distances<a class="headerlink" href="#distances" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="20%" />
-<col width="47%" />
-<col width="32%" />
+<col width="27%" />
+<col width="73%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Name and parameters</th>
-<th class="head"><span class="math">\(h(x)\)</span></th>
-<th class="head">Default</th>
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">distBall_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></code></td>
-<td><span class="math">\(w\|x-\Pi_{\mathcal{B}_r(c)}x\|\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">distBall_l2</span></code></td>
+<td>Distance from a Euclidean ball</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distBox(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></code></td>
-<td><span class="math">\(\sum_i w_i(x_i-\min\{u,\max\{l,x_i\}\})\)</span></td>
-<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distBox</span></code></td>
+<td>Distance from a box</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">distNeg(w,</span> <span class="pre">u)</span></code></td>
-<td><span class="math">\(\sum_i w_i(x_i-\min\{u_i,x_i\})\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">u=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">distPos</span></code></td>
+<td>Distance from the nonnegative orthant</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distPos(w,</span> <span class="pre">l)</span></code></td>
-<td><span class="math">\(\sum_i w_i(x_i-\max\{l_i,x_i\})\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">l=0</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">distNeg</span></code></td>
+<td>Distance from the nonpositive orthant</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Ball_l2(r,</span> <span class="pre">c,</span> <span class="pre">w)</span></code></td>
-<td><span class="math">\(\tfrac{w}{2}\|x-\Pi_{\mathcal{B}_r(c)}x\|^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Ball_l2</span></code></td>
+<td>Squared distance from a Euclidean ball</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Box(l,</span> <span class="pre">u,</span> <span class="pre">w)</span></code></td>
-<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,\max\{l_i,x\}\})^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code>, <code class="docutils literal"><span class="pre">w=1</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Box</span></code></td>
+<td>Squared distance from a box</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Neg(w,</span> <span class="pre">u)</span></code></td>
-<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\min\{u_i,x_i\})^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">u=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">dist2Pos</span></code></td>
+<td>Squared distance from the nonnegative orthant</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Pos(w,</span> <span class="pre">l)</span></code></td>
-<td><span class="math">\(\tfrac{1}{2}\sum_i w_i(x_i-\max\{l_i,x_i\})^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">l=0</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">dist2Neg</span></code></td>
+<td>Squared distance from the nonpositive orthant</td>
 </tr>
 </tbody>
 </table>
@@ -206,32 +195,35 @@ help file of any of these function directly from MATLAB with:</p>
 <h2>Indicator functions<a class="headerlink" href="#indicator-functions" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="20%" />
-<col width="47%" />
-<col width="32%" />
+<col width="25%" />
+<col width="75%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Name and parameters</th>
-<th class="head"><span class="math">\(h(x)\)</span></th>
-<th class="head">Default</th>
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">indBall_l2(r,</span> <span class="pre">c)</span></code></td>
-<td><span class="math">\(\mathrm{ind}_{\{x:\ \|x-c\|\leq r\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code>, <code class="docutils literal"><span class="pre">c=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indZero</span></code></td>
+<td>Indicator of the singleton set containing the origin</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indBox(l,</span> <span class="pre">u)</span></code></td>
-<td><span class="math">\(\mathrm{ind}_{\{x:\ l\leq x\leq u\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">l=-inf</span></code>, <code class="docutils literal"><span class="pre">u=+inf</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indBall_l2</span></code></td>
+<td>Indicator of a Euclidean ball</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">indNeg(u)</span></code></td>
-<td><span class="math">\(\mathrm{ind}_{\{x:\ x\leq u\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">u=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indBox</span></code></td>
+<td>Indicator of a box</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indPos(l)</span></code></td>
-<td><span class="math">\(\mathrm{ind}_{\{x:\ x\geq l\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">l=0</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indPos</span></code></td>
+<td>Inticator of the nonnegative orthant</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indNeg</span></code></td>
+<td>Indicator of the nonpositive orthant</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">indRankBall</span></code></td>
+<td>Indicator of the set of matrices with given rank</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">indBin</span></code></td>
+<td>Indicator function of a binary set</td>
 </tr>
 </tbody>
 </table>
@@ -240,36 +232,32 @@ help file of any of these function directly from MATLAB with:</p>
 <h2>Norms and regularization functions<a class="headerlink" href="#norms-and-regularization-functions" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="17%" />
-<col width="56%" />
 <col width="27%" />
+<col width="73%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Name and parameters</th>
-<th class="head"><span class="math">\(h(x)\)</span></th>
-<th class="head">Default</th>
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">l1Norm(r)</span></code></td>
-<td><span class="math">\(r\|x\|_1\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">l0Norm</span></code></td>
+<td>L0 pseudo-norm</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">l2Norm(r)</span></code></td>
-<td><span class="math">\(r\|x\|_2\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">l1Norm</span></code></td>
+<td>L1 norm (sum of the absolute values)</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">l2NormSum(m,</span> <span class="pre">r)</span></code></td>
-<td><span class="math">\(r \sum_{i=1}^k \|x_i\|_2,\ \mbox{where}\ x=(x_1,\ldots,x_k),\ x_i\in\mathbb{R}^m\)</span></td>
-<td><code class="docutils literal"><span class="pre">m=1</span></code>, <code class="docutils literal"><span class="pre">r=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">l2Norm</span></code></td>
+<td>Euclidean norm</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">nuclearNorm(m,</span> <span class="pre">n,</span> <span class="pre">r)</span></code></td>
-<td><span class="math">\(r \sum_i \sigma_i(X),\ \mbox{where}\ X=[x_1\cdots x_n],\ x_i\in\mathbb{R}^m\)</span></td>
-<td><code class="docutils literal"><span class="pre">r=1</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">l2NormSum</span></code></td>
+<td>Sum of Euclidean norms of variable blocks</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">elasticNet(m,</span> <span class="pre">r)</span></code></td>
-<td><span class="math">\(m\|x\|_1 + \tfrac{r}{2}\|x\|_2^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">m=1</span></code>, <code class="docutils literal"><span class="pre">r=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">nuclearNorm</span></code></td>
+<td>Nuclear norm (sum of the singular values)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">elasticNet</span></code></td>
+<td>Elastic-net regularization function</td>
 </tr>
 </tbody>
 </table>
@@ -278,47 +266,66 @@ help file of any of these function directly from MATLAB with:</p>
 <h2>Other functions<a class="headerlink" href="#other-functions" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
-<col width="21%" />
-<col width="54%" />
-<col width="24%" />
+<col width="19%" />
+<col width="81%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Name and parameters</th>
-<th class="head"><span class="math">\(h(x)\)</span></th>
-<th class="head">Default</th>
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadratic(Q,</span> <span class="pre">q)</span></code></td>
-<td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle\)</span></td>
-<td><code class="docutils literal"><span class="pre">Q=1</span></code>, <code class="docutils literal"><span class="pre">q=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadratic</span></code></td>
+<td>Quadratic function with given Hessian and linear term</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadraticOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">Q,</span> <span class="pre">q)</span></code></td>
-<td><span class="math">\(\tfrac{1}{2}\langle Qx, x \rangle + \langle q,x\rangle + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">Q=1</span></code>, <code class="docutils literal"><span class="pre">q=0</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadraticOverAffine</span></code></td>
+<td>Quadratic function subject to linear equality constraints</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadLoss(w,</span> <span class="pre">p)</span></code></td>
-<td><span class="math">\(\sum_i w_i(x_i-p_i)^2\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">p=0</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">quadLoss</span></code></td>
+<td>Squared weighted Euclidean distance from a given vector</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadLossOverAffine(A,</span> <span class="pre">b,</span> <span class="pre">w,</span> <span class="pre">p)</span></code></td>
-<td><span class="math">\(\sum_i w_i(x_i-p_i)^2 + \mathrm{ind}_{\{x:\ Ax=b\}}(x)\)</span></td>
-<td><code class="docutils literal"><span class="pre">w=1</span></code>, <code class="docutils literal"><span class="pre">p=0</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">quadLossOverAffine</span></code></td>
+<td>Squared weighted Euclidean distance subject to linear equalities</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">logLoss(m)</span></code></td>
-<td><span class="math">\(m \sum_i \log(1+\exp\{-x_i\})\)</span></td>
-<td><code class="docutils literal"><span class="pre">m=1</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">logLoss</span></code></td>
+<td>Logistic loss function (used in logistic regression models for classification)</td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">powabs(p,</span> <span class="pre">c)</span></code></td>
-<td><span class="math">\(c|x|^p\)</span></td>
-<td><code class="docutils literal"><span class="pre">p=1</span></code>, <code class="docutils literal"><span class="pre">c=1</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">huberLoss</span></code></td>
+<td>Huber loss function (for robust least-squares regression)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">hingeLoss</span></code></td>
+<td>Hinge loss function (used for example in SVM)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">matFac</span></code></td>
+<td>Squared Frobenius norm of a matrix factorization residual</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="linear-mappings">
-<h2>Linear mappings<a class="headerlink" href="#linear-mappings" title="Permalink to this headline">¶</a></h2>
-<p>Todo.</p>
+<div class="section" id="linear-operators">
+<h2>Linear operators<a class="headerlink" href="#linear-operators" title="Permalink to this headline">¶</a></h2>
+<p>Linear operators composing the objective or the constraints can either be MATLAB&#8217;s matrices (dense or sparse) or
+constructed using the functions here listed. Additionally, operators from the comprehensive <a class="reference external" href="http://www.cs.ubc.ca/labs/scl/spot/">Spot toolbox</a>
+can be readily used in defining problems, as they override standard MATLAB notation for handling matrices.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">linOp</span></code></td>
+<td>Constructs an operator given a linear map and its adjoint in the form of anonymous functions</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">hankelOp</span></code></td>
+<td>Operator computing the Hankel matrix of a given size associated with a vector</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

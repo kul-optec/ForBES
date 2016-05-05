@@ -84,7 +84,11 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">How to use it</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#problem-structure">Problem structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-problem-structure">General problem structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#composite-problems">Composite problems</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#separable-problems">Separable problems</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <code class="docutils literal"><span class="pre">forbes</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
@@ -148,28 +152,37 @@ and how to specify it to the <code class="docutils literal"><span class="pre">fo
 <div class="highlight-python"><div class="highlight"><pre>help forbes
 </pre></div>
 </div>
-<div class="section" id="problem-structure">
-<span id="id1"></span><h2>Problem structure<a class="headerlink" href="#problem-structure" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="general-problem-structure">
+<span id="problem-structure"></span><h2>General problem structure<a class="headerlink" href="#general-problem-structure" title="Permalink to this headline">¶</a></h2>
 <p>The generic formulation of the problems we consider is the following:</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(z)\\
 \mathrm{subject\ to}\ &amp; Ax + Bz = b\end{split}\]</div>
-<p>Not all the terms need to be present: if <span class="math">\(A, B, b\)</span> in the constraints are
-omitted, then it is assumed to be <span class="math">\(x=z\)</span> and the problem takes the
-unconstrained composite form</p>
+<div class="section" id="composite-problems">
+<h3>Composite problems<a class="headerlink" href="#composite-problems" title="Permalink to this headline">¶</a></h3>
+<p>Not all the terms need to be present in the above general structure: if <span class="math">\(A, B, b\)</span> in the constraint are
+omitted, then it is assumed to be <span class="math">\(x=z\)</span> and the problem takes the composite form</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(x)\end{split}\]</div>
-<p>Here <span class="math">\(f\)</span> is assumed to be convex, smooth (i.e. with Lipschitz continuous
+<p>Here <span class="math">\(f\)</span> is assumed to be smooth (i.e. with Lipschitz continuous
 gradient) and twice continuously differentiable. Function <span class="math">\(g\)</span> is any
-closed, proper, convex function.</p>
+closed, proper function for which the proximal mapping</p>
+<div class="math">
+\[\begin{split}\mathrm{prox}_{\gamma g}(x)\ &amp;= \mathrm{argmin}_z \left\{g(z) + \tfrac{1}{2\gamma}\|z-x\|^2\right\}\end{split}\]</div>
+<p>is efficiently computable (e.g. it has a closed form, or can be computed numerically).</p>
+</div>
+<div class="section" id="separable-problems">
+<h3>Separable problems<a class="headerlink" href="#separable-problems" title="Permalink to this headline">¶</a></h3>
 <p>If <span class="math">\(A, B, b\)</span> are specified, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>, and the
 problem has the separable form</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(x) + g(z)\\
 \mathrm{subject\ to}\ &amp; Ax + Bz = b\end{split}\]</div>
-<p>Here <span class="math">\(f\)</span> (if present) is strongly convex and twice continuously differentiable
-in the interior of its domain, while g is proper, closed and convex. Linear operators
-<span class="math">\(A,B\)</span> are of appropriate dimension along with vector <span class="math">\(b\)</span> in the constraints.</p>
+<p>Here <span class="math">\(f\)</span> (if present) is strongly convex, while g is again proper, closed with easily
+computable proximal mapping.
+Linear operators <span class="math">\(A,B\)</span> are of appropriate dimension along with vector <span class="math">\(b\)</span>
+in the constraint.</p>
+</div>
 </div>
 <div class="section" id="calling-forbes">
 <h2>Calling <code class="docutils literal"><span class="pre">forbes</span></code><a class="headerlink" href="#calling-forbes" title="Permalink to this headline">¶</a></h2>
@@ -178,7 +191,7 @@ in the interior of its domain, while g is proper, closed and convex. Linear oper
 </pre></div>
 </div>
 <ul>
-<li><p class="first"><code class="docutils literal"><span class="pre">f</span></code> and <code class="docutils literal"><span class="pre">g</span></code> contain the objective terms of the problem (see section <a class="reference internal" href="#functions"><span>Functions</span></a> below on how to select them).</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">f</span></code> and <code class="docutils literal"><span class="pre">g</span></code> define the objective of the problem (see <a class="reference internal" href="#functions"><span>Functions</span></a> on how to construct them).</p>
 </li>
 <li><p class="first"><code class="docutils literal"><span class="pre">init</span></code> is the initial value of <span class="math">\(x\)</span> if there are no equality constraints,
 or the initial dual variable associated with the constraint <span class="math">\(Ax+Bz=b\)</span> otherwise.</p>
@@ -195,14 +208,14 @@ or the initial dual variable associated with the constraint <span class="math">\
 </div>
 <p>If omitted or empty, that is <code class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">[]</span></code> or <code class="docutils literal"><span class="pre">constr</span> <span class="pre">=</span> <span class="pre">{}</span></code>, then <span class="math">\(A=I\)</span>, <span class="math">\(B=-I\)</span> and <span class="math">\(b=0\)</span>.</p>
 </li>
-<li><p class="first"><code class="docutils literal"><span class="pre">opt</span></code> describes, e.g., details on the algorithm to use, termination criteria,
+<li><p class="first"><code class="docutils literal"><span class="pre">opt</span></code> is a structure containing options on the algorithm to use, termination criteria,
 the level of verbosity, and so on. More on this in the <a class="reference internal" href="#options"><span>Options</span></a> section below.</p>
 </li>
 </ul>
 <p>Output <code class="docutils literal"><span class="pre">out</span></code> will contain the results of the optimization process.</p>
 </div>
 <div class="section" id="functions">
-<span id="id2"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <p>All the functions involved in the problem can be picked from a library of
 functions available in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>: this contains procedures returning
 commonly used functions, specified by a list of parameters if needed. The return
@@ -217,7 +230,7 @@ functions and how to use them and the parameters they require, or the documentat
 of each of the functions in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>.</p>
 </div>
 <div class="section" id="options">
-<span id="id3"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="20%" />
@@ -239,32 +252,29 @@ of each of the functions in the <a class="reference external" href="https://gith
 <td>integer</td>
 <td>Maximum number of iterations</td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.method</span></code></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.solver</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><code class="docutils literal"><span class="pre">'sd'</span></code>: steepest descent</li>
-<li><code class="docutils literal"><span class="pre">'cg-desc'</span></code>, <code class="docutils literal"><span class="pre">'cg-prp'</span></code>, <code class="docutils literal"><span class="pre">'cg-dyhs'</span></code>: nonliner CG</li>
-<li><code class="docutils literal"><span class="pre">'lbfgs'</span></code>: L-BFGS</li>
+<li><code class="docutils literal"><span class="pre">'minfbe'</span></code>: only handles cases where <code class="docutils literal"><span class="pre">g</span></code> is convex</li>
+<li><code class="docutils literal"><span class="pre">'zerofpr'</span></code>: can handle nonconvex <code class="docutils literal"><span class="pre">g</span></code></li>
 </ul>
 </td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal"><span class="pre">opt.variant</span></code></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">opt.method</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><code class="docutils literal"><span class="pre">'basic'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'global'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'fast'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'bfgs'</span></code>: BFGS quasi-Newton method</li>
+<li><code class="docutils literal"><span class="pre">'lbfgs'</span></code>: Limited-memory BFGS</li>
 </ul>
 </td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.linesearch</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><code class="docutils literal"><span class="pre">'armijo'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'hager-zhang'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'backtracking'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'backtracking-nm'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'backtracking-armijo'</span></code></li>
 <li><code class="docutils literal"><span class="pre">'lemarechal'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'fletcher'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'more-thuente'</span></code></li>
 </ul>
 </td>
 </tr>
