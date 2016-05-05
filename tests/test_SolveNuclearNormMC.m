@@ -23,7 +23,7 @@ ASSERT_TOL = 1e-8;
 
 %% run methods
 
-baseopt.display = 2;
+baseopt.display = 0;
 baseopt.adaptive = 0;
 baseopt.tol = 1e-10;
 baseopt.maxit = 1000;
