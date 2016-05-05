@@ -5,8 +5,8 @@
 %
 %   (1)    minimize f(Cx + d) + g(x)
 %
-%   We assume that f is convex smooth with Lipschitz continuous gradient,
-%   and that g is closed, proper, convex. C is a linear mapping of the
+%   We assume that f has Lipschitz continuous gradient,
+%   and that g is closed and proper. C is a linear mapping of the
 %   appropriate dimension.
 %
 %   out = FORBES(f, g, init, aff, [], opt) solves the problem with the
@@ -20,8 +20,7 @@
 %   (2)    minimize    f(x) + g(z)
 %          subject to  Ax + Bz = b
 %
-%   We assume that f is strongly convex, and that g is closed, proper,
-%   convex. 
+%   We assume that f is strongly convex, and that g is closed and proper. 
 %
 %   out = FORBES(f, g, init, [], constr, opt) solves the specified problem.
 %   init is the initial *dual* variable, constr is a cell array defining
@@ -51,28 +50,23 @@
 %   In opt the user can specify the behaviour of the algorithm to be used.
 %   The following options can be set:
 %
-%       opt.tol: Tolerance on the optimality condition. (Default: 1e-8).
+%       opt.tol: Tolerance on the optimality condition.
 % 
-%       opt.maxit: Maximum number of iterations. (Default: 10*n, with n
-%           being the number of variables).
+%       opt.maxit: Maximum number of iterations.
+%
+%		opt.solver: Internal solver to use. Can select between:
+%			* 'minfbe' (only for problems where g is convex)
+%			* 'zerofpr' (can handle also nonconvex g)
 % 
 %       opt.method: Algorithm to use. Can select between:
-%           * 'sd' (steepest descent),
-%           * 'lbfgs' (limited memory BFGS, default),
-%           * 'cg-desc', 'cg-prp', 'cg-dyhs' (various CG algorithms),
-%           * 'bb' (Barzilai-Borwein).
-% 
-%       opt.variant: Variant of the method to use. Select between:
-%           * 'basic', the basic algorithm,
-%           * 'global', the global variant (default),
-%           * 'fast', the fast variant.
+%			* 'bfgs' (BFGS quasi-Newton method)
+%           * 'lbfgs' (limited memory BFGS, default).
 % 
 %       opt.linesearch: Line search strategy to use. Can select between:
-%           * 'armijo' (default for 'sd'),
-%           * 'nonmonotone-armijo' (default for 'bb'),
-%           * 'hager-zhang' (default for the rest),
-%           * 'lemarechal',
-%           * 'fletcher'.
+%           * 'backtracking' (simple backtracking),
+%           * 'backtracking-armijo' (backtracking satisfying Armijo condition),
+%           * 'backtracking-nm' (nonmonotone backtracking),
+%           * 'lemarechal' (line search for the Wolfe conditions).
 %
 % Authors: Lorenzo Stella (lorenzo.stella -at- imtlucca.it)
 %          Panagiotis Patrinos (panagiotis.patrinos -at- imtlucca.it)
