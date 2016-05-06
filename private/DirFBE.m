@@ -18,20 +18,16 @@
 function [cachet, ops] = DirFBE(cache, tau, mode, cachet)
 % Computes the 'directional' FBE, i.e., FBE(x+tau*d) and its derivative with
 % respect to tau, if requested. Here x = cache.x, d = cache.dir.
-% If cachet (6th argument) is provided, then skips precomputing the data
+% If cachet (4th argument) is provided, then skips precomputing the data
 % that has already been stored in cachet.
 %
 % If mode == 1, then compute only FBE(x+tau*d) and put it into cachet.
 % If mode == 2, compute only dFBE(x+tau*d), the directional derivative.
 % If mode == 3, compute both FBE and dFBE at x+tau*d.
 
-% if ~isfield(cache, 'flagInit') || cache.flagInit ~= 1
-%     error('DirFBE: cache was not initialized');
-% end
-% 
-% if cache.flagLineSearch ~= 1
-%     error('DirFBE: line search data was not precomputed');
-% end
+if cache.flagLineSearch ~= 1
+    error('DirFBE: line search data was not precomputed');
+end
 
 ops = OpsInit();
 

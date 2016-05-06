@@ -6,6 +6,7 @@ tests_path = fullfile(forbes_path, 'tests');
 addpath(tests_path);
 
 fprintf('%40s', 'CheckGamma... ');          test_CheckGamma;            fprintf('OK\n');
+fprintf('%40s', 'DirFBE... ');              test_DirFBE;                fprintf('OK\n');
 fprintf('%40s', 'SolveLasso... ');          test_SolveLasso;            fprintf('OK\n');
 fprintf('%40s', 'SolveSparseLogReg... ');   test_SolveSparseLogReg;     fprintf('OK\n');
 fprintf('%40s', 'SolveSVM... ');            test_SolveSVM;              fprintf('OK\n');
