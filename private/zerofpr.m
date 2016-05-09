@@ -190,7 +190,7 @@ for it = 1:opt.maxit
                 if abs(lambda) >= thetabar, theta = 1.0;
                 else theta = (1-sign(lambda)*thetabar)/(1+lambda); end
                 v = R*y-s;
-                R = R - (theta/(sts+theta*(v'*s)))*(v*(hasGammaChangeds'*R));
+                R = R - (theta/(sts+theta*(v'*s)))*(v*(s'*R));
                 d = R*cache_z.diff;
             end
         case 9
