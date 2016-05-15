@@ -29,23 +29,31 @@ function obj = quadLoss(w, p)
     if any(w < 0)
         error('first argument should be nonnegative');
     end
-    if isscalar(w)
-        obj.Q = w;
-        obj.q = -w*p;
-    elseif isvector(w)
-        n = length(w);
-        obj.Q = spdiags(w,0,n,n);
-        obj.q = -w.*p;
-    end
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;
+    obj.hasHessian = 1;
     obj.L = max(w);
-    if all(w > 0)
-        obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, w, p);
+    if isscalar(w)
+        obj.makef = @() @(x) call_squaredWeightedDistance(x, w, p);
+        if w > 0
+            obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, 1/w, p);
+        end
+    elseif isvector(w)
+        n = length(w);
+        obj.makef = @() @(x) call_squaredWeightedDistance(x, spdiags(w,0,n,n), p);
+        if all(w > 0)
+            obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, spdiags(1./w,0,n,n), p);
+        end
     end
 end
 
-function [val, grad] = call_squaredWeightedDistance_conj(y, w, p)
-    grad = p + (y./w);
-    val = 0.5*(y'*(grad + p));
+function [v, g, W] = call_squaredWeightedDistance(x, W, p)
+    res = x-p;
+    g = W*res;
+    v = 0.5*(res'*g);
+end
+
+function [v, g, W] = call_squaredWeightedDistance_conj(y, W, p)
+    g = p + W*y;
+    v = 0.5*(y'*(g + p));
 end

@@ -17,27 +17,25 @@
 
 function out = minfbe(prob, opt)
 
+% initialize line-search options
+
 lsopt = ProcessLineSearchOptions(prob, opt);
 
-% initialize output stuff
-objective = zeros(1, opt.maxit);
-ts = zeros(1, opt.maxit);
-residual = zeros(1, opt.maxit);
-msgTerm = '';
-record = [];
-
 % initialize operations counter
+
 ops = OpsInit();
 
 % initialize gamma
+
 gam = (1-opt.beta)/prob.Lf;
 
 % display header
+
 if opt.display >= 2
     fprintf('%6s%11s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||dir||', 'slope', 'tau');
 end
 
-cntSkip = 0;
+cacheDir.cntSkip = 0;
 hasGammaChanged = 0;
 
 cache_current = CacheInit(prob, prob.x0, gam);
@@ -47,24 +45,28 @@ t0 = tic();
 for it = 1:opt.maxit
     
     % compute FBE
+    
     [cache_current, ops1] = CacheFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
 
     % store initial cache
+    
     if it == 1
         cache_0 = cache_current;
     end
 
     % trace stuff
+    
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_current.FPR, 'inf')/gam;
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
-        record = [record, opt.record(prob, it, gam, cache_0, cache_current, ops)];
+        record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
     end
 
     % check for termination
-    if isnan(cache_current.normdiff)
+    
+    if isnan(cache_current.normFPR)
         msgTerm = 'something went wrong';
         flagTerm = 1;
         break;
@@ -92,151 +94,32 @@ for it = 1:opt.maxit
     end
 
     % compute gradient of the FBE
+    
     [cache_current, ops1] = CacheGradFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
+    
+    % compute pair (s, y) for quasi-Newton updates
+    
+    if it > 1
+        sk = cache_current.x - cache_previous.x;
+        yk = cache_current.gradFBE - cache_previous.gradFBE;
+    else
+        sk = [];
+        yk = [];
+    end
 
     % compute search direction and slope
-    switch opt.methodID
-        case {1, 7} % STEEPEST DESCENT and BARZILAI-BORWEIN
-            dir = -cache_current.gradFBE;
-        case 2 % BFGS
-            if it == 1 || hasGammaChanged
-                dir = -cache_current.gradFBE;
-                R = eye(prob.n);
-            else
-                Sk = cache_current.x - cache_previous.x;
-                Yk = cache_current.gradFBE - cache_previous.gradFBE;
-                YSk = Yk'*Sk;
-                Bs = R'*(R*Sk);
-                sBs = Sk'*Bs;
-                if YSk > 0
-                    R = cholupdate(cholupdate(R,Yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
-                else
-                    cntSkip = cntSkip+1;
-                end
-                dir = -linsolve(R,linsolve(R,cache_current.gradFBE,opt.optsL),opt.optsU);
-            end
-        case 3 % L-BFGS
-            if it == 1 || hasGammaChanged
-                dir = -cache_current.gradFBE; % use steepest descent direction initially
-                LBFGS_col = 0; % last column of Sk, Yk that was filled in
-                LBFGS_mem = 0; % current memory of the method
-            else
-                %%% x' - x %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                Sk = cache_current.x - cache_previous.x;
-                Yk = cache_current.gradFBE - cache_previous.gradFBE;
-                YSk = Yk'*Sk;
-                if YSk > 0
-                    LBFGS_col = 1+mod(LBFGS_col, opt.memory);
-                    LBFGS_mem = min(LBFGS_mem+1, opt.memory);
-                    S(:,LBFGS_col) = Sk;
-                    Y(:,LBFGS_col) = Yk;
-                    YS(LBFGS_col) = YSk;
-                else
-                    cntSkip = cntSkip+1;
-                end
-                if LBFGS_mem > 0
-                    H = YS(LBFGS_col)/(Y(:,LBFGS_col)'*Y(:,LBFGS_col));
-                    dir = LBFGS(S, Y, YS, H, -cache_current.gradFBE, int32(LBFGS_col), int32(LBFGS_mem));
-                else
-                    dir = -cache_current.gradFBE;
-                end
-            end
-%         case 4 % CG-DESCENT
-%             if it == 1 || hasGammaChanged
-%                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
-%             else
-%                 yy = cache_current.gradFBE-cache_previous.gradFBE;
-%                 dy = dir'*yy;
-%                 lambda = 1; %Hager-Zhang proposed lambda = 2 but Kou, Dai found that lambda = 1 is more efficient
-%                 %                 lambda = 2-(dir'*yy)/((dir'*dir)*(yy'*yy));
-%                 beta = ((yy-lambda*dir*(yy'*yy)/dy)'*cache_current.gradFBE)/dy;
-%                 etak = -1/(norm(dir)*min(0.01,norm(cache_current.gradFBE)));
-%                 beta = max(beta,etak);
-%                 dir = -cache_current.gradFBE + beta*dir;
-%                 if dir'*cache_current.gradFBE >= 0 % restart if not descent direction
-%                     dir = -cache_current.gradFBE;
-%                     cntSkip = cntSkip+1;
-%                 end
-%             end
-%         case 5 % CG-PRP
-%             if it == 1 || hasGammaChanged
-%                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
-%             else
-%                 yy = cache_current.gradFBE - cache_previous.gradFBE;
-%                 beta = max((cache_current.gradFBE'*yy)/(cache_previous.gradFBE'*cache_previous.gradFBE),0);
-%                 dir = -cache_current.gradFBE + beta*dir;
-%                 if dir'*cache_current.gradFBE >= 0 % restart if not descent direction
-%                     dir = -cache_current.gradFBE;
-%                     cntSkip = cntSkip+1;
-%                 end
-%             end
-%         case 6 % CG-DYHS
-%             if it == 1 || hasGammaChanged
-%                 dir = -cache_current.gradFBE; % Initially use steepest descent direction
-%             else
-%                 yy = cache_current.gradFBE - cache_previous.gradFBE;
-%                 betaDY = (cache_current.gradFBE'*cache_current.gradFBE)/(dir'*yy);
-%                 betaHS = (cache_current.gradFBE'*yy)/(dir'*yy);
-%                 beta = max(0,min(betaHS,betaDY));
-%                 dir = -cache_current.gradFBE + beta*dir;
-%                 if dir'*cache_current.gradFBE >= 0 % restart if not descent direction
-%                     dir = -cache_current.gradFBE;
-%                     cntSkip = cntSkip+1;
-%                 end
-%             end
-        otherwise
-            error('search direction not implemented')
-    end
     
+    [dir, cacheDir] = ComputeDir(prob, opt, it, hasGammaChanged, sk, yk, ...
+        cache_current.gradFBE, cacheDir);
     slope = cache_current.gradFBE'*dir;
 
     % set initial guess for the step length
-    switch opt.methodID
-        case {2, 3} % (L-)BFGS
-            tau0 = 1.0;
-        case 7 % BARZILAI-BORWEIN
-            if it == 1 || hasGammaChanged
-                tau0 = 1.0/norm(cache_current.gradFBE, inf);
-            else
-                Sk = cache_current.x-cache_previous.x;
-                Yk = cache_current.gradFBE-cache_previous.gradFBE;
-                tau0 = (Sk'*Sk)/(Sk'*Yk);
-            end
-%         otherwise
-%             if it == 1 || hasGammaChanged
-%                 xinf = norm(cache_current.x,inf);
-%                 if xinf ~= 0
-%                     tau0 = lsopt.psi0*xinf/norm(cache_current.gradFBE, inf); % g is the gradient at x
-%                 elseif cache_current.FBE ~= 0
-%                     % Check changes in Version 5.2 (3). psi0 is set equal
-%                     % to 0 when x=0;
-%                     tau0 = lsopt.psi0*abs(cache_current.FBE)/(cache_current.gradFBE'*cache_current.gradFBE);
-%                 else
-%                     tau0 = 1;
-%                 end
-%             else
-%                 %                             lsopt.tau0 = lsopt.psi2*tau;
-%                 %                             lsopt.tau0 = 2*(cache.FBE - FBE_old)/slope;
-%                 tau0 = -2*max(cache_previous.FBE-cache_current.FBE, 10*eps)/slope;% Fletcher, pp. 38
-%                 if lsopt.quadStep
-%                     tp = tau*lsopt.psi1;
-%                     [cache_current, ops1] = CacheLineSearch(cache_current, dir);
-%                     ops = OpsSum(ops, ops1);
-%                     [cache_tau, ops1] = DirFBE(cache_current, tp, 1);
-%                     ops = OpsSum(ops, ops1);
-%                     if cache_tau.FBE <= cache_current.FBE
-%                         % quadratic interpolation
-%                         q = cache_tau.FBE - cache_current.FBE - tp*slope;
-%                         if q > 0
-%                             tau0 = -(slope*tp^2)/(2*q);
-%                         end
-%                     end
-%                 end
-%             end
-    end
+    
+    tau0 = ComputeTau0(prob, opt, sk, yk, dir);
 
     % perform line search
+    
     switch opt.linesearchID
         case 1 % backtracking
             [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt);
@@ -262,6 +145,7 @@ for it = 1:opt.maxit
     ops = OpsSum(ops, ops1);
 
     % check for line search fails
+    
     if flagLS > 0 && ~opt.global
         flagTerm = 2;
         msgTerm = strcat('line search failed at iteration', num2str(it));
@@ -269,6 +153,7 @@ for it = 1:opt.maxit
     end
 
     % prepare next iteration, store current solution
+    
     hasGammaChanged = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
@@ -290,6 +175,7 @@ for it = 1:opt.maxit
     end
 
     % display stuff
+    
     if opt.display == 1
         PrintProgress(it);
     elseif opt.display >= 2
@@ -317,8 +203,8 @@ out.operations = ops;
 out.residual = residual(1, 1:it);
 out.objective = objective(1, 1:it);
 out.ts = ts(1, 1:it);
-out.record = record;
+if opt.toRecord, out.record = record; end
 out.prob = prob;
 out.opt = opt;
 out.gam = gam;
-out.skip = cntSkip;
+out.skip = cacheDir.cntSkip;

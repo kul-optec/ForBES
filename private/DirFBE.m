@@ -43,7 +43,7 @@ if nargin < 4 || cachet.flagGradStep ~= 1
     gradfxt = 0;
     if prob.istheref1
         cachet.res1x = cache.res1x + tau*cache.C1dir;
-        cachet.Qres1x = cache.Qres1x + tau*cache.QC1dir;
+        cachet.gradf1res1x = cache.gradf1res1x + tau*cache.QC1dir;
         cachet.gradf1x = cache.gradf1x + tau*cache.C1tQC1dir;
         cachet.f1x = cache.f1x + tau*cache.f1linear + (0.5*tau^2)*cache.f1quad;
         fxt = fxt + cachet.f1x;
@@ -86,15 +86,15 @@ if nargin < 4 || cachet.flagProxGradStep ~= 1
     [cachet.z, cachet.gz] = prob.callg(cachet.y, gam);
     ops.proxg = ops.proxg + 1;
     ops.g = ops.g + 1;
-    cachet.diff = cachet.z-cachet.x;
+    cachet.FPR = cachet.x-cachet.z;
     
     cachet.flagProxGradStep = 1;
 end
 
 if mode == 1 || mode == 3
-    sqnormdifft = cachet.diff'*cachet.diff;
-    cachet.normdiff = sqrt(sqnormdifft);
-    cachet.FBE = cachet.fx + cachet.gz + cachet.gradfx'*cachet.diff + (0.5/gam)*sqnormdifft;
+    sqnormFPRt = cachet.FPR'*cachet.FPR;
+    cachet.normFPR = sqrt(sqnormFPRt);
+    cachet.FBE = cachet.fx + cachet.gz - cachet.gradfx'*cachet.FPR + (0.5/gam)*sqnormFPRt;
     
     cachet.flagFBE = 1;
 end
@@ -110,7 +110,7 @@ if mode >= 2
         else
             res2xtepsdir = cachet.res2x + 1e-100i*cache.C2dir;
             [~, gradf2res2xtepsdir] = prob.callf2(res2xtepsdir);
-            ops.f2 = ops.f2 + 1;
+            ops.gradf2 = ops.gradf2 + 1;
             HC2dir = imag(gradf2res2xtepsdir)/1e-100;
 %                 res2xtepsdir = cache.res2x + 1e-8*cache.C2dir;
 %                 [~, gradf2res2xtepsdir] = prob.callf2(res2xtepsdir);
@@ -125,5 +125,5 @@ if mode >= 2
             Hdir = Hdir + HC2dir;
         end
     end
-    cachet.dFBE = cachet.diff'*Hdir-(cachet.diff'*cache.dir)/gam;
+    cachet.dFBE = (cachet.FPR'*cache.dir)/gam - cachet.FPR'*Hdir;
 end

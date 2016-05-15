@@ -31,7 +31,7 @@ if prob.istheref1
         else cache.QC1dir = prob.Q*cache.C1dir; end
         cache.C1tQC1dir = cache.QC1dir;
     end
-    ops.Q = ops.Q + 2;
+    ops.gradf1 = ops.gradf1 + 1;
     cache.f1linear = cache.gradf1x'*dir;
     cache.f1quad = cache.C1dir'*cache.QC1dir;
 end

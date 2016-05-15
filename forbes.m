@@ -106,8 +106,6 @@ function out = forbes(fs, gs, init, aff, constr, opt)
                     out = minfbe(prob, opt);
                 case 'zerofpr'
                     out = zerofpr(prob, opt);
-                case 'minfbe2'
-                    out = minfbe2(prob, opt);
             end
         case 2
             [prob, dualprob] = ProcessSeparableProblem(prob, opt);
@@ -119,8 +117,6 @@ function out = forbes(fs, gs, init, aff, constr, opt)
                     dualout = minfbe(dualprob, opt);
                 case 'zerofpr'
                     dualout = zerofpr(dualprob, opt);
-                case 'minfbe2'
-                    dualout = minfbe2(dualprob, opt);
             end
             out = GetPrimalOutput(prob, dualprob, dualout);
     end

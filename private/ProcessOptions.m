@@ -40,6 +40,7 @@ switch opt.solver
         opt.solverID = 2;
     case 'zerofpr'
         opt.solverID = 3;
+        if ~isfield(opt, 'qnopt') || isempty(opt.qnopt), opt.qnopt = 1; end
     case 'minfbe2'
         opt.solverID = 4;
     otherwise
@@ -92,8 +93,15 @@ switch opt.method
         opt.methodID = 7;
     case 'broyden'
         opt.methodID = 8;
+        if ~isfield(opt, 'bopt') || isempty(opt.bopt), opt.bopt = 0; end
     case 'lbroyden'
         opt.methodID = 9;
+        opt.memory = 5;
+        if ~isfield(opt, 'bopt') || isempty(opt.bopt), opt.bopt = 0; end
+    case 'rbroyden'
+        opt.methodID = 10;
+        opt.memory = 5;
+        if ~isfield(opt, 'bopt') || isempty(opt.bopt), opt.bopt = 0; end
     otherwise
         error('unknown method');
 end

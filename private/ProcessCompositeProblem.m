@@ -26,17 +26,9 @@ function prob = ProcessCompositeProblem(prob, opt)
         if ~isfield(prob.f1, 'isQuadratic') || ~prob.f1.isQuadratic
             error('function f1 must be quadratic');
         end
+        if ~isfield(prob.f1, 'makef'), error('value/gradient of f1 is not defined (there is no makef)'); end
+        prob.callf1 = prob.f1.makef();
         prob.istheref1 = true;
-        prob.isC1fun = false;
-        prob.isQfun = false;
-        if isfield(prob.f1, 'Q')
-            prob.Q = prob.f1.Q;
-        else
-            prob.Q = 1;
-        end
-        if isa(prob.Q, 'function_handle')
-            prob.isQfun = true;
-        end
         if isfield(prob, 'C1')
             if isa(prob.C1, 'function_handle')
                 prob.m1 = length(prob.C1(prob.x0));
@@ -46,12 +38,16 @@ function prob = ProcessCompositeProblem(prob, opt)
                 prob.isC1fun = true;
             else
                 prob.m1 = size(prob.C1*prob.x0, 1);
+                prob.isC1fun = false;
             end
             prob.isthereC1 = true;
         else
             prob.m1 = prob.n;
             prob.isthereC1 = false;
         end
+        [~, ~, prob.Q] = prob.callf1(zeros(prob.m1, 1));
+        if isa(prob.Q, 'function_handle'), prob.isQfun = true;
+        else prob.isQfun = false; end
         if ~isfield(prob, 'd1'), prob.d1 = zeros(prob.m1, 1); end
         if ~isfield(prob.f1, 'q'), prob.q = zeros(prob.m1, 1);
         else prob.q = prob.f1.q; end
@@ -65,10 +61,9 @@ function prob = ProcessCompositeProblem(prob, opt)
         if isfield(prob.f2, 'isQuadratic') && prob.f2.isQuadratic
             error('you should provide f2 as f1, since it is quadratic');
         end
-        if ~isfield(prob.f2, 'makef'), error('function of f2 is not defined'); end
+        if ~isfield(prob.f2, 'makef'), error('value/gradient of f2 is not defined (there is no makef)'); end
         prob.callf2 = prob.f2.makef();
         prob.istheref2 = true;
-        prob.isC2fun = false;
         if isfield(prob, 'C2')
             if isa(prob.C2, 'function_handle')
                 prob.m2 = length(prob.C2(prob.x0));
@@ -78,6 +73,7 @@ function prob = ProcessCompositeProblem(prob, opt)
                 prob.isC2fun = true;
             else
                 prob.m2 = size(prob.C2, 1);
+                prob.isC2fun = false;
             end
             prob.isthereC2 = true;
         else

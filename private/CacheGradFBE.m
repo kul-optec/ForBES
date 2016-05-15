@@ -14,39 +14,39 @@ end
 
 if cache.flagGradFBE == 0 || gam0 ~= gam
     prob = cache.prob;
-    Hdiff = 0;
+    HFPR = 0;
     if prob.istheref1
         if prob.isthereC1
-            if prob.isC1fun, C1diff = prob.C1(cache.diff);
-            else C1diff = prob.C1*cache.diff; end
-            if prob.isQfun, QC1diff = prob.Q(C1diff);
-            else QC1diff = prob.Q*C1diff; end
-            if prob.isC1fun, C1tQC1diff = prob.C1t(QC1diff);
-            else C1tQC1diff = prob.C1'*QC1diff; end
+            if prob.isC1fun, C1FPR = prob.C1(cache.FPR);
+            else C1FPR = prob.C1*cache.FPR; end
+            if prob.isQfun, Hessf1C1FPR = prob.Q(C1FPR);
+            else Hessf1C1FPR = prob.Q*C1FPR; end
+            if prob.isC1fun, C1tHessf1C1diff = prob.C1t(Hessf1C1FPR);
+            else C1tHessf1C1diff = prob.C1'*Hessf1C1FPR; end
             ops.C1 = ops.C1 + 2;
         else
-            if prob.isQfun, C1tQC1diff = prob.Q(cache.diff);
-            else C1tQC1diff = prob.Q*cache.diff; end
+            if prob.isQfun, C1tHessf1C1diff = prob.Q(cache.FPR);
+            else C1tHessf1C1diff = prob.Q*cache.FPR; end
         end
-        ops.Q = ops.Q + 2;
-        Hdiff = Hdiff + C1tQC1diff;
+        ops.gradf1 = ops.gradf1 + 1;
+        HFPR = HFPR + C1tHessf1C1diff;
     end
     if prob.istheref2
         if prob.isthereC2
-            if prob.isC2fun, C2diff = prob.C2(cache.diff);
-            else C2diff = prob.C2*cache.diff; end
+            if prob.isC2fun, C2FPR = prob.C2(cache.FPR);
+            else C2FPR = prob.C2*cache.FPR; end
             ops.C2 = ops.C2 + 1;
         else
-            C2diff = cache.diff;
+            C2FPR = cache.FPR;
         end
         if prob.useHessian
-            HC2diff = cache.Hessf2res2x*C2diff;
+            HC2FPR = cache.Hessf2res2x*C2FPR;
         else
             % imaginary trick
-            res2xepsdiff = cache.res2x + 1e-100i*C2diff;
-            [~, gradf2res2xepsd] = prob.callf2(res2xepsdiff);
+            res2xepsFPR = cache.res2x + 1e-100i*C2FPR;
+            [~, gradf2res2xepsd] = prob.callf2(res2xepsFPR);
             ops.gradf2 = ops.gradf2 + 1;
-            HC2diff = imag(gradf2res2xepsd)/1e-100;
+            HC2FPR = imag(gradf2res2xepsd)/1e-100;
             % forward differences
     %             res2xepsdiff = cache.res2x + 1e-8*C2diff;
     %             [~, gradf2res2xepsd] = prob.callf2(res2xepsdiff);
@@ -54,14 +54,14 @@ if cache.flagGradFBE == 0 || gam0 ~= gam
     %             HC2diff = (gradf2res2xepsd-cache.gradf2res2x)/1e-8;
         end
         if prob.isthereC2
-            if prob.isC2fun, Hdiff = Hdiff + prob.C2t(HC2diff);
-            else Hdiff = Hdiff + (prob.C2'*HC2diff); end
-            ops.C2 = ops.C2 + 2;
+            if prob.isC2fun, HFPR = HFPR + prob.C2t(HC2FPR);
+            else HFPR = HFPR + (prob.C2'*HC2FPR); end
+            ops.C2 = ops.C2 + 1;
         else
-            Hdiff = Hdiff + HC2diff;
+            HFPR = HFPR + HC2FPR;
         end
     end
-    cache.gradFBE = (Hdiff - cache.diff/gam);
+    cache.gradFBE = cache.FPR/gam - HFPR;
     cache.gam = gam;
     cache.flagGradFBE = 1;
 end

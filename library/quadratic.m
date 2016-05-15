@@ -25,19 +25,26 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = quadratic(Q, q)
-    obj.Q = Q;
-    obj.q = q;
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;
-%     obj.makef = @() @(x) call_quadratic(Q, q, x); % do we need to keep this?
+    obj.hasHessian = 1;
+    if isa(Q, 'function_handle')
+        obj.makef = @() @(x) call_quadratic_handle(Q, q, x);
+    else
+        obj.makef = @() @(x) call_quadratic_matrix(Q, q, x);
+    end
     obj.makefconj = @() make_quadratic_conj(Q, q);
 end
 
-% % do we need to keep this?
-% function [v, g] = call_quadratic(Q, q, x)
-%     g = Q*x+q;
-%     v = 0.5*(g+q)'*x;   
-% end
+function [v, g, Q] = call_quadratic_matrix(Q, q, x)
+    g = Q*x+q;
+    v = 0.5*(g+q)'*x;   
+end
+
+function [v, g, Q] = call_quadratic_handle(Q, q, x)
+    g = Q(x)+q;
+    v = 0.5*(g+q)'*x;   
+end
 
 function fun = make_quadratic_conj(Q, q)
     if issparse(Q)

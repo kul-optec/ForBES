@@ -64,14 +64,14 @@ for it = 1:opt.maxit
     end
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_yk.diff, 'inf')/gam;
+    residual(1, it) = norm(cache_yk.FPR, 'inf')/gam;
     objective(1, it) = cache_yk.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_yk, ops)];
     end
 
     % check for termination
-    if isnan(cache_yk.normdiff)
+    if isnan(cache_yk.FPR)
         msgTerm = 'something went wrong';
         flagTerm = 1;
         break;

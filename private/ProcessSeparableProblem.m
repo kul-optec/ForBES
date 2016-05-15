@@ -37,9 +37,9 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         if ~isfield(prob.f1, 'isConjQuadratic') || ~prob.f1.isConjQuadratic
             error('the conjugate function of f1 must be quadratic');
         end
-        dualprob.istheref1 = true;
         if ~isfield(prob.f1, 'makefconj'), error('conjugate function of f1 is not defined'); end
-        dualprob.isQfun = true;
+        dualprob.callf1 = prob.f1.makefconj();
+        dualprob.istheref1 = true;
         if isfield(prob, 'A1')
             dualprob.isthereC1 = true;
             if isa(prob.A1, 'function_handle')
@@ -47,13 +47,11 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
                     error('you must specify both A1 and A1t as function handles');
                 end
                 dualprob.isC1fun = true;
-                [dualprob.Q, dualprob.q] = make_quad_conj(prob.f1, prob.A1t(zeros(n, 1)));
                 dualprob.C1 = @(x) -prob.A1t(x);
                 dualprob.C1t = @(y) -prob.A1(y);
                 dualprob.m1 = length(dualprob.C1(dualprob.x0));
             else
                 dualprob.isC1fun = false;
-                [dualprob.Q, dualprob.q] = make_quad_conj(prob.f1, prob.A1'*zeros(n, 1));
                 dualprob.C1 = -prob.A1';
                 dualprob.m1 = size(dualprob.C1, 1);
             end
@@ -61,6 +59,9 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         else
             error('you must specify matrix A1 in the constraint');
         end
+        [~, ~, dualprob.Q] = dualprob.callf1(zeros(dualprob.m1, 1));
+        if isa(dualprob.Q, 'function_handle'), dualprob.isQfun = true;
+        else dualprob.isQfun = false; end
     else
         dualprob.istheref1 = false;
     end
@@ -123,15 +124,4 @@ function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu)
     Bz = B*z;
     proxpoint = y+gam*Bz;
     proxval = -proxpoint'*Bz - v;
-end
-
-function [Q, q] = make_quad_conj(obj, zero)
-    fconj = obj.makefconj();
-    [~, q] = fconj(zero);
-    Q = @(x) hessvec_quad_conj(x, fconj, q);
-end
- 
-function y = hessvec_quad_conj(x, fconj, gradfconj0)
-    [~, gradfconjx] = fconj(x);
-    y = gradfconjx-gradfconj0;
 end

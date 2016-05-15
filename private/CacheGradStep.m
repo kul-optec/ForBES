@@ -23,18 +23,15 @@ end
 
 cache.gam = gam;
 prob = cache.prob;
-gradf1x = 0;
-gradf2x = 0;
 
 if prob.istheref1
     if prob.isthereC1
-        if prob.isC1fun, gradf1x = prob.C1t(cache.Qres1x + prob.q);
-        else gradf1x = prob.C1'*(cache.Qres1x + prob.q); end
+        if prob.isC1fun, cache.gradf1x = prob.C1t(cache.gradf1res1x);
+        else cache.gradf1x = prob.C1'*(cache.gradf1res1x); end
         ops.C1 = ops.C1 + 1;
-    else
-        gradf1x = cache.Qres1x + prob.q;
     end
-    cache.gradf1x = gradf1x;
+else
+    cache.gradf1x = 0;
 end
 
 if prob.istheref2
@@ -45,8 +42,8 @@ if prob.istheref2
             [~, gradf2res2x] = prob.callf2(cache.res2x);
             cache.gradf2res2x = gradf2res2x;
         end
-        if prob.isC2fun, gradf2x = prob.C2t(gradf2res2x);
-        else gradf2x = prob.C2'*gradf2res2x; end
+        if prob.isC2fun, cache.gradf2x = prob.C2t(gradf2res2x);
+        else cache.gradf2x = prob.C2'*gradf2res2x; end
         ops.C2 = ops.C2 + 1;
     else
         if prob.useHessian
@@ -55,16 +52,17 @@ if prob.istheref2
             [~, gradf2res2x] = prob.callf2(cache.res2x);
             cache.gradf2res2x = gradf2res2x;
         end
-        gradf2x = gradf2res2x;
+        cache.gradf2x = gradf2res2x;
     end
     ops.gradf2 = ops.gradf2 + 1;
-    cache.gradf2x = gradf2x;
+else
+    cache.gradf2x = 0;
 end
 
 if prob.istherelin
-    cache.gradfx = gradf1x + gradf2x + prob.l;
+    cache.gradfx = cache.gradf1x + cache.gradf2x + prob.l;
 else
-    cache.gradfx = gradf1x + gradf2x;
+    cache.gradfx = cache.gradf1x + cache.gradf2x;
 end
 
 cache.y = cache.x - gam*cache.gradfx;
