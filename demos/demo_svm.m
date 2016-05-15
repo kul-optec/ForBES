@@ -58,14 +58,3 @@ fprintf('prox       : %d\n', out.operations.proxg);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
 
-fprintf('\nCG-DYHS\n');
-opt_cg = opt;
-opt_cg.method = 'cg-dyhs';
-out = forbes(f, g, y0, [], constr, opt_cg);
-fprintf('\n');
-fprintf('message    : %s\n', out.message);
-fprintf('iterations : %d\n', out.iterations);
-fprintf('matvecs    : %d\n', out.operations.C1);
-fprintf('prox       : %d\n', out.operations.proxg);
-fprintf('time       : %7.4e\n', out.ts(end));
-fprintf('residual   : %7.4e\n', out.residual(end));

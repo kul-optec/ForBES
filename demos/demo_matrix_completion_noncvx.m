@@ -27,7 +27,7 @@ opt.display = 1;
 
 fprintf('\nFBS\n');
 opt_fbs = opt;
-opt_fbs.method = 'fbs';
+opt_fbs.solver = 'fbs';
 opt_fbs.variant = 'basic';
 out_fbs = forbes(f, g, x0, [], [], opt_fbs);
 fprintf('\n');
@@ -38,7 +38,8 @@ fprintf('residual   : %7.4e\n', out_fbs.residual(end));
 
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
-opt_lbfgs.method = 'lbfgs-fpr';
+opt_lbfgs.solver = 'zerofpr';
+opt_lbfgs.method = 'lbfgs';
 out_lbfgs = forbes(f, g, x0, [], [], opt_lbfgs);
 fprintf('\n');
 fprintf('iterations : %d\n', out_lbfgs.iterations);
