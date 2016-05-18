@@ -37,7 +37,7 @@ if opt.display >= 2
     fprintf('%6s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', 'tau');
 end
 
-cacheDir = [];
+cacheDir.cntSkip = 0;
 
 alpha = 0.5;
 flag = -1; % to track what happened at every iteration
