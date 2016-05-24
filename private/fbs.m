@@ -76,11 +76,6 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if residual(1, it) <= 100*eps % cache_yk.normdiff/(1+norm(cache_yk.normdiff)) <= 100*eps
-        msgTerm = 'reached optimum (fpr close to eps)';
-        flagTerm = 0;
-        break;
-    end
     if ~flagChangedGamma
         if ~opt.customTerm
             if StoppingCriterion(cache_yk, opt.tol)
