@@ -75,18 +75,13 @@ end
 function op = make_separableSum_callf(objs, idx, sizes)
     callfs = {};
     for i=1:length(objs)
-        if isfield(objs{i}, 'isQuadratic') && objs{i}.isQuadratic
-            callfs{end+1} = @(x) call_quadratic_f(x, objs{i}.Q, objs{i}.q);
-        else
-            callfs{end+1} = objs{i}.makef();
-        end
+        callfs{end+1} = objs{i}.makef();
     end
     op = @(x) call_separableSum_f(x, callfs, idx, sizes);
 end
 
 function [val, grad] = call_separableSum_f(x, callfs, idx, sizes)
     n = sum(sizes);
-    prox = zeros(n, 1);
     val = 0;
     grad = [];
     baseidx = 0;
@@ -108,9 +103,4 @@ function [val, grad] = call_separableSum_f(x, callfs, idx, sizes)
             baseidx = endcurr;
         end
     end
-end
-
-function [val, grad] = call_quadratic_f(x, Q, q)
-    grad = Q*x+q;
-    val = 0.5*(x'*(grad+q));
 end
