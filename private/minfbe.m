@@ -63,6 +63,8 @@ for it = 1:opt.maxit
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
     end
+    
+    solution = cache_current.z;
 
     % check for termination
     
@@ -154,19 +156,24 @@ for it = 1:opt.maxit
         cache_previous = cache_current;
         prob.Lf = prob.Lf*2; gam = gam/2;
         hasGammaChanged = 1;
+        solution = cache_current.z;
     elseif flagLS > 0 % line-search failed
         cache_previous = cache_current;
         cache_current = CacheInit(prob, cache_current.z, gam);
+        solution = cache_current.z;
     elseif opt.global % globalized line-search method
         cache_previous = cache_current;
         if ~isempty(cache_tau1)
             cache_current = cache_tau1;
+            solution = cache_previous.z;
         else
             cache_current = CacheInit(prob, cache_tau.z, gam);
+            solution = cache_tau.z;
         end
     else % basic line-search method
         cache_previous = cache_current;
         cache_current = cache_tau;
+        solution = cache_tau.z;
     end
 
     % display stuff
@@ -192,7 +199,7 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.x = cache_current.z;
+out.x = solution;
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
