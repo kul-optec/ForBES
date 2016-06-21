@@ -49,10 +49,10 @@ MINIMUM_d = 1e-15;
 
 t0 = tic();
 
-cache_current = CacheInit(prob, prob.x0, gam);
-[cache_current, ops1] = CacheProxGradStep(cache_current, gam);
+cache_x = CacheInit(prob, prob.x0, gam);
+[cache_x, ops1] = CacheProxGradStep(cache_x, gam);
 ops = OpsSum(ops, ops1);
-cache_0 = cache_current;
+cache_0 = cache_x;
 
 for it = 1:opt.maxit
     
@@ -61,16 +61,16 @@ for it = 1:opt.maxit
     % backtracking on gamma
     
     if prob.unknownLf || opt.adaptive
-        [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
+        [isGammaOK, cache_x, cache_xbar, ops1] = CheckGamma(cache_x, gam, opt.beta);
         ops = OpsSum(ops, ops1);
         while ~isGammaOK
             prob.Lf = 2*prob.Lf; gam = gam/2; sig = 2*sig;
             hasGammaChanged = 1;
-            [isGammaOK, cache_current, cache_z, ops1] = CheckGamma(cache_current, gam, opt.beta);
+            [isGammaOK, cache_x, cache_xbar, ops1] = CheckGamma(cache_x, gam, opt.beta);
             ops = OpsSum(ops, ops1);
         end
     else
-        cache_z = CacheInit(prob, cache_current.z, gam);
+        cache_xbar = CacheInit(prob, cache_x.z, gam);
     end
     
     if prob.Lf >= MAXIMUM_Lf
@@ -82,35 +82,35 @@ for it = 1:opt.maxit
     % trace stuff
     
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.FPR, 'inf')/gam;
+    residual(1, it) = norm(cache_x.FPR, 'inf')/gam;
     if opt.toRecord
-        record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
+        record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
     
     % compute FBE at current point
     % this should count zero operations if gamma hasn't changed
     
-    [cache_current, ops1] = CacheFBE(cache_current, gam);
+    [cache_x, ops1] = CacheFBE(cache_x, gam);
     ops = OpsSum(ops, ops1);
     
-    objective(1,it) = cache_current.FBE;
+    objective(1,it) = cache_x.FBE;
     
     % check for termination
     
-    if isnan(cache_current.normFPR)
+    if isnan(cache_x.normFPR)
         msgTerm = 'something went wrong';
         flagTerm = 1;
         break;
     end
     if ~hasGammaChanged
         if ~opt.customTerm 
-            if StoppingCriterion(cache_current, opt.tol)
+            if StoppingCriterion(cache_x, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
             end
         else
-            flagStop = opt.term(prob, it, gam, cache_0, cache_current, ops);
+            flagStop = opt.term(prob, it, gam, cache_0, cache_x, ops);
             if (prob.unknownLf == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;
@@ -121,14 +121,14 @@ for it = 1:opt.maxit
     
     % select a direction
     
-    [cache_z, ops1] = CacheProxGradStep(cache_z, gam);
+    [cache_xbar, ops1] = CacheProxGradStep(cache_xbar, gam);
     ops = OpsSum(ops, ops1);
     
     % compute pair (s, y) for quasi-Newton updates
     
     if it > 1 && ~hasGammaChanged
-        sk = cache_current.x - cache_previous.x;
-        yk = cache_current.FPR - cache_previous.FPR;
+        sk = cache_x.x - cache_previous.x;
+        yk = cache_x.FPR - cache_previous.FPR;
 %         fprintf('%7.4e %7.4e %7.4e\n', norm(yk - opt.G_star(gam, sk))/norm(sk), norm(yk - opt.H_star(gam, sk))/norm(sk), norm(yk - opt.G_sym_star(gam, sk))/norm(sk));
     else
         sk = [];
@@ -138,8 +138,8 @@ for it = 1:opt.maxit
     % compute search direction and slope
     
     [dir, cacheDir] = ComputeDir(prob, opt, it, hasGammaChanged, sk, yk, ...
-        cache_z.FPR, cacheDir);
-    cacheDir.prev_v = cache_z.FPR;
+        cache_xbar.FPR, cacheDir);
+    cacheDir.prev_v = cache_xbar.FPR;
     
     % set initial guess for the step length
     
@@ -149,19 +149,19 @@ for it = 1:opt.maxit
     
     switch opt.linesearchID
         case 1 % backtracking
-            ref = cache_current.FBE - sig*cache_current.normFPR^2;
-            [tau, cache_tau, ~, ops1, ~] = BacktrackingLS(cache_z, dir, tau0, lsopt, ref);
+            ref = cache_x.FBE - sig*cache_x.normFPR^2;
+            [tau, cache_tau, ~, ops1, ~] = BacktrackingLS(cache_xbar, dir, tau0, lsopt, ref);
         case 2 % backtracking (nonmonotone)
             if it == 1 || hasGammaChanged
                 Q = 1;
-                C = cache_current.FBE;
+                C = cache_x.FBE;
             else
                 newQ = lsopt.eta*Q+1;
-                C = (lsopt.eta*Q*C + cache_current.FBE)/newQ;
+                C = (lsopt.eta*Q*C + cache_x.FBE)/newQ;
                 Q = newQ;
             end
-            ref = C - sig*cache_current.normFPR^2;
-            [tau, cache_tau, ~, ops1, ~] = BacktrackingLS(cache_z, dir, tau0, lsopt, ref);
+            ref = C - sig*cache_x.normFPR^2;
+            [tau, cache_tau, ~, ops1, ~] = BacktrackingLS(cache_xbar, dir, tau0, lsopt, ref);
         otherwise
             error('line search not implemented')
     end
@@ -170,12 +170,12 @@ for it = 1:opt.maxit
     % update iterates
     
     if opt.qnopt == 1
-        cache_previous = cache_z; % s = x_{k+1}-\bar{x}_{k}, y = r_{k+1}-\bar{r}_{k}
+        cache_previous = cache_xbar; % s = x_{k+1}-\bar{x}_{k}, y = r_{k+1}-\bar{r}_{k}
     elseif opt.qnopt == 2
-        cache_previous = cache_current; % s = x_{k+1}-x_{k}, y = r_{k+1}-r_{k}
+        cache_previous = cache_x; % s = x_{k+1}-x_{k}, y = r_{k+1}-r_{k}
     end
     
-    cache_current = cache_tau;
+    cache_x = cache_tau;
     ops = OpsSum(ops, ops1);
 
     if flagTerm == 1
@@ -205,7 +205,7 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.x = cache_current.z;
+out.x = cache_x.z;
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
