@@ -1,16 +1,15 @@
-.. _library.rst:
+.. _library_index:
 
 ********************
 Library of functions
 ********************
 
 In the `library folder`_ a set of commonly used functions and linear
-operators is provided. These can be used to formulate problems (see section :ref:`howto.rst` on how
-to formulate a problem and invoke ``forbes`` to solve it). Each of these functions
-is provided as a constructor taking as input all the parameters that define the
-function, and returning an object: this will contain all the information
-needed to compute the value, the gradient or the proximal mapping of the
-correspondent function or its conjugate.
+operators is provided that can be used to formulate problems (see also :ref:`howto_index`).
+Each of these functions is provided as a constructor taking as input all the
+parameters that define the function, and returning an object: this will contain
+all the information needed to compute the value, the gradient or the proximal
+mapping of the correspondent function or its conjugate.
 
 You can access the help file of each of these function directly from MATLAB with::
 

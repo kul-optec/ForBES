@@ -1,168 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>How to use it &mdash; ForBES 0.1 documentation</title>
-  
-
-  
-  
-
-  
-
-  
-  
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-    <link rel="top" title="ForBES 0.1 documentation" href="index.html"/>
-        <link rel="next" title="Library of functions" href="library.html"/>
-        <link rel="prev" title="Installation" href="installation.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
-</head>
-
-<body class="wy-body-for-nav" role="document">
-
-  <div class="wy-grid-for-nav">
-
+    <title>How to use ForBES &mdash; ForBES 1.0 documentation</title>
     
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ForBES 1.0 documentation" href="../index.html" />
+    <link rel="next" title="Library of functions" href="../library/index.html" />
+    <link rel="prev" title="Installation" href="../installation.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
 
-          
-            <a href="index.html" class="icon icon-home"> ForBES
-          
+  </head>
+  <body role="document">  
 
-          
-          </a>
-
-          
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
             
-            
-              <div class="version">
-                0.1
-              </div>
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-                <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">How to use it</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#general-problem-structure">General problem structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#composite-problems">Composite problems</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#separable-problems">Separable problems</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <code class="docutils literal"><span class="pre">forbes</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="library.html">Library of functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="advanced.html">Advanced features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
-</ul>
-
-            
-          
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">ForBES</a>
-      </nav>
-
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>How to use it</li>
-      <li class="wy-breadcrumbs-aside">
-        
-          
-            <a href="_sources/howto.txt" rel="nofollow"> View page source</a>
-          
-        
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-            
-  <div class="section" id="how-to-use-it">
-<span id="howto-rst"></span><h1>How to use it<a class="headerlink" href="#how-to-use-it" title="Permalink to this headline">¶</a></h1>
-<p>ForBES consist of the MATLAB routine <code class="docutils literal"><span class="pre">forbes</span></code> taking a problem description
+  <div class="section" id="how-to-use-forbes">
+<span id="howto-index"></span><h1>How to use ForBES<a class="headerlink" href="#how-to-use-forbes" title="Permalink to this headline">¶</a></h1>
+<p>ForBES consist of the MATLAB routine <code class="docutils literal"><span class="pre">forbes</span></code> taking as input a problem description
 and (optionally) some options, and returning the results of the optimization
 process. We will now describe the structure of the problems that ForBES solves,
 and how to specify it to the <code class="docutils literal"><span class="pre">forbes</span></code> routine.</p>
-<p>Examples on how to use forbes can be found in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/demos">demos folder</a>.</p>
+<p>Examples can be found in the <a class="reference internal" href="../examples/index.html#examples-index"><span>Examples</span></a> section, or in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/demos">demos folder</a>.</p>
 <p>You can access the help file of the solver directly from MATLAB in any moment with:</p>
 <div class="highlight-python"><div class="highlight"><pre>help forbes
 </pre></div>
 </div>
-<div class="section" id="general-problem-structure">
-<span id="problem-structure"></span><h2>General problem structure<a class="headerlink" href="#general-problem-structure" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="problem-structure">
+<span id="id1"></span><h2>Problem structure<a class="headerlink" href="#problem-structure" title="Permalink to this headline">¶</a></h2>
 <p>The generic formulation of the problems we consider is the following:</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(z)\\
 \mathrm{subject\ to}\ &amp; Ax + Bz = b\end{split}\]</div>
-<div class="section" id="composite-problems">
-<h3>Composite problems<a class="headerlink" href="#composite-problems" title="Permalink to this headline">¶</a></h3>
-<p>Not all the terms need to be present in the above general structure: if <span class="math">\(A, B, b\)</span> in the constraint are
-omitted, then it is assumed to be <span class="math">\(x=z\)</span> and the problem takes the composite form</p>
+<p><strong>Composite problems.</strong> Not all the terms need to be present in the above general structure
+above: if <span class="math">\(A, B, b\)</span> in the constraint are omitted, then it is assumed to be <span class="math">\(x=z\)</span>
+and the problem takes the composite form</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(Cx+d) + g(x)\end{split}\]</div>
 <p>Here <span class="math">\(f\)</span> is assumed to be smooth (i.e. with Lipschitz continuous
@@ -171,10 +67,7 @@ closed, proper function for which the proximal mapping</p>
 <div class="math">
 \[\begin{split}\mathrm{prox}_{\gamma g}(x)\ &amp;= \mathrm{argmin}_z \left\{g(z) + \tfrac{1}{2\gamma}\|z-x\|^2\right\}\end{split}\]</div>
 <p>is efficiently computable (e.g. it has a closed form, or can be computed numerically).</p>
-</div>
-<div class="section" id="separable-problems">
-<h3>Separable problems<a class="headerlink" href="#separable-problems" title="Permalink to this headline">¶</a></h3>
-<p>If <span class="math">\(A, B, b\)</span> are specified, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>, and the
+<p><strong>Separable problems.</strong> If <span class="math">\(A, B, b\)</span> are specified, then <span class="math">\(C=I\)</span> and <span class="math">\(d=0\)</span>, and the
 problem has the separable form</p>
 <div class="math">
 \[\begin{split}\mathrm{minimize}\ &amp; f(x) + g(z)\\
@@ -183,7 +76,6 @@ problem has the separable form</p>
 computable proximal mapping.
 Linear operators <span class="math">\(A,B\)</span> are of appropriate dimension along with vector <span class="math">\(b\)</span>
 in the constraint.</p>
-</div>
 </div>
 <div class="section" id="calling-forbes">
 <h2>Calling <code class="docutils literal"><span class="pre">forbes</span></code><a class="headerlink" href="#calling-forbes" title="Permalink to this headline">¶</a></h2>
@@ -216,7 +108,7 @@ the level of verbosity, and so on. More on this in the <a class="reference inter
 <p>Output <code class="docutils literal"><span class="pre">out</span></code> will contain the results of the optimization process.</p>
 </div>
 <div class="section" id="functions">
-<span id="id1"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <p>All the functions involved in the problem can be picked from a library of
 functions available in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>: this contains procedures returning
 commonly used functions, specified by a list of parameters if needed. The return
@@ -226,22 +118,24 @@ g = indPos(); % g is the indicator function of the nonnegative orthant
 out = forbes(f, g);
 </pre></div>
 </div>
-<p>Check out the <a class="reference internal" href="library.html#library-rst"><span>Library of functions</span></a> section for more information on the available
+<p>Check out the <a class="reference internal" href="../library/index.html#library-index"><span>Library of functions</span></a> section for more information on the available
 functions and how to use them and the parameters they require, or the documentation
 of each of the functions in the <a class="reference external" href="https://github.com/kul-forbes/ForBES/tree/master/library">library folder</a>.</p>
 </div>
 <div class="section" id="options">
-<span id="id2"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<p>The following table summarizes the main options of the solver. None of these needs
+to be specified, each one will be set to a default value if not provided.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="20%" />
-<col width="23%" />
-<col width="58%" />
+<col width="18%" />
+<col width="18%" />
+<col width="64%" />
 </colgroup>
 <thead valign="bottom">
 <tr class="row-odd"><th class="head">Attribute</th>
 <th class="head">Type</th>
-<th class="head">What is it</th>
+<th class="head">Description</th>
 </tr>
 </thead>
 <tbody valign="top">
@@ -272,10 +166,10 @@ of each of the functions in the <a class="reference external" href="https://gith
 <tr class="row-even"><td><code class="docutils literal"><span class="pre">opt.linesearch</span></code></td>
 <td>string</td>
 <td><ul class="first last simple">
-<li><code class="docutils literal"><span class="pre">'backtracking'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'backtracking-nm'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'backtracking-armijo'</span></code></li>
-<li><code class="docutils literal"><span class="pre">'lemarechal'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'backtracking'</span></code>: simple backtracking line-search</li>
+<li><code class="docutils literal"><span class="pre">'backtracking-nm'</span></code>: nonmonotone backtracking</li>
+<li><code class="docutils literal"><span class="pre">'backtracking-armijo'</span></code>: backtracking enforcing Armijo condition</li>
+<li><code class="docutils literal"><span class="pre">'lemarechal'</span></code>: line-search enforcing Wolfe conditions</li>
 </ul>
 </td>
 </tr>
@@ -285,72 +179,70 @@ of each of the functions in the <a class="reference external" href="https://gith
 </div>
 
 
-           </div>
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="library.html" class="btn btn-neutral float-right" title="Library of functions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="installation.html" class="btn btn-neutral" title="Installation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &copy; Copyright 2016, Lorenzo Stella, Panagiotis Patrinos.
-
-    </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
-
         </div>
       </div>
-
-    </section>
-
-  </div>
-  
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">ForBES</a></h1>
 
 
-  
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-  
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=&repo=&type=watch&count=true&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
 
-  
-  
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
-      });
-  </script>
-   
 
-</body>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">How to use ForBES</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#problem-structure">Problem structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-forbes">Calling <code class="docutils literal"><span class="pre">forbes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../library/index.html">Library of functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">References</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Lorenzo Stella, Panagiotis Patrinos.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="../_sources/howto/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
 </html>

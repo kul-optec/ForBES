@@ -9,4 +9,8 @@ The algorithms implemented in ForBES are described in the following references:
 [1] L. Stella, A. Themelis, P. Patrinos, "Forward-backward quasi-Newton methods for nonsmooth optimization problems,"
 `arXiv:1604.08096`_ (2016).
 
+[2] A. Themelis, L. Stella, P. Patrinos, "Forward-backward envelope for the sum of two nonconvex functions: Further properties and nonmonotone line-search algorithms,"
+`arXiv:1606.06256`_ (2016).
+
 .. _arXiv:1604.08096: http://arxiv.org/abs/1604.08096
+.. _arXiv:1606.06256: http://arxiv.org/abs/1606.06256

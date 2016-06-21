@@ -3,54 +3,41 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. .. figure:: _images/logo.png
- 	:width: 260 px
-	:figwidth: 280 px
-	:align: left
-	:target: `GitHub project`_
-	
-.. role:: underline
-    :class: underline
-
 Welcome to ForBES
 =================
+
+.. image:: _images/lasso_random_3e3_5e5_lambda_3e-1_noborder_cropped.png
+	:width: 290 px
+	:align: right
 
 ForBES (Forward-Backward Envelope Solver) is a MATLAB solver for
 nonsmooth optimization problems. It is generic in the sense that the user
 can customize the problem to solve in an easy and flexible way. It is efficient
 since it features very efficient algorithms, suited for large scale applications.
 
-.. image:: _images/lasso_random_3e3_5e5_lambda_3e-1_noborder_cropped.png
-	:width: 340 px
-	:align: right
-
-In the figure is a performance comparison between ForBES, the fast forward-backward
-splitting method (also known as fast proximal gradient method) and ADMM
-(alternating direction method of multipliers), applied to a Lasso problem with
-3K observations and 500K features, for a total of 7.5M nonzero coefficients.
-
 ForBES is open source and `available on GitHub`_.
 
-Contents
-========
+In the figure: performance of ForBES compared to other well known algorithms
+on a Lasso problem with 3K observations and 500K features,
+for a total of 7.5M nonzero coefficients.
 
-.. toctree::
-	:maxdepth: 2
+**References**
 
-	installation.rst
-	howto.rst
-	library.rst
-	advanced.rst
-	examples.rst
-	references.rst
+[1] L. Stella, A. Themelis, P. Patrinos, "Forward-backward quasi-Newton methods for nonsmooth optimization problems,"
+`arXiv:1604.08096`_ (2016).
 
-Credits
-=======
+[2] A. Themelis, L. Stella, P. Patrinos, "Forward-backward envelope for the sum of two nonconvex functions: Further properties and nonmonotone line-search algorithms,"
+`arXiv:1606.06256`_ (2016).
+
+**Credits**
 
 ForBES is developed by `Lorenzo Stella`_ [lorenzo.stella-at-imtlucca.it] and Panos
 Patrinos [panos.patrinos-at-esat.kuleuven.be] at `IMT Lucca`_ and `KU Leuven`_. Any feedback, bug
 report or suggestion for future improvements is more than welcome. We recommend
 using the `issue tracker`_ on GitHub to report bugs.
+
+.. _arXiv:1604.08096: http://arxiv.org/abs/1604.08096
+.. _arXiv:1606.06256: http://arxiv.org/abs/1606.06256
 
 .. _Lorenzo Stella: http://lostella.github.io
 .. _IMT Lucca: http://www.imtlucca.it
@@ -58,3 +45,12 @@ using the `issue tracker`_ on GitHub to report bugs.
 .. _available on GitHub: https://github.com/kul-forbes/ForBES
 .. _GitHub project: https://github.com/kul-forbes/ForBES
 .. _issue tracker: https://github.com/kul-forbes/ForBES/issues
+
+.. toctree::
+  :hidden:
+
+  installation.rst
+  howto/index.rst
+  library/index.rst
+  examples/index.rst
+  references.rst

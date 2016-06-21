@@ -1,7 +1,0 @@
-.. _advanced.rst:
-
-*****************
-Advanced features
-*****************
-
-Todo.

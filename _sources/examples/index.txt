@@ -1,4 +1,4 @@
-.. _examples.rst:
+.. _examples_index:
 
 ********
 Examples

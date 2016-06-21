@@ -19,3 +19,7 @@ in the MATLAB command line.
 
 .. _GitHub repository: https://github.com/kul-forbes/ForBES
 .. _zip archive: https://github.com/kul-forbes/ForBES/archive/master.zip
+
+.. toctree::
+	:maxdepth: 1
+	:hidden:

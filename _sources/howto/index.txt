@@ -1,15 +1,15 @@
-.. _howto.rst:
+.. _howto_index:
 
-*************
-How to use it
-*************
+*****************
+How to use ForBES
+*****************
 
-ForBES consist of the MATLAB routine ``forbes`` taking a problem description
+ForBES consist of the MATLAB routine ``forbes`` taking as input a problem description
 and (optionally) some options, and returning the results of the optimization
 process. We will now describe the structure of the problems that ForBES solves,
 and how to specify it to the ``forbes`` routine.
 
-Examples on how to use forbes can be found in the `demos folder`_. 
+Examples can be found in the :ref:`examples_index` section, or in the `demos folder`_.
 
 You can access the help file of the solver directly from MATLAB in any moment with::
 
@@ -17,8 +17,8 @@ You can access the help file of the solver directly from MATLAB in any moment wi
 
 .. _problem-structure:
 
-General problem structure
-=========================
+Problem structure
+=================
 
 The generic formulation of the problems we consider is the following:
 
@@ -26,11 +26,9 @@ The generic formulation of the problems we consider is the following:
     \mathrm{minimize}\ & f(Cx+d) + g(z)\\
     \mathrm{subject\ to}\ & Ax + Bz = b
 
-Composite problems
-------------------
-
-Not all the terms need to be present in the above general structure: if :math:`A, B, b` in the constraint are
-omitted, then it is assumed to be :math:`x=z` and the problem takes the composite form
+**Composite problems.** Not all the terms need to be present in the above general structure
+above: if :math:`A, B, b` in the constraint are omitted, then it is assumed to be :math:`x=z`
+and the problem takes the composite form
 
 .. math::
     \mathrm{minimize}\ & f(Cx+d) + g(x)
@@ -44,17 +42,14 @@ closed, proper function for which the proximal mapping
 
 is efficiently computable (e.g. it has a closed form, or can be computed numerically).
 
-Separable problems
-------------------
-
-If :math:`A, B, b` are specified, then :math:`C=I` and :math:`d=0`, and the
+**Separable problems.** If :math:`A, B, b` are specified, then :math:`C=I` and :math:`d=0`, and the
 problem has the separable form
 
 .. math::
     \mathrm{minimize}\ & f(x) + g(z)\\
     \mathrm{subject\ to}\ & Ax + Bz = b
 
-Here :math:`f` (if present) is strongly convex, while g is again proper, closed with easily 
+Here :math:`f` (if present) is strongly convex, while g is again proper, closed with easily
 computable proximal mapping.
 Linear operators :math:`A,B` are of appropriate dimension along with vector :math:`b`
 in the constraint.
@@ -72,12 +67,12 @@ The most generic call to ``forbes`` is as follows::
 - ``aff`` is a cell array describing the affine terms composed with :math:`f`::
 
     aff = {C, d};
-    
+
   If omitted or empty, that is ``aff = []`` or ``aff = {}``, then :math:`C=I` and :math:`d=0`.
 - ``constr`` is a cell array describing the linear equality constraints::
 
     constr = {A, B, b};
-    
+
   If omitted or empty, that is ``constr = []`` or ``constr = {}``, then :math:`A=I`, :math:`B=-I` and :math:`b=0`.
 - ``opt`` is a structure containing options on the algorithm to use, termination criteria,
   the level of verbosity, and so on. More on this in the :ref:`options` section below.
@@ -98,7 +93,7 @@ object can directly be fed to ``forbes`` to describe the problem. For example::
     g = indPos(); % g is the indicator function of the nonnegative orthant
     out = forbes(f, g);
 
-Check out the :ref:`library.rst` section for more information on the available
+Check out the :ref:`library_index` section for more information on the available
 functions and how to use them and the parameters they require, or the documentation
 of each of the functions in the `library folder`_.
 
@@ -107,24 +102,27 @@ of each of the functions in the `library folder`_.
 Options
 =======
 
-+--------------------+-----------------------+-----------------------------------------------------------+
-| Attribute          | Type                  | What is it                                                |
-+====================+=======================+===========================================================+
-| ``opt.tol``        | real                  | Tolerance for optimality                                  |
-+--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.maxit``      | integer               | Maximum number of iterations                              |
-+--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.solver``     | string                | - ``'minfbe'``: only handles cases where ``g`` is convex  |
-|                    |                       | - ``'zerofpr'``: can handle nonconvex ``g``               |
-+--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.method``     | string                | - ``'bfgs'``: BFGS quasi-Newton method                    |
-|                    |                       | - ``'lbfgs'``: Limited-memory BFGS                        |
-+--------------------+-----------------------+-----------------------------------------------------------+
-| ``opt.linesearch`` | string                | - ``'backtracking'``                                      |
-|                    |                       | - ``'backtracking-nm'``                                   |
-|                    |                       | - ``'backtracking-armijo'``                               |
-|                    |                       | - ``'lemarechal'``                                        |
-+--------------------+-----------------------+-----------------------------------------------------------+
+The following table summarizes the main options of the solver. None of these needs
+to be specified, each one will be set to a default value if not provided.
+
+===================== ====================== =============================================================================
+Attribute             Type                   Description
+===================== ====================== =============================================================================
+``opt.tol``           real                   Tolerance for optimality
+--------------------- ---------------------- -----------------------------------------------------------------------------
+``opt.maxit``         integer                Maximum number of iterations
+--------------------- ---------------------- -----------------------------------------------------------------------------
+``opt.solver``        string                 - ``'minfbe'``: only handles cases where ``g`` is convex
+                                             - ``'zerofpr'``: can handle nonconvex ``g``
+--------------------- ---------------------- -----------------------------------------------------------------------------
+``opt.method``        string                 - ``'bfgs'``: BFGS quasi-Newton method
+                                             - ``'lbfgs'``: Limited-memory BFGS
+--------------------- ---------------------- -----------------------------------------------------------------------------
+``opt.linesearch``    string                 - ``'backtracking'``: simple backtracking line-search
+                                             - ``'backtracking-nm'``: nonmonotone backtracking
+                                             - ``'backtracking-armijo'``: backtracking enforcing Armijo condition
+                                             - ``'lemarechal'``: line-search enforcing Wolfe conditions
+===================== ====================== =============================================================================
 
 .. _library folder: https://github.com/kul-forbes/ForBES/tree/master/library
 .. _demos folder: https://github.com/kul-forbes/ForBES/tree/master/demos
