@@ -9,7 +9,7 @@ addpath(library_path);
 savepath;
 
 % Compile necessary C source files
-LBFGS_path = fullfile(forbes_path, 'private', 'LBFGS.c');
+LBFGS_path = fullfile(forbes_path, 'private', 'lbfgs.c');
 Riccati_path = fullfile(forbes_path, 'library', 'RiccatiSolve.c');
 error_msg = 'The C compiler could not succesfully compile ';
 if mex('-outdir', private_path, LBFGS_path), error([error_msg, LBFGS_path]); end
