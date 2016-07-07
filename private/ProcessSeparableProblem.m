@@ -112,13 +112,14 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
     [dualprob.Lf, dualprob.unknownLf] = EstimateLipschitzConstant(dualprob, opt);
     dualprob.muf = 0;
     dualprob.processed = true;
+    
 end
 
 function op = make_prox_conj(proxg, B, mu)
     op = @(y, gam) call_prox_conj(y, gam, proxg, B, mu);
 end
 
-function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu)
+function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu) 
     mugam = mu*gam;
     [z, v] = prox(-(B'*y)/mugam, 1/mugam);
     Bz = B*z;

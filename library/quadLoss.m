@@ -29,6 +29,7 @@ function obj = quadLoss(w, p)
     if any(w < 0)
         error('first argument should be nonnegative');
     end
+    obj.isConvex = 1;
     obj.isQuadratic = 1;
     obj.isConjQuadratic = 1;
     obj.hasHessian = 1;

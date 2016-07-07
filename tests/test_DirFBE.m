@@ -19,7 +19,7 @@ x0 = ones(n, 1);
 opt.tol = 1e-6; % to create a structure
 
 opt = ProcessOptions(opt);
-prob = MakeProblem(f, g, x0, aff, [], opt);
+prob = MakeProblem(f, g, x0, aff, []);
 prob = ProcessCompositeProblem(prob, opt);
 
 gams = [10.0/200, 5.0/200, 2.0/200, 1.0/200];

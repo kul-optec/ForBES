@@ -90,12 +90,17 @@
 
 function out = forbes(fs, gs, init, aff, constr, opt)
     t0 = tic();
+
+    if nargin < 3, error('you must provide at least 3 arguments'); end
     if nargin < 4, aff = []; end
     if nargin < 5, constr = []; end
     if nargin < 6, opt = []; end
+
+    prob = MakeProblem(fs, gs, init, aff, constr);
     opt = ProcessOptions(opt);
-    prob = MakeProblem(fs, gs, init, aff, constr, opt);
+
     switch prob.id
+
         case 1
             prob = ProcessCompositeProblem(prob, opt);
             preprocess = toc(t0);
@@ -107,6 +112,7 @@ function out = forbes(fs, gs, init, aff, constr, opt)
                 case 'zerofpr'
                     out = zerofpr(prob, opt);
             end
+
         case 2
             [prob, dualprob] = ProcessSeparableProblem(prob, opt);
             preprocess = toc(t0);
@@ -120,6 +126,6 @@ function out = forbes(fs, gs, init, aff, constr, opt)
             end
             out = GetPrimalOutput(prob, dualprob, dualout);
     end
+
     out.preprocess = preprocess;
 end
-

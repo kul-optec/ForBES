@@ -16,7 +16,7 @@ x0 = ones(n, 1);
 opt.tol = 1e-6; % to create a structure
 
 opt = ProcessOptions(opt);
-prob = MakeProblem(f, g, x0, aff, [], opt);
+prob = MakeProblem(f, g, x0, aff, []);
 prob = ProcessCompositeProblem(prob, opt);
 
 x = ones(n, 1);
@@ -46,7 +46,7 @@ x0 = ones(n, 1);
 opt.tol = 1e-6; % to create a structure
 
 opt = ProcessOptions(opt);
-prob = MakeProblem(f, g, x0, aff, [], opt);
+prob = MakeProblem(f, g, x0, aff, []);
 prob = ProcessCompositeProblem(prob, opt);
 
 x = ones(n, 1);
