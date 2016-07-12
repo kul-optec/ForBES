@@ -9,7 +9,7 @@ b = [1, 2, 3, 4]';
 
 [m, n] = size(A);
 
-f = quadLoss(1, zeros(m,1));
+f = quadLoss();
 aff = {A, -b};
 lam = 0.1*norm(A'*b, 'inf');
 g = l1Norm(lam);

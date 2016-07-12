@@ -8,7 +8,7 @@ n = 200;
 A = randn(m, n);
 b = randn(m, 1);
 
-f = quadLoss(1, zeros(m,1));
+f = quadLoss();
 aff = {A, -b};
 lam = 0.3*norm(A'*b, 'inf');
 g = l1Norm(lam);

@@ -19,7 +19,7 @@ A = [X, ones(m, 1)];
 ratio = sum(b == 1)/(m);
 lam = 0.1 * norm((1-ratio)*sum(A(b==1,:),1) + ratio*sum(A(b==-1,:),1), 'inf');
 
-f = quadLoss(lam, zeros(n+1, 1));
+f = quadLoss(lam);
 g = hingeLoss(1, b);
 constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
