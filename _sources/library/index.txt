@@ -46,6 +46,8 @@ Name              Description
 ================= ====================================================
 ``indZero``       Indicator of the singleton set containing the origin
 ----------------- ----------------------------------------------------
+``indBall_l0``    Indicator of an L0 pseudo-norm ball
+----------------- ----------------------------------------------------
 ``indBall_l2``    Indicator of a Euclidean ball
 ----------------- ----------------------------------------------------
 ``indBox``        Indicator of a box
@@ -65,7 +67,7 @@ Norms and regularization functions
 ================= =============================================
 Name              Description
 ================= =============================================
-``l0Norm``		  L0 pseudo-norm
+``l0Norm``		    L0 pseudo-norm
 ----------------- ---------------------------------------------
 ``l1Norm``        L1 norm (sum of the absolute values)
 ----------------- ---------------------------------------------
