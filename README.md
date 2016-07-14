@@ -39,6 +39,12 @@ Furthermore, you can access the help file of the solvers directly from MATLAB wi
 > help forbes
 ```
 
+## References
+
+1. L. Stella, A. Themelis, P. Patrinos, “Forward-backward quasi-Newton methods for nonsmooth optimization problems,” [arXiv:1604.08096](http://arxiv.org/abs/1604.08096) (2016).
+
+2. A. Themelis, L. Stella, P. Patrinos, “Forward-backward envelope for the sum of two nonconvex functions: Further properties and nonmonotone line-search algorithms,” [arXiv:1606.06256](http://arxiv.org/abs/1606.06256) (2016).
+
 ## Credits
 
 ForBES is developed by Lorenzo Stella [`lorenzo.stella-at-imtlucca.it`] and Panos Patrinos [`panos.patrinos-at-esat.kuleuven.be`]
