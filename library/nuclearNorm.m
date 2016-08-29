@@ -1,36 +1,40 @@
 %NUCLEARNORM Allocates the nuclear norm function
 %
-%   NUCLEARNORM(m, n, lam, mode) builds the function
-%       
+%   NUCLEARNORM(m, n) equivalent to NUCLEARNORM(m, n, 1.0, 'exact', 'svds')
+%
+%   NUCLEARNORM(m, n, lam, mode, method) builds the function
+%
 %       g(x) = lam*||x||_*
 %
 %   where ||.||_* is the nuclear norm for m-by-n matrices, and x is assumed
 %   to be a vector of length m*n, containing the stacked columns of an
 %   m-by-n matrix. If the third argument lam is not provided, lam = 1.
 %
-%   Fourth argument 'mode' selects how to compute the proximal operator
+%   Argument 'mode' selects how to compute the proximal operator
 %   associated with the function:
-%    - mode == 'exact': compute the full svd using MATLAB's svd
-%    - mode == 'adaptive': compute the exact prox using a partial svd
-%    - mode == 'inexact': compute an inexact prox using a partial svd
+%    'exact': compute the full svd using MATLAB's svd
+%    'adaptive': compute the exact prox using a partial svd
+%    'inexact': compute an inexact prox using a partial svd
 %
-%   Fifth argument 'method' allows to choose between MATLAB's svds and
-%   PROPACK's lansvd when mode is 'adaptive' or 'inexact'
-%
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+%   Argument 'method' selects how the SVD is computed in 'adaptive'
+%   and 'inexact' mode:
+%    'svds': use MATLAB's svds
+%    'lansvd': use PROPACK'S lansvd
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 

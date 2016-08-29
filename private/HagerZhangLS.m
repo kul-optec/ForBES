@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,13 +31,13 @@ function [cachet, alpha, cnt, info] = HagerZhangLS(prob, gam, cache, df0, lsopt)
     f0 = cache.FBE;
     %      Q, A, C, f2, proxg
     cnt = [0, 0, 0, 0, 0];
-    
+
     if lsopt.PertRule
         epsilon = lsopt.eps*abs(f0);
     else
         epsilon = lsopt.eps;
     end
-    
+
     lsopt.wolfe_hi  = lsopt.delta*df0;
     lsopt.wolfe_lo  = lsopt.sigma*df0;
     lsopt.awolfe_hi = (2*lsopt.delta - 1)*df0;
@@ -102,7 +102,7 @@ function [cachet, alpha, cnt, info] = HagerZhangLS(prob, gam, cache, df0, lsopt)
             if ( lsopt.neps > 0 ), info = 6;return,end
         end
 
-        % expansion phase 
+        % expansion phase
         ngrow = ngrow +1 ;
         if ( ngrow > lsopt.nexpand ), info = 3; return,end
         % update interval (a replaced by b) */
@@ -129,7 +129,7 @@ function [cachet, alpha, cnt, info] = HagerZhangLS(prob, gam, cache, df0, lsopt)
                         b = a1 - lsopt.SecantAmp*(a1-a2)*(d1/(d1-d2)) ;
                     end
                 end
-                % safeguard growth 
+                % safeguard growth
                 b = min (b, lsopt.ExpandSafe*a1) ;
             else
                 rho = rho*lsopt.RhoGrow ;
@@ -224,7 +224,7 @@ function [cachet, alpha, cnt, info] = HagerZhangLS(prob, gam, cache, df0, lsopt)
                     else
                         alpha = -1. ;
                     end
-                end            
+                end
                 if ( (alpha <= a) || (alpha >= b) )
                     if      ( -da < db )
                         alpha = a - (a-b)*(da/(da-db)) ;
@@ -242,7 +242,7 @@ function [cachet, alpha, cnt, info] = HagerZhangLS(prob, gam, cache, df0, lsopt)
         if ( (alpha <= a) || (alpha >= b) )
             alpha = .5*(a+b) ;
             if ( (alpha == a) || (alpha == b) ),
-                info = 7; 
+                info = 7;
                 return ;
             end
             lsopt.QuadOK = false ; %/* bisection was used */
@@ -341,7 +341,7 @@ function [a,fa,da,b,fb,db,alpha,info,lsopt,cachet,cnt] = HagerZhangUpdate(a,fa,d
             alpha = HagerZhangCubInterp (a, fa, da, b, fb, db) ;
             toggle = 0 ;
             width = lsopt.gamma*(b-a) ;
-            if ( iter ), 
+            if ( iter ),
                 lsopt.QuadOK = true ;
             end %/* at least 2 cubic iterations */
         elseif ( toggle == 1 )
@@ -362,17 +362,17 @@ function [a,fa,da,b,fb,db,alpha,info,lsopt,cachet,cnt] = HagerZhangUpdate(a,fa,d
             lsopt.QuadOK = false ; %/* bisection was used */
         end
         toggle = toggle + 1 ;
-        if ( toggle > 2 ) 
+        if ( toggle > 2 )
             toggle = 0 ;
         end
         [cachet, cnt] = DirFBE(prob, gam, alpha, cache, 3);
         f = cachet.FBE; df = cachet.dFBE;
 
         if ( lsopt.QuadOK )
-            if ( HagerZhangTestWolfe (alpha, f, df, f0, lsopt) ), 
-                info = 0; 
-                return 
-            end 
+            if ( HagerZhangTestWolfe (alpha, f, df, f0, lsopt) ),
+                info = 0;
+                return
+            end
         end
 
         if ( ~AWolfe )
@@ -405,12 +405,12 @@ function [a,fa,da,b,fb,db,alpha,info,lsopt,cachet,cnt] = HagerZhangUpdate(a,fa,d
     end
 
     %% This might need debugging
-    %   see if the cost is small enough to change the PertRule 
+    %   see if the cost is small enough to change the PertRule
     if ( abs (fb) <= lsopt.SmallCost ),
         lsopt.PertRule = false ;
     end
 
-    %  increase eps if slope is negative after Parm->nshrink iterations 
+    %  increase eps if slope is negative after Parm->nshrink iterations
     if ( lsopt.PertRule )
         if ( f0 ~= 0)
             lsopt.eps = lsopt.egrow*(f1-f0)/abs (f0) ;

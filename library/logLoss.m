@@ -4,8 +4,9 @@
 %
 %       f(x) = mu*(sum_i log(1+exp(-x_i)))
 %
+%   If not provided, mu = 1.
 
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
 %
@@ -23,12 +24,12 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = logLoss(mu)
-    if nargin < 1
-        mu = 1;
-    end
+    if nargin < 1, mu = 1; end
     obj.makef = @() @(x) call_logLoss_f(x, mu);
     obj.L = mu; % Lipschitz constant of the gradient of f
     obj.hasHessian = 1;
+    obj.isConvex = 1;
+    obj.isQuadratic = 0;
 end
 
 function [val, grad, hess] = call_logLoss_f(x, mu)

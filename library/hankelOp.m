@@ -7,8 +7,8 @@ function obj = hankelOp(p, q)
     for i = 1:q
         H = [H; spdiags(ones(p,1), i-1, p, n)];
     end
-    obj.m = p*q;
-    obj.n = (p+q-1);
-    obj.makeop = @() @(x) H*x;
-    obj.makeadj = @() @(y) H'*y;
+    obj.m = [p, q];
+    obj.n = [(p+q-1), 1];
+    obj.makeop = @() @(x) reshape(H*x, p, q);
+    obj.makeadj = @() @(y) H'*vec(y);
 end

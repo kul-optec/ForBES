@@ -1,11 +1,3 @@
-%MATOP Allocates a linear operator given a matrix
-%
-%   MATOP(A) builds the linear operator associated with A. This is just for
-%   completeness, as ForBES actually accepts matrices as linear operators,
-%   and treats them accordingly.
-%
-%   All parameters are compulsory.
-
 % Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
@@ -23,15 +15,7 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
-function obj = matOp(A)
-    if nargin < 1
-        error('you should provide 1 arguments: A');
-    end
-    if ~ismatrix(A)
-        error('first argument must be a matrix');
-    end
-    obj.m = [size(A, 1), 1];
-    obj.n = [size(A, 2), 1];
-    obj.makeop = @() @(x) A*x;
-    obj.makeadj = @() @(y) A'*y;
+function Hx = HessianQuadratic(x, f, grad0)
+    [~, grad] = f(x);
+    Hx = grad-grad0;
 end

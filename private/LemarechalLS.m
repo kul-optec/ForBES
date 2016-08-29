@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -40,11 +40,11 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, dir, slope, t
 
     % precompute stuff for the line search
     [cache, ops] = CacheLineSearch(cache, dir);
-    
+
     cachet1 = [];
-    
+
     gam = cache.gam;
-    
+
     t = t0;
     wolfe_hi = lsopt.delta*slope;
     wolfe_lo = lsopt.sigma*slope;
@@ -127,7 +127,7 @@ function [t, cachet, cachet1, ops, exitflag] = LemarechalLS(cache, dir, slope, t
             break;
         end
     end
-    
+
     if exitflag == 0 && lsopt.testGamma
         [flagGamma, cachet, cachet1, ops1] = CheckGamma(cachet, gam, lsopt.beta);
         ops = OpsSum(ops, ops1);
@@ -146,7 +146,7 @@ function t = LemarechalQuadInterp(t0,f0,df0,t1,f1)
         t = -1;
     end
 end
-    
+
 function t = LemarechalCubInterp(t1,f1,df1,t2,f2,df2)
     % t1, t2 might not be sorted
     delta = t2 - t1 ;
@@ -188,4 +188,3 @@ function t = LemarechalCubInterp(t1,f1,df1,t2,f2,df2)
         end
     end
 end
-

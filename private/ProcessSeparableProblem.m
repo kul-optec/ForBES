@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,9 +23,9 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         else
             dualprob.istherelin = false;
         end
-        n = length(prob.b);
+        n = size(prob.b);
         if isfield(prob, 'y0'), dualprob.x0 = prob.y0;
-        else dualprob.x0 = zeros(n, 1); end
+        else dualprob.x0 = zeros(n); end
         dualprob.n = n;
     else
         error('you must specify the right hand side b of the equality constraint');
@@ -42,26 +42,15 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         dualprob.istheref1 = true;
         if isfield(prob, 'A1')
             dualprob.isthereC1 = true;
-            if isa(prob.A1, 'function_handle')
-                if ~isfield(prob, 'A1t') || ~isa(prob.A1t, 'function_handle')
-                    error('you must specify both A1 and A1t as function handles');
-                end
-                dualprob.isC1fun = true;
-                dualprob.C1 = @(x) -prob.A1t(x);
-                dualprob.C1t = @(y) -prob.A1(y);
-                dualprob.m1 = length(dualprob.C1(dualprob.x0));
-            else
-                dualprob.isC1fun = false;
-                dualprob.C1 = -prob.A1';
-                dualprob.m1 = size(dualprob.C1, 1);
-            end
-            dualprob.d1 = zeros(dualprob.m1, 1);
+            dualprob.isC1fun = false;
+            dualprob.C1 = -prob.A1';
+            dualprob.m1 = [size(dualprob.C1, 1), 1];
+            dualprob.d1 = zeros(dualprob.m1);
         else
             error('you must specify matrix A1 in the constraint');
         end
-        [~, ~, dualprob.Q] = dualprob.callf1(zeros(dualprob.m1, 1));
-        if isa(dualprob.Q, 'function_handle'), dualprob.isQfun = true;
-        else dualprob.isQfun = false; end
+        [~, q] = dualprob.callf1(zeros(dualprob.m1));
+        dualprob.Q = @(x) HessianQuadratic(x, dualprob.callf1, q);
     else
         dualprob.istheref1 = false;
     end
@@ -74,21 +63,10 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         dualprob.callf2 = prob.f2.makefconj();
         if isfield(prob, 'A2')
             dualprob.isthereC2 = true;
-            if isa(prob.A2, 'function_handle')
-                dualprob.isthereC2 = true;
-                if ~isfield(prob, 'A2t') || ~isa(prob.A2T, 'function_handle')
-                    error('you must specify both A2 and A2t as function handles');
-                end
-                dualprob.isC2fun = true;
-                dualprob.C2 = @(x) -prob.A2t(x);
-                dualprob.C2t = @(y) -prob.A2(y);
-                dualprob.m2 = length(dualprob.C2(dualprob.x0));
-            else
-                dualprob.isC2fun = false;
-                dualprob.C2 = -prob.A2';
-                dualprob.m2 = size(dualprob.C2, 1);
-            end
-            dualprob.d2 = zeros(dualprob.m2, 1);
+            dualprob.isC2fun = false;
+            dualprob.C2 = -prob.A2';
+            dualprob.m2 = [size(dualprob.C2, 1), 1];
+            dualprob.d2 = zeros(dualprob.m2);
         else
             error('yout must specify matrix A2 in the constraint');
         end
@@ -103,23 +81,32 @@ function [prob, dualprob] = ProcessSeparableProblem(prob, opt)
         error('you must specify matrix B in the constraint');
     end
     mus = sum((prob.B).*(prob.B), 1);
-    if (max(mus)-min(mus))/max(mus) > 10*eps, error('B''B must be a multiple of the identity'); end
+    if (max(mus)-min(mus))/max(mus) > 10*eps, error('B''B must be a positive multiple of the identity'); end
     prob.muB = mus(1);
     if ~isfield(prob, 'g'), error('you must specify term g'); end
     if ~isfield(prob.g, 'makeprox'), error('the prox for the term g you specified is not available'); end
     prob.callg = prob.g.makeprox();
     dualprob.callg = make_prox_conj(prob.callg, prob.B, prob.muB);
-    [dualprob.Lf, dualprob.unknownLf] = EstimateLipschitzConstant(dualprob, opt);
+    if isfield(opt, 'Lf')
+        dualprob.Lf = opt.Lf;
+        dualprob.adaptive = 0;
+    else
+        dualprob.Lf = EstimateLipschitzConstant(dualprob);
+        dualprob.adaptive = 1;
+    end
     dualprob.muf = 0;
     dualprob.processed = true;
-    
+
 end
 
 function op = make_prox_conj(proxg, B, mu)
     op = @(y, gam) call_prox_conj(y, gam, proxg, B, mu);
 end
 
-function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu) 
+function [proxpoint, proxval] = call_prox_conj(y, gam, prox, B, mu)
+% Compute prox_{gamma,h}, where h(y) = g*(-B'y), from prox_{gamma,g} and B.
+% Uses Bauschke, Combettes, Prop. 23.32, and Moreau identity.
+% Then uses conjugate subgradient theorem to compute the function value.
     mugam = mu*gam;
     [z, v] = prox(-(B'*y)/mugam, 1/mugam);
     Bz = B*z;

@@ -22,7 +22,7 @@ aff = {A, -b};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
-opt.tol = 1e-8;
+opt.tol = 1e-6;
 opt.display = 1;
 
 fprintf('\nFast FBS\n');
@@ -45,5 +45,3 @@ fprintf('iterations : %d\n', out.iterations);
 fprintf('matvecs    : %d\n', out.operations.C2);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
-
-

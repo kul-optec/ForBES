@@ -18,10 +18,10 @@ P = sprand(m, n, d) ~= 0; % sampling pattern
 B = full(M.*P);
 
 f = quadLoss(P(:), B(:));
-g = indRankBall(m, n, r);
+g = indRankBall(m, n, 5);
 x0 = zeros(m*n, 1);
 opt.maxit = 1000;
-opt.tol = 1e-8;
+opt.tol = 1e-6;
 opt.Lf = 1;
 opt.display = 1;
 
@@ -38,7 +38,6 @@ fprintf('residual   : %7.4e\n', out_fbs.residual(end));
 
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
-opt_lbfgs.solver = 'zerofpr';
 opt_lbfgs.method = 'lbfgs';
 out_lbfgs = forbes(f, g, x0, [], [], opt_lbfgs);
 fprintf('\n');

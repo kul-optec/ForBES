@@ -1,4 +1,4 @@
-% solve a basis pursuit denoising problem using ForBES
+% solve a lasso problem using ForBES
 
 close all;
 clear;
@@ -23,8 +23,7 @@ aff = {A, -b};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
-opt.tol = 1e-8;
-opt.adaptive = 1;
+opt.tol = 1e-6;
 opt.display = 1;
 
 fprintf('\nFast FBS\n');

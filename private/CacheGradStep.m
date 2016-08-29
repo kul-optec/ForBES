@@ -1,3 +1,20 @@
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
+%
+% This file is part of ForBES.
+%
+% ForBES is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Lesser General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% ForBES is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+% GNU Lesser General Public License for more details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with ForBES. If not, see <http://www.gnu.org/licenses/>.
+
 function [cache, ops] = CacheGradStep(cache, gam)
 
 ops = OpsInit();
@@ -26,8 +43,7 @@ prob = cache.prob;
 
 if prob.istheref1
     if prob.isthereC1
-        if prob.isC1fun, cache.gradf1x = prob.C1t(cache.gradf1res1x);
-        else cache.gradf1x = prob.C1'*(cache.gradf1res1x); end
+        cache.gradf1x = prob.C1'*cache.gradf1res1x;
         ops.C1 = ops.C1 + 1;
     end
 else
@@ -42,8 +58,7 @@ if prob.istheref2
             [~, gradf2res2x] = prob.callf2(cache.res2x);
             cache.gradf2res2x = gradf2res2x;
         end
-        if prob.isC2fun, cache.gradf2x = prob.C2t(gradf2res2x);
-        else cache.gradf2x = prob.C2'*gradf2res2x; end
+        cache.gradf2x = prob.C2'*gradf2res2x;
         ops.C2 = ops.C2 + 1;
     else
         if prob.useHessian

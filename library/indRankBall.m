@@ -1,23 +1,32 @@
 %INDRANKBALL Allocates the nuclear norm function
 %
-%   INDRANKBALL(m, n, r) builds the function
-%       
-%       g(X) = 0 if rank(X) <= r, +infinity otherwise
+%   INDRANKBALL(m, n, r) equivalent to INDRANKBALL(m, n, r, 'svds')
 %
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+%   INDRANKBALL(m, n, r, method) builds the function
+%
+%       g(x) = 0 if rank(x) <= r, +infinity otherwise
+%
+%   where x is a vector of length m*n, containing the stacked columns of a
+%   m-by-n matrix.
+%
+%   Argument 'method' selects how the SVD is computed:
+%    'svds': use MATLAB's svds
+%    'lansvd': use PROPACK'S lansvd
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 

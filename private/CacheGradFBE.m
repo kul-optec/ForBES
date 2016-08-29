@@ -1,3 +1,20 @@
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
+%
+% This file is part of ForBES.
+%
+% ForBES is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Lesser General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% ForBES is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+% GNU Lesser General Public License for more details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with ForBES. If not, see <http://www.gnu.org/licenses/>.
+
 function [cache, ops] = CacheGradFBE(cache, gam)
 
 if nargin < 2
@@ -17,24 +34,19 @@ if cache.flagGradFBE == 0 || gam0 ~= gam
     HFPR = 0;
     if prob.istheref1
         if prob.isthereC1
-            if prob.isC1fun, C1FPR = prob.C1(cache.FPR);
-            else C1FPR = prob.C1*cache.FPR; end
-            if prob.isQfun, Hessf1C1FPR = prob.Q(C1FPR);
-            else Hessf1C1FPR = prob.Q*C1FPR; end
-            if prob.isC1fun, C1tHessf1C1diff = prob.C1t(Hessf1C1FPR);
-            else C1tHessf1C1diff = prob.C1'*Hessf1C1FPR; end
+            C1FPR = prob.C1*cache.FPR;
+            QC1FPR = prob.Q(C1FPR);
+            C1tQC1diff = prob.C1'*QC1FPR;
             ops.C1 = ops.C1 + 2;
         else
-            if prob.isQfun, C1tHessf1C1diff = prob.Q(cache.FPR);
-            else C1tHessf1C1diff = prob.Q*cache.FPR; end
+            C1tQC1diff = prob.Q(cache.FPR);
         end
         ops.gradf1 = ops.gradf1 + 1;
-        HFPR = HFPR + C1tHessf1C1diff;
+        HFPR = HFPR + C1tQC1diff;
     end
     if prob.istheref2
         if prob.isthereC2
-            if prob.isC2fun, C2FPR = prob.C2(cache.FPR);
-            else C2FPR = prob.C2*cache.FPR; end
+            C2FPR = prob.C2*cache.FPR;
             ops.C2 = ops.C2 + 1;
         else
             C2FPR = cache.FPR;
@@ -54,8 +66,7 @@ if cache.flagGradFBE == 0 || gam0 ~= gam
     %             HC2diff = (gradf2res2xepsd-cache.gradf2res2x)/1e-8;
         end
         if prob.isthereC2
-            if prob.isC2fun, HFPR = HFPR + prob.C2t(HC2FPR);
-            else HFPR = HFPR + (prob.C2'*HC2FPR); end
+            HFPR = HFPR + (prob.C2'*HC2FPR);
             ops.C2 = ops.C2 + 1;
         else
             HFPR = HFPR + HC2FPR;

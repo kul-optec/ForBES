@@ -1,26 +1,26 @@
 %QUADRATIC Allocates a quadratic function.
 %
 %   QUADRATIC(Q, q) builds the function
-%       
+%
 %       f(x) = 0.5*x'*Q*x+q'*x
 %
 %   Both arguments are required. Matrix Q can be a scalar, in which case
 %   it is intended to be a diagonal matrix with uniform diagonal elements.
-%
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,20 +30,22 @@ function obj = quadratic(Q, q)
     obj.hasHessian = 1;
     if isa(Q, 'function_handle')
         obj.makef = @() @(x) call_quadratic_handle(Q, q, x);
+        obj.Q = Q;
     else
         obj.makef = @() @(x) call_quadratic_matrix(Q, q, x);
+        obj.Q = @(x) Q*x;
     end
     obj.makefconj = @() make_quadratic_conj(Q, q);
 end
 
 function [v, g, Q] = call_quadratic_matrix(Q, q, x)
     g = Q*x+q;
-    v = 0.5*(g+q)'*x;   
+    v = 0.5*(g+q)'*x;
 end
 
 function [v, g, Q] = call_quadratic_handle(Q, q, x)
     g = Q(x)+q;
-    v = 0.5*(g+q)'*x;   
+    v = 0.5*(g+q)'*x;
 end
 
 function fun = make_quadratic_conj(Q, q)

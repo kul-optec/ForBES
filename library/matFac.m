@@ -1,13 +1,28 @@
-% Function 0.5||A-UV||^2_F
-%   where if A is n-times-m
-%   then U is n-times-r and V is r-times-m
+%MATFAC
 %
-% The vector of variables x is supposed to be partitioned as
+%   MATFAC(A, r) returns the function
 %
-%   x = (u, v)
+%       f(x) = 0.5*||A-UV||^2_F
 %
-% where length(u) = n*r, i.e., u is stacked columns of U
-% and length(v) = r*m, i.e., v is stacked columns of V
+%   where x = [U(:); V(:)]. If A is n-times-m then U is n-times-r and V is
+%   r-times-m, therefore it must be length(x) = (n+m)*r.
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
+%
+% This file is part of ForBES.
+%
+% ForBES is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Lesser General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% ForBES is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+% GNU Lesser General Public License for more details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function obj = matFac(A, r)
     if nargin < 2

@@ -1,5 +1,3 @@
-clear;
-
 A = [1,  2, -1, -1; ...
     -2, -1,  0, -1; ...
     3,  0,  4, -1; ...
@@ -22,8 +20,7 @@ ASSERT_TOL = 1e-8;
 %% adaptive
 
 baseopt.display = 0;
-baseopt.adaptive = 1;
-baseopt.tol = 1e-14;
+baseopt.tol = 1e-12;
 baseopt.maxit = 10000;
 
 opt_fbs = baseopt; opt_fbs.solver = 'fbs'; opt_fbs.variant = 'basic';
@@ -34,7 +31,7 @@ assert(out_fbs.iterations < baseopt.maxit);
 opts = {};
 outs = {};
 
-opts{end+1} = baseopt; opts{end}.solver = 'fbs'; opts{end}.variant = 'fast'; 
+opts{end+1} = baseopt; opts{end}.solver = 'fbs'; opts{end}.variant = 'fast';
 opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking-armijo';

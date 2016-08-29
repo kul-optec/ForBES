@@ -12,32 +12,29 @@
 %   Parameter init is the starting dual point, opt is a structure
 %   containing options for the augmented Lagrangian method, inn_opt is a
 %   structure containing options for the inner solver.
-%
-% Authors: Lorenzo Stella (lorenzo.stella -at- imtlucca.it)
-%          Panagiotis Patrinos (panagiotis.patrinos -at- imtlucca.it)
-%
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function out = forbes_alm(f, g, h, F, init, opt, inn_init, inn_opt)
 
-if nargin < 5 || isempty(init), init = zeros(F.m, 1); end
+if nargin < 5 || isempty(init), init = zeros(F.m(1), F.m(2)); end
 if nargin < 6, opt = []; end
-if nargin < 7 || isempty(inn_init), inn_init = zeros(F.n,1); end
+if nargin < 7 || isempty(inn_init), inn_init = zeros(F.n(1),F.n(2)); end
 if nargin < 8, inn_opt = []; end
 
 % fill-in missing options with defaults
@@ -61,15 +58,16 @@ r = 10;
 inn_opt.tol = 1/r;
 eta = 0.1258925;
 
-inn_linop = stackOp({F, diagOp(F.n)});
+D = diagOp(F.n);
+inn_linop = stackOp({F, D});
 
 if ~isfield(opt, 'sqOpNorm')
     linop_op = inn_linop.makeop();
     linop_adj = inn_linop.makeadj();
-    linop_toiter = @(x) linop_adj(linop_op(x));
+    linop_toiter = @(x) vec(linop_adj(linop_op(reshape(x, F.n(1), F.n(2)))));
     eigsOpt.issym = 1;
     eigsOpt.tol = 1e-3;
-    sqnorm_linop = eigs(linop_toiter, F.n, 1, 'LM', eigsOpt);
+    sqnorm_linop = eigs(linop_toiter, prod(F.n), 1, 'LM', eigsOpt);
 else
     sqnorm_linop = opt.sqOpNorm;
 end
@@ -78,8 +76,8 @@ for it = 1:opt.maxit
 
     % define smooth term of the inner augmented Lagrangian subproblem
     hgamma = moreauEnvelope(h, 1/r);
-    inn_f = separableSum({hgamma, f}, [F.m, F.n]);
-    inn_aff = {inn_linop, [y/r; zeros(F.n, 1)]};
+    inn_f = separableSum({hgamma, f}, {F.m, F.n});
+    inn_aff = {inn_linop, [y(:)/r; zeros(prod(D.n), 1)]};
     if isfield(f, 'L'), inn_opt.Lf = f.L + sqnorm_linop*r; end
 
     % solve subproblem (warm start)
@@ -92,7 +90,7 @@ for it = 1:opt.maxit
     callhgamma = hgamma.makef();
     [~, y1] = callhgamma(callF(x) + y/r);
     res(1,it) = norm(y1-y)/r;
-    
+
     % display info
     if opt.display == 1
         fprintf('.');
@@ -130,7 +128,7 @@ out.y = y;
 out.iterations = it;
 out.inner_iterations = tot_inn_it;
 out.operations = tot_ops;
-    
+
 function opt = default_opt(opt)
 
 if ~isfield(opt, 'display'), opt.display = 1; end

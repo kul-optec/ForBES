@@ -1,6 +1,27 @@
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
+%
+% This file is part of ForBES.
+%
+% ForBES is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Lesser General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% ForBES is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+% GNU Lesser General Public License for more details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with ForBES. If not, see <http://www.gnu.org/licenses/>.
+
 % in minfbe:    v = gradient of FBE
 % in zerofpr:   v = residual
 function [dir, cacheDir] = ComputeDir(prob, opt, it, hasGammaChanged, sk, yk, v, cacheDir)
+
+sk = sk(:);
+yk = yk(:);
+v = v(:);
 
 % compute direction according to the method
 switch opt.methodID
@@ -9,7 +30,7 @@ switch opt.methodID
     case 2 % BFGS
         if it == 1 || hasGammaChanged
             dir = -v;
-            cacheDir.R = eye(prob.n);
+            cacheDir.R = eye(prod(prob.n));
         else
             R = cacheDir.R;
             YSk = yk'*sk;
@@ -51,7 +72,7 @@ switch opt.methodID
     case 8 % Broyden
         if it == 1 || hasGammaChanged % || mod(it, 5) == 1
             dir = -v;
-            cacheDir.R = eye(prob.n);
+            cacheDir.R = eye(prod(prob.n));
         else
             R = cacheDir.R;
             sts = sk'*sk;
@@ -211,6 +232,7 @@ switch opt.methodID
     otherwise
         error('search direction not implemented');
 end
+dir = reshape(dir, prob.n);
 
 function s = sgn(a)
 s = 2*(a>=0)-1;

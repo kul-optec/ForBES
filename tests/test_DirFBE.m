@@ -1,5 +1,3 @@
-clear;
-
 NUM_TOL_VAL = 1e-8;
 NUM_TOL_DER = 1e-8;
 
@@ -33,7 +31,7 @@ for igam = 1:length(gams)
 gam = gams(igam);
 cache = CacheInit(prob, x, gam);
 
-for idir = 1:30 % try several random directions
+for idir = 1:10 % try several random directions
 
 dir = randn(n, 1);
 cache = CacheLineSearch(cache, dir);

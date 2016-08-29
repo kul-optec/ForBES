@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,7 +23,7 @@ function lsopt = ProcessLineSearchOptions(prob, opt)
     % phi (a) - phi (0) <= delta phi'(0)
     if isfield(opt, 'delta'), lsopt.delta = opt.delta;
     else lsopt.delta = 0.1; end
-    lsopt.testGamma = prob.unknownLf || opt.adaptive;
+    lsopt.testGamma = prob.adaptive || opt.adaptive;
     lsopt.beta = opt.beta;
     switch opt.linesearchID
         case 1 % backtracking

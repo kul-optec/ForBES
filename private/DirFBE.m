@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -60,8 +60,7 @@ if nargin < 4 || cachet.flagGradStep ~= 1
         ops.f2 = ops.f2 + 1;
         ops.gradf2 = ops.gradf2 + 1;
         if prob.isthereC2
-            if prob.isC2fun, gradf2xt = prob.C2t(gradf2res2xt);
-            else gradf2xt = prob.C2'*gradf2res2xt; end
+            gradf2xt = prob.C2'*gradf2res2xt;
             ops.C2 = ops.C2 + 1;
         else
             gradf2xt = gradf2res2xt;
@@ -78,7 +77,7 @@ if nargin < 4 || cachet.flagGradStep ~= 1
     cachet.fx = fxt;
     cachet.gradfx = gradfxt;
     cachet.y = cachet.x - gam*gradfxt;
-    
+
     cachet.flagGradStep = 1;
 end
 
@@ -87,15 +86,15 @@ if nargin < 4 || cachet.flagProxGradStep ~= 1
     ops.proxg = ops.proxg + 1;
     ops.g = ops.g + 1;
     cachet.FPR = cachet.x-cachet.z;
-    
+
     cachet.flagProxGradStep = 1;
 end
 
 if mode == 1 || mode == 3
-    sqnormFPRt = cachet.FPR'*cachet.FPR;
+    sqnormFPRt = cachet.FPR(:)'*cachet.FPR(:);
     cachet.normFPR = sqrt(sqnormFPRt);
-    cachet.FBE = cachet.fx + cachet.gz - cachet.gradfx'*cachet.FPR + (0.5/gam)*sqnormFPRt;
-    
+    cachet.FBE = cachet.fx + cachet.gz - cachet.gradfx(:)'*cachet.FPR(:) + (0.5/gam)*sqnormFPRt;
+
     cachet.flagFBE = 1;
 end
 
@@ -125,5 +124,5 @@ if mode >= 2
             Hdir = Hdir + HC2dir;
         end
     end
-    cachet.dFBE = (cachet.FPR'*cache.dir)/gam - cachet.FPR'*Hdir;
+    cachet.dFBE = (cachet.FPR(:)'*cache.dir(:))/gam - cachet.FPR(:)'*Hdir(:);
 end

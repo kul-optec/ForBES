@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -41,13 +41,11 @@ switch opt.solver
     case 'zerofpr'
         opt.solverID = 3;
         if ~isfield(opt, 'qnopt') || isempty(opt.qnopt), opt.qnopt = 1; end
-    case 'minfbe2'
-        opt.solverID = 4;
     otherwise
         error('unknown solver');
 end
 
-solver2variant = {'fast', 'global', '', 'global'};
+solver2variant = {'fast', 'global', ''};
 if ~isfield(opt, 'variant') || isempty(opt.variant)
     opt.variant = solver2variant{opt.solverID};
 end
@@ -63,7 +61,7 @@ switch opt.variant
         opt.fast = 1;
 end
 
-solver2method = {'none', 'lbfgs', 'lbfgs', 'lbfgs'};
+solver2method = {'none', 'lbfgs', 'lbfgs'};
 if ~isfield(opt, 'method') || isempty(opt.method)
     opt.method = solver2method{opt.solverID};
 end

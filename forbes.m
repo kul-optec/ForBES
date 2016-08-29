@@ -1,13 +1,15 @@
-%FORBES Solver for nonsmooth convex optimization problems.
+% FORBES Solver for nonsmooth, nonconvex optimization problems.
 %
 %   Composite problems
 %   ------------------
 %
 %   (1)    minimize f(Cx + d) + g(x)
 %
-%   We assume that f has Lipschitz continuous gradient,
-%   and that g is closed and proper. C is a linear mapping of the
-%   appropriate dimension.
+%   We assume that f is continuously differentiable, and that g is closed
+%   and proper. C is a linear mapping and can be a MATLAB matrix, or any
+%   other matrix-like object, which essentially supports matrix-vector
+%   products, transposition and 'size'. For example operators from the Spot
+%   toolbox [1] can be used to form C.
 %
 %   out = FORBES(f, g, init, aff, [], opt) solves the problem with the
 %   specified f and g. init is the initial value for x, aff is a cell array
@@ -20,7 +22,9 @@
 %   (2)    minimize    f(x) + g(z)
 %          subject to  Ax + Bz = b
 %
-%   We assume that f is strongly convex, and that g is closed and proper. 
+%   We assume that f is strongly convex, and that g is closed and proper. A
+%   and B are matrix-like objects (just like C in the composite case) and
+%   such that B*B' = a*Id for some a > 0.
 %
 %   out = FORBES(f, g, init, [], constr, opt) solves the specified problem.
 %   init is the initial *dual* variable, constr is a cell array defining
@@ -51,40 +55,45 @@
 %   The following options can be set:
 %
 %       opt.tol: Tolerance on the optimality condition.
-% 
+%
 %       opt.maxit: Maximum number of iterations.
 %
-%		opt.solver: Internal solver to use. Can select between:
-%			* 'minfbe' (only for problems where g is convex)
-%			* 'zerofpr' (can handle also nonconvex g)
-% 
+%       opt.solver: Internal solver to use. Can select between:
+%           * 'minfbe' (only for problems where g is convex)
+%           * 'zerofpr' (default, can handle also nonconvex g)
+%
 %       opt.method: Algorithm to use. Can select between:
-%			* 'bfgs' (BFGS quasi-Newton method)
-%           * 'lbfgs' (limited memory BFGS, default).
-% 
+%           * 'bfgs' (BFGS quasi-Newton method)
+%           * 'lbfgs' (default, limited memory BFGS).
+%
 %       opt.linesearch: Line search strategy to use. Can select between:
-%           * 'backtracking' (simple backtracking),
+%           * 'backtracking' (default, simple backtracking),
 %           * 'backtracking-armijo' (backtracking satisfying Armijo condition),
 %           * 'backtracking-nm' (nonmonotone backtracking),
 %           * 'lemarechal' (line search for the Wolfe conditions).
 %
-% Authors: Lorenzo Stella (lorenzo.stella -at- imtlucca.it)
-%          Panagiotis Patrinos (panagiotis.patrinos -at- imtlucca.it)
+%   References
+%   ----------
 %
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+%   [1] Spot linear operators toolbox: http://www.cs.ubc.ca/labs/scl/spot/
+%
+% Authors: Lorenzo Stella (lorenzo.stella -at- imtlucca.it)
+%          Panagiotis Patrinos (panos.patrinos -at- esat.kuleuven.be)
+
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 

@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -55,12 +55,12 @@ ops = OpsSum(ops, ops1);
 cache_0 = cache_x;
 
 for it = 1:opt.maxit
-    
+
     hasGammaChanged = 0;
-    
+
     % backtracking on gamma
-    
-    if prob.unknownLf || opt.adaptive
+
+    if prob.adaptive || opt.adaptive
         [isGammaOK, cache_x, cache_xbar, ops1] = CheckGamma(cache_x, gam, opt.beta);
         ops = OpsSum(ops, ops1);
         while ~isGammaOK
@@ -70,40 +70,42 @@ for it = 1:opt.maxit
             ops = OpsSum(ops, ops1);
         end
     else
+        [cache_x, ops1] = CacheProxGradStep(cache_x, gam);
+        ops = OpsSum(ops, ops1);
         cache_xbar = CacheInit(prob, cache_x.z, gam);
     end
-    
+
     if prob.Lf >= MAXIMUM_Lf
         msgTerm = ['estimate for Lf became too large: ', num2str(prob.Lf)];
         flagTerm = 1;
         break;
     end
-    
+
     % trace stuff
-    
+
     ts(1, it) = toc(t0);
     residual(1, it) = norm(cache_x.FPR, 'inf')/gam;
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
-    
+
     % compute FBE at current point
     % this should count zero operations if gamma hasn't changed
-    
+
     [cache_x, ops1] = CacheFBE(cache_x, gam);
     ops = OpsSum(ops, ops1);
-    
+
     objective(1,it) = cache_x.FBE;
-    
+
     % check for termination
-    
+
     if isnan(cache_x.normFPR)
         msgTerm = 'something went wrong';
         flagTerm = 1;
         break;
     end
     if ~hasGammaChanged
-        if ~opt.customTerm 
+        if ~opt.customTerm
             if StoppingCriterion(cache_x, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
@@ -118,14 +120,14 @@ for it = 1:opt.maxit
             end
         end
     end
-    
+
     % select a direction
-    
+
     [cache_xbar, ops1] = CacheProxGradStep(cache_xbar, gam);
     ops = OpsSum(ops, ops1);
-    
+
     % compute pair (s, y) for quasi-Newton updates
-    
+
     if it > 1 && ~hasGammaChanged
         sk = cache_x.x - cache_previous.x;
         yk = cache_x.FPR - cache_previous.FPR;
@@ -136,17 +138,17 @@ for it = 1:opt.maxit
     end
 
     % compute search direction and slope
-    
+
     [dir, cacheDir] = ComputeDir(prob, opt, it, hasGammaChanged, sk, yk, ...
         cache_xbar.FPR, cacheDir);
     cacheDir.prev_v = cache_xbar.FPR;
-    
+
     % set initial guess for the step length
-    
+
     tau0 = ComputeTau0(prob, opt, sk, yk, dir);
-    
+
     % perform line search
-    
+
     switch opt.linesearchID
         case 1 % backtracking
             ref = cache_x.FBE - sig*cache_x.normFPR^2;
@@ -165,25 +167,29 @@ for it = 1:opt.maxit
         otherwise
             error('line search not implemented')
     end
+    ops = OpsSum(ops, ops1);
     cacheDir.prev_tau = tau;
-    
+
     % update iterates
-    
+
     if opt.qnopt == 1
         cache_previous = cache_xbar; % s = x_{k+1}-\bar{x}_{k}, y = r_{k+1}-\bar{r}_{k}
     elseif opt.qnopt == 2
         cache_previous = cache_x; % s = x_{k+1}-x_{k}, y = r_{k+1}-r_{k}
     end
-    
-    cache_x = cache_tau;
-    ops = OpsSum(ops, ops1);
+
+    if opt.global == 1
+        cache_x = CacheInit(prob, cache_tau.z, gam);
+    else
+        cache_x = cache_tau;
+    end
 
     if flagTerm == 1
         break;
     end
 
     % display stuff
-    
+
     if opt.display == 1
         PrintProgress(it);
     elseif opt.display >= 2

@@ -1,17 +1,17 @@
-% Copyright (C) 2015, Lorenzo Stella and Panagiotis Patrinos
+% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
 %
 % This file is part of ForBES.
-% 
+%
 % ForBES is free software: you can redistribute it and/or modify
 % it under the terms of the GNU Lesser General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-% 
+%
 % ForBES is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 % GNU Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public License
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
@@ -43,31 +43,31 @@ cache_current = CacheInit(prob, prob.x0, gam);
 t0 = tic();
 
 for it = 1:opt.maxit
-    
+
     % compute FBE
-    
+
     [cache_current, ops1] = CacheFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
 
     % store initial cache
-    
+
     if it == 1
         cache_0 = cache_current;
     end
 
     % trace stuff
-    
+
     ts(1, it) = toc(t0);
     residual(1, it) = norm(cache_current.FPR, 'inf')/gam;
     objective(1, it) = cache_current.FBE;
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
     end
-    
+
     solution = cache_current.z;
 
     % check for termination
-    
+
     if isnan(cache_current.normFPR)
         msgTerm = 'something went wrong';
         flagTerm = 1;
@@ -91,12 +91,12 @@ for it = 1:opt.maxit
     end
 
     % compute gradient of the FBE
-    
+
     [cache_current, ops1] = CacheGradFBE(cache_current, gam);
     ops = OpsSum(ops, ops1);
-    
+
     % compute pair (s, y) for quasi-Newton updates
-    
+
     if it > 1
         sk = cache_current.x - cache_previous.x;
         yk = cache_current.gradFBE - cache_previous.gradFBE;
@@ -106,17 +106,17 @@ for it = 1:opt.maxit
     end
 
     % compute search direction and slope
-    
+
     [dir, cacheDir] = ComputeDir(prob, opt, it, hasGammaChanged, sk, yk, ...
         cache_current.gradFBE, cacheDir);
     slope = cache_current.gradFBE'*dir;
 
     % set initial guess for the step length
-    
+
     tau0 = ComputeTau0(prob, opt, sk, yk, dir);
 
     % perform line search
-    
+
     switch opt.linesearchID
         case 1 % backtracking
             [tau, cache_tau, cache_tau1, ops1, flagLS] = BacktrackingLS(cache_current, dir, tau0, lsopt);
@@ -142,7 +142,7 @@ for it = 1:opt.maxit
     ops = OpsSum(ops, ops1);
 
     % check for line search fails
-    
+
     if flagLS > 0 && ~opt.global
         flagTerm = 2;
         msgTerm = strcat('line search failed at iteration', num2str(it));
@@ -150,7 +150,7 @@ for it = 1:opt.maxit
     end
 
     % prepare next iteration, store current solution
-    
+
     hasGammaChanged = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
@@ -177,7 +177,7 @@ for it = 1:opt.maxit
     end
 
     % display stuff
-    
+
     if opt.display == 1
         PrintProgress(it);
     elseif opt.display >= 2

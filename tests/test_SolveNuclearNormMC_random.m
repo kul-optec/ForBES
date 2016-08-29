@@ -1,5 +1,3 @@
-clear;
-
 rng(0, 'twister'); % uncomment this to control the random number generator
 
 m = 50; % number of rows
@@ -15,7 +13,7 @@ P = sprand(m, n, d) ~= 0; % sampling pattern
 B = full(M.*P);
 
 f = quadLoss(P(:), B(:));
-lam = 5;
+lam = 2;
 g = nuclearNorm(m, n, lam, 'inexact');
 x0 = zeros(m*n, 1);
 
@@ -24,7 +22,6 @@ ASSERT_TOL = 1e-8;
 %% run methods
 
 baseopt.display = 0;
-baseopt.adaptive = 0;
 baseopt.tol = 1e-10;
 baseopt.maxit = 1000;
 baseopt.Lf = 1;
