@@ -104,7 +104,7 @@ for it = 1:opt.maxit
 
     [direction, tau0, cacheDir] = ...
         opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_x.FPR, cacheDir);
-    direction = direction - cache_x.FPR;
+    direction = direction + cache_x.FPR;
 
     % perform line search
 
