@@ -1,4 +1,4 @@
-function out = zerofpr(prob, opt, lsopt)
+function out = zerofpr_new(prob, opt, lsopt)
 
 % initialize operations counter
 
@@ -53,7 +53,6 @@ for it = 1:opt.maxit
 
     ts(1, it) = toc(t0);
     residual(1, it) = norm(cache_x.FPR, 'inf')/gam;
-
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
@@ -101,13 +100,11 @@ for it = 1:opt.maxit
         yk = [];
     end
 
-    % compute search direction
+    % compute search direction and slope
 
-    [cache_xbar, ops1] = Cache_ProxGradStep(cache_xbar, gam);
-    ops = Ops_Sum(ops, ops1);
-
-    [dir, tau0, cacheDir] = ...
-        opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_xbar.FPR, cacheDir);
+    [direction, tau0, cacheDir] = ...
+        opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_x.FPR, cacheDir);
+    direction = direction - cache_x.FPR;
 
     % perform line search
 
@@ -115,17 +112,13 @@ for it = 1:opt.maxit
     lin = 0.0;
     const = -sig*cache_x.normFPR^2;
     [tau, cache_tau, ~, ops1, lsopt, ~] = ...
-        lsopt.linesearchfun(cache_xbar, dir, 0.0, tau0, lsopt, it, hasGammaChanged, ref, lin, const);
+        lsopt.linesearchfun(cache_xbar, direction, 0.0, tau0, lsopt, it, hasGammaChanged, ref, lin, const);
     ops = Ops_Sum(ops, ops1);
 
     % update iterate
 
-    if opt.memopt == 1
-        cache_previous = cache_xbar;
-    elseif opt.memopt == 2
-        cache_previous = cache_x;
-    end
-    cache_x = cache_tau;
+    cache_previous = cache_x;
+    cache_x = Cache_Init(prob, cache_tau.z, gam);
 
     if flagTerm == 1
         break;
