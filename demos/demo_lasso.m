@@ -29,6 +29,7 @@ opt.display = 1;
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
 opt_fbs.solver = 'fbs';
+opt_fbs.variant = 'fast';
 out_fbs = forbes(f, g, x0, aff, [], opt_fbs);
 fprintf('\n');
 fprintf('message    : %s\n', out_fbs.message);

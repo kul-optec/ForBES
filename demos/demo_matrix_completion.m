@@ -30,6 +30,7 @@ opt.display = 1;
 fprintf('\nFast FBS\n');
 opt_fbs = opt;
 opt_fbs.solver = 'fbs';
+opt_fbs.variant = 'fast';
 out = forbes(f, g, x0, [], [], opt_fbs);
 fprintf('\n');
 fprintf('iterations : %d\n', out.iterations);

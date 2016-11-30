@@ -1,4 +1,4 @@
-rng(0, 'twister');
+% rng(0, 'twister');
 
 m = 50;
 n = 200;
@@ -12,13 +12,13 @@ lam = 0.3*norm(A'*b, 'inf');
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 
-ASSERT_TOL = 1e-10;
+ASSERT_TOL = 1e-8;
 
 baseopt.display = 0;
 baseopt.tol = 1e-12;
 baseopt.maxit = 10000;
 
-opt_fbs = baseopt; opt_fbs.solver = 'fbs'; opt_fbs.variant = 'basic';
+opt_fbs = baseopt; opt_fbs.solver = 'fbs';
 out_fbs = forbes(f, g, x0, aff, [], opt_fbs);
 
 assert(out_fbs.iterations < baseopt.maxit);
@@ -42,5 +42,6 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyde
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
     assert(outs{i}.iterations < opts{i}.maxit);
-    assert(norm(outs{i}.x - out_fbs.x) <= ASSERT_TOL);
+    assert(norm(outs{i}.x - out_fbs.x,inf)/(1+norm(out_fbs.x,inf)) <= ASSERT_TOL);
+    fprintf('.');
 end

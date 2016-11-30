@@ -56,4 +56,5 @@ for i = 1:length(opts)
     assert(outs{i}.iterations < opts{i}.maxit);
     assert(abs(outs{i}.dual.objective(end) - fval_qp)/(1+abs(fval_qp)) <= ASSERT_TOLF);
     assert(norm(outs{i}.x1 - x_qp, inf)/(1+norm(x_qp, inf)) <= ASSERT_TOLX);
+    fprintf('.');
 end

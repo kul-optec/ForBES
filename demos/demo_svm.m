@@ -57,4 +57,3 @@ fprintf('matvecs    : %d\n', out.operations.C1);
 fprintf('prox       : %d\n', out.operations.proxg);
 fprintf('time       : %7.4e\n', out.ts(end));
 fprintf('residual   : %7.4e\n', out.residual(end));
-

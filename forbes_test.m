@@ -17,13 +17,13 @@ fprintf('%40s', 'MakeProblem... ');                 t0 = tic(); test_MakeProblem
 fprintf('%40s', 'CheckGamma... ');                  t0 = tic(); test_CheckGamma;                   fprintf('OK (%5.2f s)\n', toc(t0));
 fprintf('%40s', 'DirFBE... ');                      t0 = tic(); test_DirFBE;                       fprintf('OK (%5.2f s)\n', toc(t0));
 
-fprintf('* testing algorithms:\n');
+fprintf('* testing problems:\n');
 
-fprintf('%40s', 'SolveLasso_small... ');            t0 = tic(); test_SolveLasso_small;             fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'SolveLasso_random... ');           t0 = tic(); test_SolveLasso_random;            fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'SolveSparseLogReg_small... ');     t0 = tic(); test_SolveSparseLogReg_small ;     fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'SolveSVM_random... ');             t0 = tic(); test_SolveSVM_random;              fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'SolveNuclearNormMC_random... ');	t0 = tic(); test_SolveNuclearNormMC_random;    fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'SolveRankConstrMC_random... ');	t0 = tic(); test_SolveRankConstrMC_random;     fprintf('OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveLasso_small');                t0 = tic(); test_SolveLasso_small;             fprintf(' OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveLasso_random');               t0 = tic(); test_SolveLasso_random;            fprintf(' OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveSparseLogReg_small');         t0 = tic(); test_SolveSparseLogReg_small ;     fprintf(' OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveSVM_random');                 t0 = tic(); test_SolveSVM_random;              fprintf(' OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveNuclearNormMC_random');	      t0 = tic(); test_SolveNuclearNormMC_random;    fprintf(' OK (%5.2f s)\n', toc(t0));
+fprintf('%36s', 'SolveRankConstrMC_random');	       t0 = tic(); test_SolveRankConstrMC_random;    fprintf(' OK (%5.2f s)\n', toc(t0));
 
 rmpath(tests_path);

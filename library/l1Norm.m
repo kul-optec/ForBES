@@ -31,7 +31,7 @@ end
 
 function [prox, g] = call_l1Norm_prox(x, gam, mu)
 % prox(x) and g(prox(x)) for function g(x) = mu*||x||_1
-    uz = max(0, abs(x)-gam*mu);
+    uz = max(0.0, abs(x)-gam*mu);
     prox = sign(x).*uz;
     if nargout >= 2
         g = mu*sum(uz);

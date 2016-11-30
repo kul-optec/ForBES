@@ -1,4 +1,4 @@
-function out = minfbe(prob, opt, lsopt)
+function out = classical(prob, opt, lsopt)
 
 % initialize operations counter
 
@@ -14,8 +14,8 @@ if opt.display >= 2
     fprintf('%6s%11s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||dir||', 'slope', 'tau');
 end
 
-cache_dir.cntSkip = 0;
-gamma_changed = 0;
+cacheDir.cntSkip = 0;
+hasGammaChanged = 0;
 
 cache_current = Cache_Init(prob, prob.x0, gam);
 
@@ -47,7 +47,12 @@ for it = 1:opt.maxit
 
     % check for termination
 
-    if ~gamma_changed
+    if isnan(cache_current.normFPR)
+        msgTerm = 'something went wrong';
+        flagTerm = 1;
+        break;
+    end
+    if ~hasGammaChanged
         if ~opt.customTerm
             if Cache_StoppingCriterion(cache_current, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
@@ -69,18 +74,11 @@ for it = 1:opt.maxit
     [cache_current, ops1] = Cache_GradFBE(cache_current, gam);
     ops = Ops_Sum(ops, ops1);
 
-    % store pair (s, y) to compute direction
+    % compute pair (s, y) for quasi-Newton updates
 
     if it > 1
-        if opt.memopt == 1
-            sk = cache_current.x - cache_previous.x;
-            yk = cache_current.gradFBE - cache_previous.gradFBE;
-        elseif opt.memopt == 2
-            [cache_tau, ops1] = Cache_GradFBE(cache_tau, gam);
-            ops = Ops_Sum(ops, ops1);
-            sk = cache_tau.x - cache_previous.x;
-            yk = cache_tau.gradFBE - cache_previous.gradFBE;
-        end
+        sk = cache_current.x - cache_previous.x;
+        yk = cache_current.gradFBE - cache_previous.gradFBE;
     else
         sk = [];
         yk = [];
@@ -88,37 +86,32 @@ for it = 1:opt.maxit
 
     % compute search direction and slope
 
-    [dir, tau0, cache_dir] = ...
-        opt.methodfun(prob, opt, it, gamma_changed, sk, yk, cache_current.gradFBE, cache_dir);
+    [dir, tau0, cacheDir] = ...
+        opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_current.gradFBE, cacheDir);
     slope = cache_current.gradFBE'*dir;
 
     % perform line search
 
-    [tau, cache_tau, cache_tau1, ops1, lsopt, flagLS] = ...
-        lsopt.linesearchfun(cache_current, dir, slope, tau0, lsopt, it, gamma_changed);
+    [tau, cache_tau, ~, ops1, lsopt, flagLS] = ...
+        lsopt.linesearchfun(cache_current, dir, slope, tau0, lsopt, it, hasGammaChanged);
     ops = Ops_Sum(ops, ops1);
 
     % prepare next iteration, store current solution
 
-    gamma_changed = 0;
+    hasGammaChanged = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
         prob.Lf = prob.Lf*2; gam = gam/2;
-        gamma_changed = 1;
+        hasGammaChanged = 1;
         solution = cache_current.z;
     elseif flagLS > 0 % line-search failed
-        cache_previous = cache_current;
-        cache_current = Cache_Init(prob, cache_current.z, gam);
-        solution = cache_current.x;
+        flagTerm = 2;
+        msgTerm = strcat(['line search failed at iteration ', num2str(it)]);
+        break;
     else
         cache_previous = cache_current;
-        if ~isempty(cache_tau1)
-            solution = cache_current.z;
-            cache_current = cache_tau1;
-        else
-            solution = cache_tau.z;
-            cache_current = Cache_Init(prob, cache_tau.z, gam);
-        end
+        cache_current = cache_tau;
+        solution = cache_tau.z;
     end
 
     % display stuff
@@ -141,7 +134,6 @@ if opt.display == 1
 end
 
 % pack up results
-
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
@@ -153,6 +145,4 @@ out.objective = objective(1, 1:it);
 out.ts = ts(1, 1:it);
 if opt.toRecord, out.record = record; end
 out.gam = gam;
-out.skip = cache_dir.cntSkip;
-
-end
+out.skip = cacheDir.cntSkip;

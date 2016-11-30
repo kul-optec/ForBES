@@ -14,7 +14,7 @@ lam_max = norm(0.5*(A'*b),'inf')/m;
 lam = 0.1*lam_max;
 
 f = logLoss(1/m);
-aff = {diag(sparse(b))*A};
+aff = {diag(sparse(b))*A, zeros(m, 1)};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
@@ -50,5 +50,3 @@ fprintf('g          : %d\n', out_lbfgs.operations.g);
 fprintf('prox       : %d\n', out_lbfgs.operations.proxg);
 fprintf('time       : %7.4e\n', out_lbfgs.ts(end));
 fprintf('residual   : %7.4e\n', out_lbfgs.residual(end));
-
-

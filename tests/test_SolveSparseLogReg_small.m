@@ -46,5 +46,6 @@ for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
     assert(outs{i}.iterations < opts{i}.maxit);
     assert(outs{i}.objective(end) - out_fbs.objective(end) <= ASSERT_TOL);
-    assert(norm(outs{i}.x - x_star, 'fro') <= ASSERT_TOL);
+    assert(norm(outs{i}.x - x_star,inf)/(1+norm(x_star,inf)) <= ASSERT_TOL);
+    fprintf('.');
 end

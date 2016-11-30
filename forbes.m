@@ -105,36 +105,27 @@ function out = forbes(fs, gs, init, aff, constr, opt)
     if nargin < 5, constr = []; end
     if nargin < 6, opt = []; end
 
-    prob = MakeProblem(fs, gs, init, aff, constr);
-    opt = ProcessOptions(opt);
+    prob = Process_MakeProblem(fs, gs, init, aff, constr);
+    opt = Process_Options(opt);
+    lsopt = Process_LineSearchOptions(opt);
 
     switch prob.id
 
         case 1
-            prob = ProcessCompositeProblem(prob, opt);
+            prob = Process_CompositeProblem(prob, opt);
             preprocess = toc(t0);
-            switch opt.solver
-                case 'fbs'
-                    out = fbs(prob, opt);
-                case 'minfbe'
-                    out = minfbe(prob, opt);
-                case 'zerofpr'
-                    out = zerofpr(prob, opt);
-            end
+            out = opt.solverfun(prob, opt, lsopt);
 
         case 2
-            [prob, dualprob] = ProcessSeparableProblem(prob, opt);
+            [prob, dualprob] = Process_SeparableProblem(prob, opt);
             preprocess = toc(t0);
-            switch opt.solver
-                case 'fbs'
-                    dualout = fbs(dualprob, opt);
-                case 'minfbe'
-                    dualout = minfbe(dualprob, opt);
-                case 'zerofpr'
-                    dualout = zerofpr(dualprob, opt);
-            end
-            out = GetPrimalOutput(prob, dualprob, dualout);
+            dualout = opt.solverfun(dualprob, opt, lsopt);
+            out = Process_PrimalOutput(prob, dualprob, dualout);
     end
+
+    out.prob = prob;
+    out.opt = opt;
+    out.lsopt = lsopt;
 
     out.preprocess = preprocess;
 end
