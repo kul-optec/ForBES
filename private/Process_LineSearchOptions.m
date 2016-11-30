@@ -5,15 +5,13 @@ function lsopt = Process_LineSearchOptions(opt)
 %     lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
     % Armijo condition parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
-    if strcmp(opt.solver, 'zerofpr') || strcmp(opt.solver, 'zerofpr_new')
-      lsopt.testGamma = 0;
-    else
-      lsopt.testGamma = opt.adaptive;
-    end
+    lsopt.testGamma = opt.adaptive && ~strcmp(opt.solver, 'zerofpr');
     if isfield(opt, 'delta'), lsopt.delta = opt.delta;
     else lsopt.delta = 0.1; end
     lsopt.beta = opt.beta;
     switch opt.linesearch
+        case ''
+            lsopt.linesearchfun = @() error('no line-search selected');
         case 'backtracking'
             lsopt.linesearchfun = @LineSearch_Backtracking;
             lsopt.progTol = 0;
@@ -101,6 +99,8 @@ function lsopt = Process_LineSearchOptions(opt)
             lsopt.progTol = 0;
             % estimate of minimum value of the function
             lsopt.fmin = -inf;
+        otherwise
+            error('unknown line-search');
     end
 
     % if method is not L-BFGS then initial stepsize is selected according to Hager-Zhang
