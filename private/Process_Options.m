@@ -50,6 +50,8 @@ elseif strcmp(opt.solver, 'minfbe')
     method2linesearch = @(s) 'backtracking';
 elseif strcmp(opt.solver, 'zerofpr')
     method2linesearch = @(s) 'backtracking';
+elseif strcmp(opt.solver, 'zerofpr_new')
+    method2linesearch = @(s) 'backtracking';
 else
     method2linesearch = @(s) '';
 end
