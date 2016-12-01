@@ -90,17 +90,12 @@ for it = 1:opt.maxit
         break;
     end
 
-    % store pair (s, y) to compute direction
+    % compute search direction and slope
 
-    if it > 1 && ~hasGammaChanged
-        sk = cache_x.x - cache_previous.x;
-        yk = cache_x.FPR - cache_previous.FPR;
-    else
+    if it == 1 || hasGammaChanged
         sk = [];
         yk = [];
     end
-
-    % compute search direction and slope
 
     [direction, tau0, cacheDir] = ...
         opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_x.FPR, cacheDir);
@@ -110,19 +105,19 @@ for it = 1:opt.maxit
 
     ref = cache_x.FBE;
     lin = 0.0;
-    const = -sig*cache_x.normFPR^2;
+    const = 0.0;
     [tau, cache_tau, ~, ops1, lsopt, ~] = ...
         lsopt.linesearchfun(cache_xbar, direction, 0.0, tau0, lsopt, it, hasGammaChanged, ref, lin, const);
     ops = Ops_Sum(ops, ops1);
 
+    % store pair (s, y) to compute next direction
+
+    sk = cache_tau.x - cache_x.x;
+    yk = cache_tau.FPR - cache_x.FPR;
+
     % update iterate
 
-    cache_previous = cache_x;
     cache_x = Cache_Init(prob, cache_tau.z, gam);
-
-    if flagTerm == 1
-        break;
-    end
 
     % display stuff
 

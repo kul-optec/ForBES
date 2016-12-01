@@ -1,10 +1,11 @@
-function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Backtracking(cache, dir, slope, t0, lsopt, it, restart, ref, lin, const)
+function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Backtracking...
+    (cache, direction, slope, t0, lsopt, it, restart, ref, lin, const)
 
     if nargin < 8, ref = cache.FBE; end
     if nargin < 9, lin = 0.0; end
     if nargin < 10, const = 0.0; end
 
-    [cache, ops] = Cache_LineSearch(cache, dir);
+    [cache, ops] = Cache_LineSearch(cache, direction);
 
     cachet1 = [];
 

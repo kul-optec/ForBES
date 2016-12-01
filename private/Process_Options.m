@@ -59,7 +59,7 @@ if ~isfield(opt, 'linesearch') || isempty(opt.linesearch)
     opt.linesearch = method2linesearch(opt.method);
 end
 
-% wrap up a string summarizing the algorithm that will be used
+% wrap up a string describing the algorithm
 
 opt.name = opt.solver;
 if length(opt.variant) > 0, opt.name = strcat([opt.name, ', ', opt.variant]); end
