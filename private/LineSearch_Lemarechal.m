@@ -39,7 +39,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
     exitflag = 1;
     testGammaFlag = 0;
     for it = 1:lsopt.nbracket
-        [cachet, ops1] = Cache_DirFBE(cache, t, 1);
+        [cachet, ops1] = Cache_LineFBE(cache, t, 1);
         ops = Ops_Sum(ops, ops1);
         if lsopt.testGamma && testGammaFlag
             [flagGamma, cachet, cachet1, ops1] = Cache_CheckGamma(cachet, gam, lsopt.beta);
@@ -55,7 +55,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
                 tn = min(tn,b - theta*(b - a));
                 tn = max(tn,a + theta*(b - a));
             elseif lsopt.interp == 2
-                [cachet, ops1] = Cache_DirFBE(cache, t, 3, cachet);
+                [cachet, ops1] = Cache_LineFBE(cache, t, 3, cachet);
                 ops = Ops_Sum(ops, ops1);
                 dfb = cachet.dFBE;
                 tn = LemarechalCubInterp(a,fa,dfa,b,fb,dfb);
@@ -67,7 +67,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
             end
             t = tn;
         else
-            [cachet, ops1] = Cache_DirFBE(cache, t, 2, cachet);
+            [cachet, ops1] = Cache_LineFBE(cache, t, 2, cachet);
             ops = Ops_Sum(ops, ops1);
             if cachet.dFBE < wolfe_lo
                 a = t; fa = cachet.FBE; dfa = cachet.dFBE;

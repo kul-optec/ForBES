@@ -10,6 +10,7 @@ cache.flagGradStep = 0;
 cache.flagProxGradStep = 0;
 cache.flagFBE = 0;
 cache.flagGradFBE = 0;
-cache.flagLineSearch = 0;
+cache.flagLineSearch1 = 0;
+cache.flagLineSearch2 = 0;
 
 end

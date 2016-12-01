@@ -15,7 +15,7 @@ fprintf('* testing solver utilities:\n');
 
 fprintf('%40s', 'MakeProblem... ');                 t0 = tic(); test_MakeProblem;                  fprintf('OK (%5.2f s)\n', toc(t0));
 fprintf('%40s', 'CheckGamma... ');                  t0 = tic(); test_CheckGamma;                   fprintf('OK (%5.2f s)\n', toc(t0));
-fprintf('%40s', 'DirFBE... ');                      t0 = tic(); test_DirFBE;                       fprintf('OK (%5.2f s)\n', toc(t0));
+fprintf('%40s', 'LineFBE... ');                      t0 = tic(); test_LineFBE;                       fprintf('OK (%5.2f s)\n', toc(t0));
 
 fprintf('* testing problems:\n');
 

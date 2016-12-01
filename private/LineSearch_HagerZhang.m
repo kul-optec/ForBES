@@ -31,14 +31,14 @@ function [alpha, cachet, cachet1, ops, lsopt, info] = LineSearch_HagerZhang(cach
 
     % evaluate function or gradient at alpha (starting guess)
     if ( lsopt.QuadOK )
-        [cachet, ops1] = DirFBE(cache, alpha, 3);
+        [cachet, ops1] = LineFBE(cache, alpha, 3);
         ops = Ops_Sum(ops, ops1);
         f = cachet.FBE; df = cachet.dFBE;
         fb = f;
         if ( ~AWolfe ), fb = fb - alpha*lsopt.wolfe_hi ;end
         qb = true ; % function value at b known
     else
-        [cachet, ops1] = DirFBE(cache, alpha, 2);
+        [cachet, ops1] = LineFBE(cache, alpha, 2);
         ops = Ops_Sum(ops, ops1);
         df = cachet.dFBE;
         qb = false ;
@@ -70,7 +70,7 @@ function [alpha, cachet, cachet1, ops, lsopt, info] = LineSearch_HagerZhang(cach
     ngrow = 1 ;
     while ( db < 0 )
         if ( ~qb )
-            [cachet, ops1] = DirFBE(cache, alpha, 1, cachet);
+            [cachet, ops1] = LineFBE(cache, alpha, 1, cachet);
             ops = Ops_Sum(ops, ops1);
             f = cachet.FBE;
             if ( AWolfe )
@@ -125,7 +125,7 @@ function [alpha, cachet, cachet1, ops, lsopt, info] = LineSearch_HagerZhang(cach
         end
         b = max (bmin, b) ;
         alpha = b ;
-        [cachet, ops1] = DirFBE(cache, alpha, 2);
+        [cachet, ops1] = LineFBE(cache, alpha, 2);
         ops = Ops_Sum(ops, ops1);
         df = cachet.dFBE;
         b = alpha ;
@@ -248,7 +248,7 @@ function [alpha, cachet, cachet1, ops, lsopt, info] = LineSearch_HagerZhang(cach
 
         toggle = toggle + 1 ;
         if ( toggle > 2 ), toggle = 0 ;end
-        [cachet, ops1] = DirFBE(cache, alpha, 3);
+        [cachet, ops1] = LineFBE(cache, alpha, 3);
         ops = Ops_Sum(ops, ops1);
         f = cachet.FBE;df = cachet.dFBE;
         if ( lsopt.QuadOK )
@@ -350,7 +350,7 @@ function [a,fa,da,b,fb,db,alpha,info,lsopt,cachet,ops] = HagerZhangUpdate(a,fa,d
         if ( toggle > 2 )
             toggle = 0 ;
         end
-        [cachet, ops1] = DirFBE(cache, alpha, 3);
+        [cachet, ops1] = LineFBE(cache, alpha, 3);
         ops = Ops_Sum(ops, ops1);
         f = cachet.FBE; df = cachet.dFBE;
 

@@ -15,7 +15,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Backtracking...
     exitflag = 1;
 
     for i = 1:lsopt.nLS
-        [cachet, ops1] = Cache_DirFBE(cache, t, 1);
+        [cachet, ops1] = Cache_LineFBE(cache, t, 1);
         ops = Ops_Sum(ops, ops1);
         ft = cachet.FBE;
         if ft <= ref + t*lin + 1e-14*abs(ref) + const

@@ -158,7 +158,7 @@ function [cachet, t, cnt, info ] = LineSearch_MoreThuente(prob, gam, cache, df0,
         %        Evaluate the function and gradient at t
         %        and compute the directional derivative.
         %
-        [cachet, cnt1] = DirFBE(prob, gam, t, cache, 3);
+        [cachet, cnt1] = LineFBE(prob, gam, t, cache, 3);
         cnt = cnt+cnt1;
         nf = nf+1;
         f = cachet.FBE; dg = cachet.dFBE;

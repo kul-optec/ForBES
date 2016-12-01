@@ -59,7 +59,7 @@ function [cachet,a,b,fa,dfa,fb,dfb,t,exitflag,cnt] = FletcherBracket(cache,prob,
     t = t0;
     for nbracket = 1:lsopt.nbracket
         fold = ft; dfold = dft;
-        [cachet, cnt1] = DirFBE(prob, gam, t, cache, 3);
+        [cachet, cnt1] = LineFBE(prob, gam, t, cache, 3);
         cnt = cnt+cnt1;
         ft = cachet.FBE; dft = cachet.dFBE;
 
@@ -130,7 +130,7 @@ function [cachet,t,exitflag,cnt] = FletcherSection(cache,prob,gam,f0,a,fa,dfa,b,
         t = FletcherCubInterp(a,fa,dfa,b,fb,dfb);
         t = min(max(t,lb),ub);
 
-        [cachet, cnt1] = DirFBE(prob, gam, t, cache, 3);
+        [cachet, cnt1] = LineFBE(prob, gam, t, cache, 3);
         cnt = cnt+cnt1;
         ft = cachet.FBE; dft = cachet.dFBE;
 

@@ -1,11 +1,4 @@
-function [cache, ops] = Cache_LineSearch(cache, dir)
-
-if cache.flagLineSearch == 1
-    if norm(dir-cache.dir) == 0
-        ops = Ops_Init();
-        return;
-    end
-end
+function [cache, ops] = Cache_LineSearch(cache, dir1)
 
 if cache.flagGradStep == 0
     [cache, ops] = Cache_GradStep(cache, cache.gam);
@@ -14,37 +7,79 @@ else
 end
 
 prob = cache.prob;
-cache.dir = dir;
 
-if prob.istheref1
-    if prob.isthereC1
-        cache.C1dir = prob.C1*dir;
-        cache.QC1dir = prob.Q(cache.C1dir);
-        cache.C1tQC1dir = prob.C1'*cache.QC1dir;
-        ops.C1 = ops.C1 + 2;
-    else
-        cache.C1dir = dir;
-        cache.QC1dir = prob.Q(cache.C1dir);
-        cache.C1tQC1dir = cache.QC1dir;
+if nargin > 1 && ~isempty(dir1)
+
+    cache.dir1 = dir1;
+
+    if prob.istheref1
+        if prob.isthereC1
+            cache.C1dir1 = prob.C1*dir1;
+            cache.QC1dir1 = prob.Q(cache.C1dir1);
+            cache.C1tQC1dir1 = prob.C1'*cache.QC1dir1;
+            ops.C1 = ops.C1 + 2;
+        else
+            cache.C1dir1 = dir1;
+            cache.QC1dir1 = prob.Q(cache.C1dir1);
+            cache.C1tQC1dir1 = cache.QC1dir1;
+        end
+        ops.gradf1 = ops.gradf1 + 1;
+        cache.f1linear = cache.gradf1x(:)'*dir1(:);
+        cache.f1quad = cache.C1dir1(:)'*cache.QC1dir1(:);
     end
-    ops.gradf1 = ops.gradf1 + 1;
-    cache.f1linear = cache.gradf1x(:)'*dir(:);
-    cache.f1quad = cache.C1dir(:)'*cache.QC1dir(:);
-end
 
-if prob.istheref2
-    if prob.isthereC2
-        cache.C2dir = prob.C2*dir;
-        ops.C2 = ops.C2 + 1;
-    else
-        cache.C2dir = dir;
+    if prob.istheref2
+        if prob.isthereC2
+            cache.C2dir1 = prob.C2*dir1;
+            ops.C2 = ops.C2 + 1;
+        else
+            cache.C2dir1 = dir1;
+        end
     end
+
+    if prob.istherelin
+        cache.lindir1 = prob.l(:)'*dir1(:);
+    end
+
+    cache.flagLineSearch1 = 1;
+
 end
 
-if prob.istherelin
-    cache.lindir = prob.l(:)'*dir(:);
-end
+if nargin > 2 && ~isempty(dir2)
 
-cache.flagLineSearch = 1;
+    cache.dir2 = dir2;
+
+    if prob.istheref1
+        if prob.isthereC1
+            cache.C1dir2 = prob.C1*dir2;
+            cache.QC1dir2 = prob.Q(cache.C1dir2);
+            cache.C1tQC1dir2 = prob.C1'*cache.QC1dir2;
+            ops.C1 = ops.C1 + 2;
+        else
+            cache.C1dir2 = dir2;
+            cache.QC1dir2 = prob.Q(cache.C1dir2);
+            cache.C1tQC1dir2 = cache.QC1dir2;
+        end
+        ops.gradf1 = ops.gradf1 + 1;
+        cache.f1linear = cache.gradf1x(:)'*dir2(:);
+        cache.f1quad = cache.C1dir2(:)'*cache.QC1dir2(:);
+    end
+
+    if prob.istheref2
+        if prob.isthereC2
+            cache.C2dir2 = prob.C2*dir2;
+            ops.C2 = ops.C2 + 1;
+        else
+            cache.C2dir2 = dir2;
+        end
+    end
+
+    if prob.istherelin
+        cache.lindir2 = prob.l(:)'*dir2(:);
+    end
+
+    cache.flagLineSearch2 = 1;
+
+end
 
 end

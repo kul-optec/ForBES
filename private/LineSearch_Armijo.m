@@ -24,7 +24,7 @@ function [t, cachet, cachet1, ops, exitflag] = LineSearch_Armijo(cache, dir, slo
         f0 = cache.FBE;
     end
     for i = 1:lsopt.nLS
-        [cachet, ops1] = DirFBE(cache, t, 1);
+        [cachet, ops1] = LineFBE(cache, t, 1);
         ops = OpsSum(ops, ops1);
         ft = cachet.FBE;
         if ft <= f0 + t*arm_hi

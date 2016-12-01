@@ -42,19 +42,19 @@ for itau = 1:length(taus)
 
     tau = taus(itau);
 
-    cache_1 = Cache_DirFBE(cache, tau, 1);
+    cache_1 = Cache_LineFBE(cache, tau, 1);
     cache_2 = Cache_Init(prob, x+tau*dir, gam);
     cache_2 = Cache_FBE(cache_2, gam);
 
     assert(abs(cache_1.FBE - cache_2.FBE)/abs(cache_2.FBE) <= NUM_TOL_VAL);
 
-    cache_1 = Cache_DirFBE(cache, tau, 2);
+    cache_1 = Cache_LineFBE(cache, tau, 2);
     cache_2 = Cache_GradFBE(cache_2, gam);
     slope = cache_2.gradFBE'*dir;
 
     assert(abs(cache_1.dFBE - slope)/abs(slope) <= NUM_TOL_DER);
 
-    cache_1 = Cache_DirFBE(cache, tau, 3);
+    cache_1 = Cache_LineFBE(cache, tau, 3);
 
     assert(abs(cache_1.FBE - cache_2.FBE)/abs(cache_2.FBE) <= NUM_TOL_VAL);
     assert(abs(cache_1.dFBE - slope)/abs(slope) <= NUM_TOL_DER);

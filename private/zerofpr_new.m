@@ -97,18 +97,26 @@ for it = 1:opt.maxit
         yk = [];
     end
 
-    [direction, tau0, cacheDir] = ...
+    [dir_QN, tau0, cacheDir] = ...
         opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_x.FPR, cacheDir);
-    direction = direction + cache_x.FPR;
+    dir_FB = cache_x.FPR;
 
     % perform line search
 
-    ref = cache_x.FBE;
-    lin = 0.0;
-    const = 0.0;
-    [tau, cache_tau, ~, ops1, lsopt, ~] = ...
-        lsopt.linesearchfun(cache_xbar, direction, 0.0, tau0, lsopt, it, hasGammaChanged, ref, lin, const);
+    tau = 1.0; % this *must* be 1.0 for this line-search to work
+    [cache_x, ops1] = Cache_LineSearch(cache_x, dir_QN);
     ops = Ops_Sum(ops, ops1);
+    [cache_tau, ops1] = Cache_LineFBE(cache_x, 1.0, 1);
+    ops = Ops_Sum(ops, ops1);
+    if cache_tau.FBE > cache_x.FBE
+        [cache_x, ops1] = Cache_LineSearch(cache_x, [], dir_FB);
+        ops = Ops_Sum(ops, ops1);
+    end
+    while cache_tau.FBE > cache_x.FBE
+        tau = tau/2;
+        [cache_tau, ops1] = Cache_SegmentFBE(cache_x, tau);
+        ops = Ops_Sum(ops, ops1);
+    end
 
     % store pair (s, y) to compute next direction
 

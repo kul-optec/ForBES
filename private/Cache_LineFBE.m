@@ -1,4 +1,4 @@
-function [cachet, ops] = Cache_DirFBE(cache, tau, mode, cachet)
+function [cachet, ops] = Cache_LineFBE(cache, tau, mode, cachet)
 % Computes the 'directional' FBE, i.e., FBE(x+tau*d) and its derivative with
 % respect to tau, if requested. Here x = cache.x, d = cache.dir.
 % If cachet (4th argument) is provided, then skips precomputing the data
@@ -8,8 +8,8 @@ function [cachet, ops] = Cache_DirFBE(cache, tau, mode, cachet)
 % If mode == 2, compute only dFBE(x+tau*d), the directional derivative.
 % If mode == 3, compute both FBE and dFBE at x+tau*d.
 
-if cache.flagLineSearch ~= 1
-    error('DirFBE: line search data was not precomputed');
+if cache.flagLineSearch1 ~= 1
+    error('line search data was not precomputed');
 end
 
 ops = Ops_Init();
@@ -18,22 +18,22 @@ prob = cache.prob;
 gam = cache.gam;
 
 if nargin < 4
-    cachet = Cache_Init(prob, cache.x + tau*cache.dir, gam);
+    cachet = Cache_Init(prob, cache.x + tau*cache.dir1, gam);
 end
 
-if nargin < 4 || cachet.flagGradStep ~= 1
+if nargin < 4 || cachet.flagGradStep == 0
     fxt = 0;
     gradfxt = 0;
     if prob.istheref1
-        cachet.res1x = cache.res1x + tau*cache.C1dir;
-        cachet.gradf1res1x = cache.gradf1res1x + tau*cache.QC1dir;
-        cachet.gradf1x = cache.gradf1x + tau*cache.C1tQC1dir;
+        cachet.res1x = cache.res1x + tau*cache.C1dir1;
+        cachet.gradf1res1x = cache.gradf1res1x + tau*cache.QC1dir1;
+        cachet.gradf1x = cache.gradf1x + tau*cache.C1tQC1dir1;
         cachet.f1x = cache.f1x + tau*cache.f1linear + (0.5*tau^2)*cache.f1quad;
         fxt = fxt + cachet.f1x;
         gradfxt = gradfxt + cachet.gradf1x;
     end
     if prob.istheref2
-        cachet.res2x = cache.res2x + tau*cache.C2dir;
+        cachet.res2x = cache.res2x + tau*cache.C2dir1;
         if prob.useHessian
             [f2xt, gradf2res2xt, cachet.Hessf2res2x] = prob.callf2(cachet.res2x);
         else
@@ -52,7 +52,7 @@ if nargin < 4 || cachet.flagGradStep ~= 1
         gradfxt = gradfxt + gradf2xt;
     end
     if prob.istherelin
-        cachet.flinx = cache.flinx + tau*cache.lindir;
+        cachet.flinx = cache.flinx + tau*cache.lindir1;
         fxt = fxt + cachet.flinx;
         gradfxt = gradfxt + prob.l;
     end
@@ -64,7 +64,7 @@ if nargin < 4 || cachet.flagGradStep ~= 1
     cachet.flagGradStep = 1;
 end
 
-if nargin < 4 || cachet.flagProxGradStep ~= 1
+if nargin < 4 || cachet.flagProxGradStep == 0
     [cachet.z, cachet.gz] = prob.callg(cachet.y, gam);
     ops.proxg = ops.proxg + 1;
     ops.g = ops.g + 1;
@@ -82,27 +82,27 @@ if mode == 1 || mode == 3
 end
 
 if mode >= 2
-    Hdir = 0;
+    Hdir1 = 0;
     if prob.istheref1
-        Hdir = Hdir + cache.C1tQC1dir;
+        Hdir1 = Hdir1 + cache.C1tQC1dir1;
     end
     if prob.istheref2
         if prob.useHessian
-            HC2dir = cachet.Hessf2res2x*cache.C2dir;
+            HC2dir1 = cachet.Hessf2res2x*cache.C2dir1;
         else
-            res2xtepsdir = cachet.res2x + 1e-100i*cache.C2dir;
-            [~, gradf2res2xtepsdir] = prob.callf2(res2xtepsdir);
+            res2xtepsdir1 = cachet.res2x + 1e-100i*cache.C2dir1;
+            [~, gradf2res2xtepsdir1] = prob.callf2(res2xtepsdir1);
             ops.gradf2 = ops.gradf2 + 1;
-            HC2dir = imag(gradf2res2xtepsdir)/1e-100;
+            HC2dir1 = imag(gradf2res2xtepsdir1)/1e-100;
         end
         if prob.isthereC2
-            Hdir = Hdir + (prob.C2'*HC2dir);
+            Hdir1 = Hdir1 + (prob.C2'*HC2dir1);
             ops.C2 = ops.C2 + 1;
         else
-            Hdir = Hdir + HC2dir;
+            Hdir1 = Hdir1 + HC2dir1;
         end
     end
-    cachet.dFBE = (cachet.FPR(:)'*cache.dir(:))/gam - cachet.FPR(:)'*Hdir(:);
+    cachet.dFBE = (cachet.FPR(:)'*cache.dir1(:))/gam - cachet.FPR(:)'*Hdir1(:);
 end
 
 end
