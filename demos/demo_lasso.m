@@ -41,7 +41,6 @@ fprintf('residual   : %7.4e\n', out_fbs.residual(end));
 
 fprintf('\nL-BFGS\n');
 opt_lbfgs = opt;
-opt_lbfgs.solver = 'zerofpr';
 opt_lbfgs.method = 'lbfgs';
 out_lbfgs = forbes(f, g, x0, aff, [], opt_lbfgs);
 fprintf('\n');
@@ -51,4 +50,3 @@ fprintf('matvecs    : %d\n', out_lbfgs.operations.C1);
 fprintf('prox       : %d\n', out_lbfgs.operations.proxg);
 fprintf('time       : %7.4e\n', out_lbfgs.ts(end));
 fprintf('residual   : %7.4e\n', out_lbfgs.residual(end));
-

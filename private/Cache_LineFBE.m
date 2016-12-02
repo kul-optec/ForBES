@@ -28,7 +28,7 @@ if nargin < 4 || cachet.flagGradStep == 0
         cachet.res1x = cache.res1x + tau*cache.C1dir1;
         cachet.gradf1res1x = cache.gradf1res1x + tau*cache.QC1dir1;
         cachet.gradf1x = cache.gradf1x + tau*cache.C1tQC1dir1;
-        cachet.f1x = cache.f1x + tau*cache.f1linear + (0.5*tau^2)*cache.f1quad;
+        cachet.f1x = cache.f1x + tau*cache.f1linear1 + (0.5*tau^2)*cache.f1quad1;
         fxt = fxt + cachet.f1x;
         gradfxt = gradfxt + cachet.gradf1x;
     end

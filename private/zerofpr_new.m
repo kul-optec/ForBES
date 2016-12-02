@@ -97,7 +97,7 @@ for it = 1:opt.maxit
         yk = [];
     end
 
-    [dir_QN, tau0, cacheDir] = ...
+    [dir_QN, ~, cacheDir] = ...
         opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_x.FPR, cacheDir);
     dir_FB = cache_x.FPR;
 
@@ -106,7 +106,7 @@ for it = 1:opt.maxit
     tau = 1.0; % this *must* be 1.0 for this line-search to work
     [cache_x, ops1] = Cache_LineSearch(cache_x, dir_QN);
     ops = Ops_Sum(ops, ops1);
-    [cache_tau, ops1] = Cache_LineFBE(cache_x, 1.0, 1);
+    [cache_tau, ops1] = Cache_LineFBE(cache_x, tau, 1);
     ops = Ops_Sum(ops, ops1);
     if cache_tau.FBE > cache_x.FBE
         [cache_x, ops1] = Cache_LineSearch(cache_x, [], dir_FB);
@@ -116,6 +116,8 @@ for it = 1:opt.maxit
         tau = tau/2;
         [cache_tau, ops1] = Cache_SegmentFBE(cache_x, tau);
         ops = Ops_Sum(ops, ops1);
+        cache_DEBUG = Cache_Init(prob, cache_x.z + tau*(dir_FB + dir_QN), gam);
+        cache_DEBUG = Cache_FBE(cache_DEBUG, gam);
     end
 
     % store pair (s, y) to compute next direction

@@ -1,4 +1,4 @@
-function [cache, ops] = Cache_LineSearch(cache, dir1)
+function [cache, ops] = Cache_LineSearch(cache, dir1, dir2)
 
 if cache.flagGradStep == 0
     [cache, ops] = Cache_GradStep(cache, cache.gam);
@@ -24,8 +24,8 @@ if nargin > 1 && ~isempty(dir1)
             cache.C1tQC1dir1 = cache.QC1dir1;
         end
         ops.gradf1 = ops.gradf1 + 1;
-        cache.f1linear = cache.gradf1x(:)'*dir1(:);
-        cache.f1quad = cache.C1dir1(:)'*cache.QC1dir1(:);
+        cache.f1linear1 = cache.gradf1x(:)'*dir1(:);
+        cache.f1quad1 = cache.C1dir1(:)'*cache.QC1dir1(:);
     end
 
     if prob.istheref2
@@ -61,8 +61,9 @@ if nargin > 2 && ~isempty(dir2)
             cache.C1tQC1dir2 = cache.QC1dir2;
         end
         ops.gradf1 = ops.gradf1 + 1;
-        cache.f1linear = cache.gradf1x(:)'*dir2(:);
-        cache.f1quad = cache.C1dir2(:)'*cache.QC1dir2(:);
+        cache.f1linear2 = cache.gradf1x(:)'*dir2(:);
+        cache.f1quad2 = cache.C1dir2(:)'*cache.QC1dir2(:);
+        cache.f1cross = cache.QC1dir1(:)'*cache.C1dir2(:);
     end
 
     if prob.istheref2
