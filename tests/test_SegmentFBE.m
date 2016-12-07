@@ -34,7 +34,8 @@ cache = Cache_Init(prob, x, gam);
 for idir = 1:10 % try several random directions
 
 dir1 = randn(n, 1);
-dir2 = randn(n, 1);
+cache = Cache_ProxGradStep(cache, gam);
+dir2 = -cache.FPR;
 cache = Cache_LineSearch(cache, dir1);
 cache = Cache_LineSearch(cache, [], dir2);
 
@@ -51,6 +52,10 @@ for itau = 1:length(taus)
     assert(abs(cache_1.FBE - cache_2.FBE)/abs(cache_2.FBE) <= NUM_TOL_VAL);
 
 end
+
+cache_1 = Cache_SegmentFBE(cache, 0.0);
+assert(norm(cache_1.x - cache.z, inf) <= 1e-12);
+
 end
 end
 end
