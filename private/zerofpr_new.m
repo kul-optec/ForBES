@@ -7,7 +7,6 @@ ops = Ops_Init();
 % initialize gamma and sigma
 
 gam = (1-opt.beta)/prob.Lf;
-sig = (1-gam*prob.Lf)/(4*gam);
 
 % display header
 
@@ -97,8 +96,8 @@ for it = 1:opt.maxit
     
     % DEBUG LINES FOLLOW
     
-    cache_xbar = Cache_Init(prob, cache_x.z, gam);
-    cache_xbar = Cache_FBE(cache_xbar, gam);
+%     cache_xbar = Cache_Init(prob, cache_x.z, gam);
+%     cache_xbar = Cache_FBE(cache_xbar, gam);
 
     % perform line search
 
@@ -119,7 +118,7 @@ for it = 1:opt.maxit
         ops = Ops_Sum(ops, ops1);
     end
     while cache_w.FBE > cache_x.FBE
-        if tau <= 1e-10
+        if tau <= 1e-12
             msgTerm = 'line search failed';
             flagTerm = 1;
             break;
@@ -135,6 +134,9 @@ for it = 1:opt.maxit
     end
     if restart, continue; end
     restart = 0;
+    if flagTerm
+        break;
+    end
 
     % store pair (s, y) to compute next direction
 
@@ -155,10 +157,6 @@ for it = 1:opt.maxit
         Util_PrintProgress(it);
     elseif opt.display >= 2
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it), tau);
-    end
-    
-    if flagTerm
-        break;
     end
 
 end
