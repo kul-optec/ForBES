@@ -1,7 +1,7 @@
 function stop = Cache_StoppingCriterion(cache, tol, cache_prev)
 
 % Absolute stopping criterion on the fixed point residual
-normInfFPR = norm(cache.FPR, 'inf');
+normInfFPR = norm(cache.FPR, 'inf')/cache.gam;
 if normInfFPR <= tol
     stop = 1;
 else

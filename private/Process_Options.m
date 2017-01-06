@@ -1,4 +1,4 @@
-function [opt, lsopt] = Process_Options(opt)
+function opt = Process_Options(opt)
 
 % fill in missing options with defaults
 
@@ -9,8 +9,6 @@ if ~isfield(opt, 'record') || isempty(opt.record), opt.toRecord = false;
 else opt.toRecord = true; end
 if ~isfield(opt, 'maxit') || isempty(opt.maxit), opt.maxit = 10000; end
 if ~isfield(opt, 'beta') || isempty(opt.beta), opt.beta = 0.05; end
-if ~isfield(opt, 'Lf') || isempty(opt.Lf), opt.adaptive = 1; end
-if ~isfield(opt, 'adaptive') || isempty(opt.adaptive), opt.adaptive = 0; end
 if ~isfield(opt, 'variant'), opt.variant = ''; end
 if ~isfield(opt, 'display') || isempty(opt.display), opt.display = 2; end
 if ~isfield(opt, 'useHessian') || isempty(opt.useHessian), opt.useHessian = 0; end
@@ -32,8 +30,8 @@ opt.solverfun = str2func(opt.solver);
 
 % sets default method if not specified
 
-solver2method = containers.Map({'fbs', 'classical', 'minfbe', 'zerofpr'}, ...
-                               {'',    'lbfgs',     'lbfgs',  'lbfgs'});
+solver2method = containers.Map({'fbs', 'classical', 'minfbe', 'zerofpr', 'amls'}, ...
+                               {'',    'lbfgs',     'lbfgs',  'lbfgs',   'lbfgs'});
 if ~isfield(opt, 'method') || isempty(opt.method)
    opt.method = solver2method(opt.solver);
 end
@@ -50,7 +48,7 @@ elseif strcmp(opt.solver, 'minfbe')
     method2linesearch = @(s) 'backtracking';
 elseif strcmp(opt.solver, 'zerofpr')
     method2linesearch = @(s) 'backtracking';
-elseif strcmp(opt.solver, 'zerofpr_new')
+elseif strcmp(opt.solver, 'amls')
     method2linesearch = @(s) 'backtracking';
 else
     method2linesearch = @(s) '';

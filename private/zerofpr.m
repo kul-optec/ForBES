@@ -24,21 +24,15 @@ MAXIMUM_Lf = 1e14;
 t0 = tic();
 
 cache_x = Cache_Init(prob, prob.x0, gam);
+restart = 0;
 
 for it = 1:opt.maxit
 
     % backtracking on gamma
 
-    hasGammaChanged = 0;
     if opt.adaptive
-        [isGammaOK, cache_x, cache_xbar, ops1] = Cache_CheckGamma(cache_x, gam, opt.beta);
+        [gam, cache_x, cache_xbar, ops1, restart] = Cache_BacktrackGamma(cache_x, gam, opt.beta);
         ops = Ops_Sum(ops, ops1);
-        while ~isGammaOK
-            prob.Lf = 2*prob.Lf; gam = gam/2; sig = 2*sig;
-            hasGammaChanged = 1;
-            [isGammaOK, cache_x, cache_xbar, ops1] = Cache_CheckGamma(cache_x, gam, opt.beta);
-            ops = Ops_Sum(ops, ops1);
-        end
     else
         [cache_x, ops1] = Cache_ProxGradStep(cache_x, gam);
         ops = Ops_Sum(ops, ops1);
@@ -52,7 +46,7 @@ for it = 1:opt.maxit
     end
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_x.FPR, 'inf')/gam;
+    residual(1, it) = norm(cache_x.FPR, 'inf')/cache_x.gam;
 
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
@@ -69,7 +63,7 @@ for it = 1:opt.maxit
 
     % check for termination
 
-    if ~hasGammaChanged
+    if ~restart
         if ~opt.customTerm
             if Cache_StoppingCriterion(cache_x, opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
@@ -93,7 +87,7 @@ for it = 1:opt.maxit
 
     % compute search direction
 
-    if it == 1 || hasGammaChanged
+    if it == 1 || restart
         sk = [];
         yk = [];
     end
@@ -102,7 +96,14 @@ for it = 1:opt.maxit
     ops = Ops_Sum(ops, ops1);
 
     [dir, tau0, cacheDir] = ...
-        opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_xbar.FPR, cacheDir);
+        opt.methodfun(prob, opt, it, restart, sk, yk, cache_xbar.FPR, cacheDir);
+    
+    % FOR DEBUGGING
+%     cache_xbar = Cache_Init(prob, cache_x.z, gam);
+%     cache_xbar = Cache_FBE(cache_xbar, gam);
+%     if cache_xbar.FBE > cache_x.FBE
+%         keyboard;
+%     end
 
     % perform line search
 
@@ -110,7 +111,7 @@ for it = 1:opt.maxit
     lin = 0.0;
     const = -sig*cache_x.normFPR^2;
     [tau, cache_tau, ~, ops1, lsopt, ~] = ...
-        lsopt.linesearchfun(cache_xbar, dir, 0.0, tau0, lsopt, it, hasGammaChanged, ref, lin, const);
+        lsopt.linesearchfun(cache_xbar, dir, 0.0, tau0, lsopt, it, restart, ref, lin, const);
     ops = Ops_Sum(ops, ops1);
 
     % store pair (s, y) to compute next direction

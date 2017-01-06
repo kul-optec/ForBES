@@ -6,19 +6,22 @@
 %
 %       g(x) = lam*||x||_*
 %
-%   where ||.||_* is the nuclear norm for m-by-n matrices, and x is assumed
-%   to be a vector of length m*n, containing the stacked columns of an
-%   m-by-n matrix. If the third argument lam is not provided, lam = 1.
+%   where ||.||_* is the nuclear norm for m-by-n matrices. The function
+%   argument x is either an m-by-n matrix, or a vector of length m*n containing
+%   the stacked columns of an m-by-n matrix. (The prox will return a
+%   consistent array, i.e., with the same shape as the input argument x).
+% 
+%   If the third argument lam is not provided, lam = 1.
 %
 %   Argument 'mode' selects how to compute the proximal operator
 %   associated with the function:
-%    'exact': compute the full svd using MATLAB's svd
+%    'exact': compute the full svd using MATLAB's svd (default)
 %    'adaptive': compute the exact prox using a partial svd
 %    'inexact': compute an inexact prox using a partial svd
 %
 %   Argument 'method' selects how the SVD is computed in 'adaptive'
 %   and 'inexact' mode:
-%    'svds': use MATLAB's svds
+%    'svds': use MATLAB's svds (default)
 %    'lansvd': use PROPACK'S lansvd
 
 % Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
@@ -74,10 +77,11 @@ function obj = nuclearNorm(m, n, lam, mode, method)
 end
 
 function [prox, val] = call_nuclearNorm_prox(x, gam, m, n, lam)
+    [m_orig, n_orig] = size(x);
     [U, S, V] = svd(reshape(x, m, n), 'econ');
     diagS1 = max(0, diag(S)-lam*gam);
     S1 = diag(sparse(diagS1));
-    prox = reshape(U*(S1*V'), m*n, 1);
+    prox = reshape(U*(S1*V'), m_orig, n_orig);
     if nargout >= 2
         val = lam*sum(diagS1);
     end
@@ -86,6 +90,7 @@ end
 function [prox, val] = call_nuclearNorm_prox_adaptive_svds(x, gam, m, n, lam)
     global nsv;
     global flagadd;
+    [m_orig, n_orig] = size(x);
     maxrank = min(m, n);
     flagok = 0;
     while ~flagok
@@ -104,7 +109,7 @@ function [prox, val] = call_nuclearNorm_prox_adaptive_svds(x, gam, m, n, lam)
         end
     end
     S1 = diag(sparse(diagS1));
-    prox = reshape(U*(S1*V'), m*n, 1);
+    prox = reshape(U*(S1*V'), m_orig, n_orig);
     if nargout >= 2
         val = lam*sum(diagS1);
     end
@@ -112,6 +117,7 @@ end
 
 function [prox, val] = call_nuclearNorm_prox_inexact_svds(x, gam, m, n, lam)
     global nsv;
+    [m_orig, n_orig] = size(x);
     maxrank = min(m, n);
     [U, S, V] = svds(reshape(x, m, n), nsv, 'L');
     diagS1 = max(0, diag(S)-lam*gam);
@@ -121,7 +127,7 @@ function [prox, val] = call_nuclearNorm_prox_inexact_svds(x, gam, m, n, lam)
         nsv = nnz(diagS1)+1;
     end
     S1 = diag(sparse(diagS1));
-    prox = reshape(U*(S1*V'), m*n, 1);
+    prox = reshape(U*(S1*V'), m_orig, n_orig);
     if nargout >= 2
         val = lam*sum(diagS1);
     end
@@ -130,6 +136,7 @@ end
 function [prox, val] = call_nuclearNorm_prox_adaptive_lansvd(x, gam, m, n, lam)
     global nsv;
     global flagadd;
+    [m_orig, n_orig] = size(x);
     maxrank = min(m, n);
     flagok = 0;
     while ~flagok
@@ -148,7 +155,7 @@ function [prox, val] = call_nuclearNorm_prox_adaptive_lansvd(x, gam, m, n, lam)
         end
     end
     S1 = diag(sparse(diagS1));
-    prox = reshape(U*(S1*V'), m*n, 1);
+    prox = reshape(U*(S1*V'), m_orig, n_orig);
     if nargout >= 2
         val = lam*sum(diagS1);
     end
@@ -156,6 +163,7 @@ end
 
 function [prox, val] = call_nuclearNorm_prox_inexact_lansvd(x, gam, m, n, lam)
     global nsv;
+    [m_orig, n_orig] = size(x);
     maxrank = min(m, n);
     [U, S, V] = lansvd(reshape(x, m, n), nsv, 'L');
     diagS1 = max(0, diag(S)-lam*gam);
@@ -165,7 +173,7 @@ function [prox, val] = call_nuclearNorm_prox_inexact_lansvd(x, gam, m, n, lam)
         nsv = nnz(diagS1)+1;
     end
     S1 = diag(sparse(diagS1));
-    prox = reshape(U*(S1*V'), m*n, 1);
+    prox = reshape(U*(S1*V'), m_orig, n_orig);
     if nargout >= 2
         val = lam*sum(diagS1);
     end

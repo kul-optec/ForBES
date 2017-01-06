@@ -1,4 +1,4 @@
-function prob = Process_CompositeProblem(prob, opt)
+function [prob, opt] = Process_CompositeProblem(prob, opt)
 
 if ~isfield(prob, 'x0'), error('the starting point x0 must be specified'); end
 prob.n = size(prob.x0);
@@ -60,8 +60,13 @@ if ~isfield(prob.g, 'makeprox'), error('the prox for the term g you specified is
 prob.callg = prob.g.makeprox();
 if isfield(opt, 'Lf')
     prob.Lf = opt.Lf;
+    if ~isfield(opt, 'adaptive') || isempty(opt.adaptive), opt.adaptive = 0; end
 else
-    prob.Lf = Process_LipschitzConstant(prob);
+    [prob.Lf, exact] = Process_LipschitzConstant(prob);
+    if ~isfield(opt, 'adaptive') || isempty(opt.adaptive)
+        if exact, opt.adaptive = 0;
+        else opt.adaptive = 1; end
+    end
 end
 prob.muf = 0;
 prob.processed = true;

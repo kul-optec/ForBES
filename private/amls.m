@@ -1,4 +1,4 @@
-function out = zerofpr_new(prob, opt, varargin)
+function out = amls(prob, opt, varargin)
 
 % initialize operations counter
 
@@ -11,7 +11,7 @@ gam = (1-opt.beta)/prob.Lf;
 % display header
 
 if opt.display >= 2
-    fprintf('%6s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', 'tau');
+    fprintf('%6s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||d||', 'tau');
 end
 
 cacheDir.cntSkip = 0;
@@ -45,7 +45,7 @@ for it = 1:opt.maxit
     end
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_x.FPR, 'inf')/gam;
+    residual(1, it) = norm(cache_x.FPR, 'inf')/cache_x.gam;
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
@@ -78,8 +78,8 @@ for it = 1:opt.maxit
         end
     end
     if prob.Lf >= MAXIMUM_Lf
-        msgTerm = ['estimate for Lf became too large: ', num2str(prob.Lf)];
-        flagTerm = 1;
+        msgTerm = 'L is too large';
+        flagTerm = 2;
         break;
     end
 
@@ -94,10 +94,12 @@ for it = 1:opt.maxit
         opt.methodfun(prob, opt, it, restart, sk, yk, cache_x.FPR, cacheDir);
     dir_FB = -cache_x.FPR;
     
-    % DEBUG LINES FOLLOW
-    
+    % FOR DEBUGGING
 %     cache_xbar = Cache_Init(prob, cache_x.z, gam);
 %     cache_xbar = Cache_FBE(cache_xbar, gam);
+%     if cache_xbar.FBE > cache_x.FBE
+%         keyboard;
+%     end
 
     % perform line search
 
@@ -120,7 +122,7 @@ for it = 1:opt.maxit
     while cache_w.FBE > cache_x.FBE
         if tau <= 1e-12
             msgTerm = 'line search failed';
-            flagTerm = 1;
+            flagTerm = 3;
             break;
         end
         tau = tau/2;
@@ -156,7 +158,7 @@ for it = 1:opt.maxit
     if opt.display == 1
         Util_PrintProgress(it);
     elseif opt.display >= 2
-        fprintf('%6d %7.4e %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it), tau);
+        fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it), norm(dir_QN), tau);
     end
 
 end
@@ -175,7 +177,11 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.x = cache_x.z;
+if it == opt.maxit
+    out.x = cache_x.x;
+else
+    out.x = cache_x.z;
+end
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);

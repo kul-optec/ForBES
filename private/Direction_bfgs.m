@@ -4,6 +4,8 @@ function [dir, tau0, cache] = Direction_bfgs(prob, opt, it, restart, sk, yk, v, 
 
 sk = sk(:);
 yk = yk(:);
+
+[m, n] = size(v);
 v = v(:);
 
 if it == 1 || restart
@@ -24,5 +26,6 @@ else
 end
 
 tau0 = 1.0;
+dir = reshape(dir, m, n);
 
 end

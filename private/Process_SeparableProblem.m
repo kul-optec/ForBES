@@ -1,4 +1,4 @@
-function [prob, dualprob] = Process_SeparableProblem(prob, opt)
+function [prob, dualprob, opt] = Process_SeparableProblem(prob, opt)
 
 if isfield(prob, 'b')
     if norm(prob.b) > 0,
@@ -73,8 +73,13 @@ prob.callg = prob.g.makeprox();
 dualprob.callg = make_prox_conj(prob.callg, prob.B, prob.muB);
 if isfield(opt, 'Lf')
     dualprob.Lf = opt.Lf;
+    if ~isfield(opt, 'adaptive') || isempty(opt.adaptive), opt.adaptive = 0; end
 else
-    dualprob.Lf = Process_LipschitzConstant(dualprob);
+    [dualprob.Lf, exact] = Process_LipschitzConstant(dualprob);
+    if ~isfield(opt, 'adaptive') || isempty(opt.adaptive)
+        if exact, opt.adaptive = 0;
+        else opt.adaptive = 1; end
+    end
 end
 dualprob.muf = 0;
 dualprob.processed = true;
@@ -96,6 +101,6 @@ mugam = mu*gam;
 [z, v] = prox(-(B'*y)/mugam, 1/mugam);
 Bz = B*z;
 proxpoint = y+gam*Bz;
-proxval = -proxpoint'*Bz - v;
+proxval = -proxpoint(:)'*Bz(:) - v;
 
 end

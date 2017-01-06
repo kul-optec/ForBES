@@ -4,6 +4,8 @@ function [dir, cache] = Direction_cgdesc(prob, opt, it, restart, sk, yk, v, cach
 
 sk = sk(:);
 yk = yk(:);
+
+[m, n] = size(v);
 v = v(:);
 
 if it == 1 || restart
@@ -22,5 +24,7 @@ else
         cntSkip = cntSkip+1;
     end
 end
+
+dir = reshape(dir, m, n);
 
 end

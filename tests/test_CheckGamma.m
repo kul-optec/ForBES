@@ -11,11 +11,11 @@ lam = 1.0;
 g = l1Norm(lam);
 x0 = ones(n, 1);
 
-opt.tol = 1e-6; % to create a structure
-
-opt = Process_Options(opt);
-prob = Process_MakeProblem(f, g, x0, aff, []);
-prob = Process_CompositeProblem(prob, opt);
+opt.maxit = 1;
+opt.display = 0;
+out = forbes(f, g, x0, aff, [], opt);
+opt = out.opt;
+prob = out.prob;
 
 x = ones(n, 1);
 gam = 10.0/200;
@@ -41,11 +41,11 @@ lam = 10.0;
 g = l1Norm(lam);
 x0 = ones(n, 1);
 
-opt.tol = 1e-6; % to create a structure
-
-opt = Process_Options(opt);
-prob = Process_MakeProblem(f, g, x0, aff, []);
-prob = Process_CompositeProblem(prob, opt);
+opt.maxit = 1;
+opt.display = 0;
+out = forbes(f, g, x0, aff, [], opt);
+opt = out.opt;
+prob = out.prob;
 
 x = ones(n, 1);
 gam = 100.0/600;

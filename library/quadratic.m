@@ -29,21 +29,21 @@ function obj = quadratic(Q, q)
     obj.isConjQuadratic = 1;
     obj.hasHessian = 1;
     if isa(Q, 'function_handle')
-        obj.makef = @() @(x) call_quadratic_handle(Q, q, x);
+        obj.makef = @() @(x) call_quadratic_fun_handle(Q, q, x);
         obj.Q = Q;
     else
-        obj.makef = @() @(x) call_quadratic_matrix(Q, q, x);
+        obj.makef = @() @(x) call_quadratic_fun_matrix(Q, q, x);
         obj.Q = @(x) Q*x;
     end
     obj.makefconj = @() make_quadratic_conj(Q, q);
 end
 
-function [v, g, Q] = call_quadratic_matrix(Q, q, x)
+function [v, g, Q] = call_quadratic_fun_matrix(Q, q, x)
     g = Q*x+q;
     v = 0.5*(g+q)'*x;
 end
 
-function [v, g, Q] = call_quadratic_handle(Q, q, x)
+function [v, g, Q] = call_quadratic_fun_handle(Q, q, x)
     g = Q(x)+q;
     v = 0.5*(g+q)'*x;
 end
@@ -64,13 +64,14 @@ function fun = make_quadratic_conj(Q, q)
     end
 end
 
-function [v, g] = call_quadratic_dense_conj(L, q, y)
-    g = L'\(L\(y-q));
-    v = (y-q)'*g;
-end
-
 function [v, g] = call_quadratic_sparse_conj(L, p, q, y)
     rhs = y-q;
     g(p,1) = L'\(L\rhs(p));
-    v = (y-q)'*g;
+    v = 0.5*(y-q)'*g;
 end
+
+function [v, g] = call_quadratic_dense_conj(L, q, y)
+    g = L'\(L\(y-q));
+    v = 0.5*(y-q)'*g;
+end
+

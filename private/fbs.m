@@ -1,5 +1,7 @@
 function out = fbs(prob, opt, varargin)
 
+MAXIMUM_Lf = 1e14;
+
 % initialize output stuff
 
 residual = zeros(1, opt.maxit);
@@ -18,7 +20,8 @@ end
 
 ops = Ops_Init();
 
-gam = (1-opt.beta)/prob.Lf;
+% gam = (1-opt.beta)/prob.Lf;
+gam = 1/prob.Lf;
 xk = prob.x0;
 vk = prob.x0;
 
@@ -59,7 +62,7 @@ for it = 1:opt.maxit
     ops = Ops_Sum(ops, ops1);
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_yk.FPR, 'inf')/gam;
+    residual(1, it) = norm(cache_yk.FPR, 'inf')/cache_yk.gam;
     objective(1, it) = cache_yk.FBE;
     if opt.toRecord
         record = [record, opt.record(prob, it, gam, cache_0, cache_yk, ops)];
@@ -81,6 +84,11 @@ for it = 1:opt.maxit
             end
         end
     end
+    if prob.Lf >= MAXIMUM_Lf
+        msgTerm = 'L is too large';
+        flagTerm = 2;
+        break;
+    end
 
     if opt.fast
         vk = xk + (cache_yk.z-xk)/theta;
@@ -99,8 +107,8 @@ for it = 1:opt.maxit
 end
 
 if it == opt.maxit
-    flagTerm = 1;
     msgTerm = [msgTerm, 'exceeded maximum iterations'];
+    flagTerm = 1;
 end
 
 if opt.display == 1

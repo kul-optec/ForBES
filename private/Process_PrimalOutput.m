@@ -1,4 +1,4 @@
-function out = GetPrimalOutput(prob, dualprob, dualout)
+function out = Process_PrimalOutput(prob, dualprob, dualout)
   
 out.name = dualout.name;
 out.message = dualout.message;
@@ -32,7 +32,7 @@ if isfield(dualout, 'operations'), out.operations = dualout.operations; end
 if isfield(dualout, 'record'), out.record = dualout.record; end
 out.residual = dualout.residual;
 out.ts = dualout.ts;
-out.prob = prob;
 out.dual = dualout;
+out.dual.prob = dualprob;
 
 end

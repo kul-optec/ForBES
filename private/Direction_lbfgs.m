@@ -4,6 +4,8 @@ function [dir, tau0, cache] = Direction_lbfgs(prob, opt, it, restart, sk, yk, v,
 
 sk = full(sk(:));
 yk = full(yk(:));
+
+[m, n] = size(v);
 v = full(v(:));
 
 if it == 1 || restart
@@ -32,5 +34,6 @@ else
 end
 
 tau0 = 1.0;
+dir = reshape(dir, m, n);
 
 end

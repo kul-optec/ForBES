@@ -5,7 +5,7 @@ function lsopt = Process_LineSearchOptions(opt)
 %     lsopt.Delta = 0.7;% this goes here to include Hager-Zhang line search as a backup
     % Armijo condition parameter delta, range [0, .5]
     % phi (a) - phi (0) <= delta phi'(0)
-    if strcmp(opt.solver, 'zerofpr') || strcmp(opt.solver, 'zerofpr_new')
+    if strcmp(opt.solver, 'zerofpr')
       lsopt.testGamma = 0;
     else
       lsopt.testGamma = opt.adaptive;
