@@ -18,7 +18,7 @@
 %       H(x) is p(r+1) by N-r+1 Hankel matrix
 %
 
-function out = forbes_hankel(U, b, r, mu, tol, freq, opt)
+function out = forbes_hankel(U, b, r, mu, tol, freq, opt, out1)
 
     p = size(b,1);
     N = size(b,2)-1;
@@ -27,13 +27,22 @@ function out = forbes_hankel(U, b, r, mu, tol, freq, opt)
 
     f = quadLoss(1, b);
     g = nuclearNorm(m, n, mu);
-    y0 = zeros(m,n);
     A = opHankel(N, r, p, U);
+    
+    if nargin < 8 || isempty(out1)
+        y0 = zeros(m,n);
+    else
+        y0 = out1.y;
+    end
 
     opt.Lf = min(r+1,N-r+1); % squared norm of A
     opt.term = @(prob, it, gam, cache_0, cache_x, ops) terminate_hankel(it, freq, cache_x, b, mu, tol);
 
     out = forbes(f, g, y0, [], {A, -1, 0}, opt);
+    
+    G = -A*out.x1;
+    nmEY = norm(out.x1-b,'fro')^2/2;
+    out.pobj = nmEY + mu*sum(svd(G));
     
 end
 
