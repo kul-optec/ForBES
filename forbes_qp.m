@@ -96,14 +96,19 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         if isempty(out1)
             x0 = zeros(n, 1);
         else
+            opt.Lf = out1.solver.prob.Lf;
             x0 = out1.x;
         end
         tprep = toc(t0);
         out = forbes(f, g, x0, [], [], opt);
     else
-        A_ext = A;
-        lb_ext = lb;
-        ub_ext = ub;
+        % Scale inequality constraints
+        scaling_A = ones(size(A, 1), 1);
+%         scaling_A = 1./sum(A.^2, 2);
+%         scaling_A = 1./max(abs(A),[],2);
+        A_ext = diag(scaling_A)*A;
+        lb_ext = scaling_A.*lb;
+        ub_ext = scaling_A.*ub;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%% This should be done only if necessary
         A_ext = [A_ext; speye(n)];
         lb_ext = [lb_ext; lx];
@@ -128,6 +133,7 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         if isempty(out1)
             y0 = zeros(m_ext, 1);
         else
+            opt.Lf = out1.solver.dual.prob.Lf;
             y0 = [out1.y_ineq; out1.y_bnd];
         end
         tprep = toc(t0);
