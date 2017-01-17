@@ -1,3 +1,6 @@
+close all;
+clear;
+
 A = randn(15,10);
 Q = A*A';
 q = randn(15, 1);

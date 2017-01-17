@@ -1,3 +1,6 @@
+close all;
+clear;
+
 ASSERT_EPS = 1e-14;
 
 % two simple operators

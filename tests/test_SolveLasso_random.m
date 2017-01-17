@@ -1,3 +1,6 @@
+close all;
+clear;
+
 % rng(0, 'twister');
 
 m = 50;
@@ -12,10 +15,10 @@ lam = 0.3*norm(A'*b, 'inf');
 g = l1Norm(lam);
 x0 = zeros(n, 1);
 
-ASSERT_TOL = 1e-8;
+ASSERT_TOL = 1e-6;
 
 baseopt.display = 0;
-baseopt.tol = 1e-12;
+baseopt.tol = 1e-8;
 baseopt.maxit = 10000;
 
 opt_fbs = baseopt; opt_fbs.solver = 'fbs';
@@ -38,6 +41,11 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, aff, [], opts{i});

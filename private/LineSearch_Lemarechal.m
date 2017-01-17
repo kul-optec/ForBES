@@ -1,4 +1,4 @@
-function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cache, dir, slope, t0, lsopt, varargin)
+function [t, cachet, cachet1, lsopt, exitflag] = LineSearch_Lemarechal(cache, dir, slope, t0, lsopt, adaptive, varargin)
 %LEMARECHALLS - computes a steplength t > 0 so that it satisfies the (weak) Wolfe conditions
 %
 % f(t) <= f(0) + delta*f'(0)
@@ -22,7 +22,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
 % Springer Verlag, Heidelberg, Algorithm 3.3.1 (Wolfe's line-search)
 
     % precompute stuff for the line search
-    [cache, ops] = Cache_LineSearch(cache, dir);
+    cache.Set_Directions(dir);
 
     cachet1 = [];
 
@@ -31,7 +31,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
     t = t0;
     wolfe_hi = lsopt.delta*slope;
     wolfe_lo = lsopt.sigma*slope;
-    a = 0; fa = cache.FBE; dfa = slope;
+    a = 0; fa = cache.Get_FBE(); dfa = slope;
     tprev = a; fprev = fa; dfprev = dfa;
     b = inf; % upper bound
     rho = lsopt.rho;
@@ -39,12 +39,10 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
     exitflag = 1;
     testGammaFlag = 0;
     for it = 1:lsopt.nbracket
-        [cachet, ops1] = Cache_LineFBE(cache, t, 1);
-        ops = Ops_Sum(ops, ops1);
-        if lsopt.testGamma && testGammaFlag
-            [flagGamma, cachet, cachet1, ops1] = Cache_CheckGamma(cachet, gam, lsopt.beta);
-            ops = Ops_Sum(ops, ops1);
-            exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
+        cachet = cache.Get_CacheLine(t, 1);
+        if adaptive && testGammaFlag
+            [isGammaOK, cachet1] = cache.Check_Gamma(lsopt.beta);
+            exitflag = ~isGammaOK;
         end
         testGammaFlag = 0;
         if cachet.FBE > cache.FBE + t*wolfe_hi
@@ -55,9 +53,8 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
                 tn = min(tn,b - theta*(b - a));
                 tn = max(tn,a + theta*(b - a));
             elseif lsopt.interp == 2
-                [cachet, ops1] = Cache_LineFBE(cache, t, 3, cachet);
-                ops = Ops_Sum(ops, ops1);
-                dfb = cachet.dFBE;
+                cachet = cache.Get_CacheLine(t, 3, cachet);
+                dfb = cachet.Get_Slope();
                 tn = LemarechalCubInterp(a,fa,dfa,b,fb,dfb);
                 % safeguard
                 tn = min(tn,b - theta*(b - a));
@@ -67,8 +64,7 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
             end
             t = tn;
         else
-            [cachet, ops1] = Cache_LineFBE(cache, t, 2, cachet);
-            ops = Ops_Sum(ops, ops1);
+            cachet = cache.Get_CacheLine(t, 2, cachet);
             if cachet.dFBE < wolfe_lo
                 a = t; fa = cachet.FBE; dfa = cachet.dFBE;
                 if b == inf
@@ -111,10 +107,9 @@ function [t, cachet, cachet1, ops, lsopt, exitflag] = LineSearch_Lemarechal(cach
         end
     end
 
-    if exitflag == 0 && lsopt.testGamma
-        [flagGamma, cachet, cachet1, ops1] = Cache_CheckGamma(cachet, gam, lsopt.beta);
-        ops = Ops_Sum(ops, ops1);
-        exitflag = flagGamma-1; % because CheckGamma returns 1 (good gamma) or 0 (bad gamma)
+    if exitflag == 0 && adaptive
+        [isGammaOK, cachet1] = cachet.Check_Gamma(lsopt.beta);
+        exitflag = ~isGammaOK;
     end
 end
 

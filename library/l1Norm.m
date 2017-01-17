@@ -26,6 +26,8 @@ function obj = l1Norm(mu)
         mu = 1;
     end
     obj.isConvex = 1;
+    obj.isQuadratic = 0;
+    obj.isConjQuadratic = 0;
     obj.makeprox = @() @(x, gam) call_l1Norm_prox(x, gam, mu);
 end
 

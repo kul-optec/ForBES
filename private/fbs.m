@@ -13,15 +13,20 @@ record = [];
 % display stuff
 
 if opt.display >= 2
-    fprintf('%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.');
+    fprintf('\n%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.');
 end
 
 % initialize operations counter
 
-ops = Ops_Init();
+ops = FBOperations();
 
-% gam = (1-opt.beta)/prob.Lf;
-gam = 1/prob.Lf;
+% get Lipschitz constant & adaptiveness
+
+[Lf, adaptive] = prob.Get_Lipschitz(opt);
+
+% set stepsize, initialize vectors
+
+gam = 1/Lf;
 xk = prob.x0;
 vk = prob.x0;
 
@@ -30,47 +35,36 @@ t0 = tic();
 for it = 1:opt.maxit
 
     if opt.fast
-        if prob.muf == 0
-            theta = 2/(it+1); % since it starts from 1
-        else
-            theta = sqrt(prob.muf/prob.Lf);
-        end
+        theta = 2/(it+1); % since it starts from 1
         yk = (1-theta)*xk+theta*vk;
     else
         yk = xk;
     end
 
-    cache_yk = Cache_Init(prob, yk, gam);
+    cache_yk = FBCache(prob, yk, gam, ops);
 
     if it == 1
         cache_0 = cache_yk;
     end
 
-    hasGammaChanged = 0;
-    if opt.adaptive
-        [isGammaOK, cache_yk, ~, ops1] = Cache_CheckGamma(cache_yk, gam, opt.beta);
-        ops = Ops_Sum(ops, ops1);
-        while ~isGammaOK
-            prob.Lf = 2*prob.Lf; gam = gam/2;
-            hasGammaChanged = 1;
-            [isGammaOK, cache_yk, ~, ops1] = Cache_CheckGamma(cache_yk, gam, opt.beta);
-            ops = Ops_Sum(ops, ops1);
-        end
+    hasGammaChanged = false;
+
+    if adaptive
+        [hasGammaChanged, ~] = cache_yk.Backtrack_Gamma(opt.beta);
+        gam = cache_yk.Get_Gamma();
     end
 
-    [cache_yk, ops1] = Cache_FBE(cache_yk, gam);
-    ops = Ops_Sum(ops, ops1);
-
+    objective(1, it) = cache_yk.Get_FBE();
+    residual(1, it) = norm(cache_yk.Get_FPR(), 'inf')/cache_yk.Get_Gamma();
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_yk.FPR, 'inf')/cache_yk.gam;
-    objective(1, it) = cache_yk.FBE;
+
     if opt.toRecord
-        record = [record, opt.record(prob, it, gam, cache_0, cache_yk, ops)];
+        record = [record, opt.record(prob, it, cache_yk.Get_Gamma(), cache_0, cache_yk, ops)];
     end
 
     if ~hasGammaChanged
         if ~opt.customTerm
-            if Cache_StoppingCriterion(cache_yk, opt.tol)
+            if cache_yk.Check_StoppingCriterion(opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
@@ -91,16 +85,16 @@ for it = 1:opt.maxit
     end
 
     if opt.fast
-        vk = xk + (cache_yk.z-xk)/theta;
+        vk = xk + (cache_yk.Get_ProxGradStep()-xk)/theta;
     end
 
-    xk = cache_yk.z;
+    xk = cache_yk.Get_ProxGradStep();
 
     % display stuff
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif opt.display >= 2
+    elseif opt.display >= 2 && mod(it,100) == 0
         fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
     end
 
@@ -113,6 +107,8 @@ end
 
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
+elseif opt.display >= 2
+    fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
 end
 
 % pack up results
@@ -120,7 +116,7 @@ end
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
-out.x = cache_yk.z;
+out.x = cache_yk.Get_ProxGradStep();
 out.iterations = it;
 out.operations = ops;
 out.residual = residual(1, 1:it);
@@ -128,5 +124,4 @@ out.objective = objective(1, 1:it);
 out.ts = ts(1, 1:it);
 out.record = record;
 out.gam = gam;
-
-end
+out.adaptive = adaptive;

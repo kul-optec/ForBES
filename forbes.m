@@ -98,6 +98,7 @@
 % along with ForBES. If not, see <http://www.gnu.org/licenses/>.
 
 function out = forbes(fs, gs, init, aff, constr, opt)
+
     t0 = tic();
 
     if nargin < 3, error('you must provide at least 3 arguments'); end
@@ -105,28 +106,24 @@ function out = forbes(fs, gs, init, aff, constr, opt)
     if nargin < 5, constr = []; end
     if nargin < 6, opt = []; end
 
-    prob = Process_MakeProblem(fs, gs, init, aff, constr);
+    [prob, id] = Process_Problem(fs, gs, init, aff, constr);
     opt = Process_Options(opt);
+    lsopt = Process_LineSearchOptions(opt);
 
-    switch prob.id
+    preprocess = toc(t0);
 
-        case 1
-            [prob, opt] = Process_CompositeProblem(prob, opt);
-            lsopt = Process_LineSearchOptions(opt);
-            preprocess = toc(t0);
-            out = opt.solverfun(prob, opt, lsopt);
+    out = opt.solverfun(prob, opt, lsopt);
 
-        case 2
-            [prob, dualprob, opt] = Process_SeparableProblem(prob, opt);
-            lsopt = Process_LineSearchOptions(opt);
-            preprocess = toc(t0);
-            dualout = opt.solverfun(dualprob, opt, lsopt);
-            out = Process_PrimalOutput(prob, dualprob, dualout);
+    if id == 2
+        out = Process_PrimalOutput(prob, out);
     end
+
+    ttime = toc(t0);
 
     out.prob = prob;
     out.opt = opt;
     out.lsopt = lsopt;
 
     out.preprocess = preprocess;
+    out.time = ttime;
 end

@@ -1,3 +1,6 @@
+close all;
+clear;
+
 % rng(0, 'twister'); % uncomment this to control the random number generator
 
 m = 50; % number of rows

@@ -1,3 +1,6 @@
+close all;
+clear;
+
 NUM_TOL_VAL = 1e-8;
 NUM_TOL_DER = 1e-8;
 
@@ -9,16 +12,12 @@ b = [1; 2; 3];
 %% Lasso
 
 f = quadLoss(1, zeros(m,1));
-aff = {A, -b};
 lam = 1.0;
 g = l1Norm(lam);
 x0 = ones(n, 1);
 
-opt.tol = 1e-6; % to create a structure
-
-opt = Process_Options(opt);
-prob = Process_MakeProblem(f, g, x0, aff, []);
-prob = Process_CompositeProblem(prob, opt);
+prob = ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
+ops = FBOperations();
 
 gams = [10.0/200, 5.0/200, 2.0/200, 1.0/200];
 
@@ -29,15 +28,14 @@ x = randn(n, 1);
 for igam = 1:length(gams)
 
 gam = gams(igam);
-cache = Cache_Init(prob, x, gam);
+cache = FBCache(prob, x, gam, ops);
 
 for idir = 1:10 % try several random directions
 
 dir1 = randn(n, 1);
-cache = Cache_ProxGradStep(cache, gam);
-dir2 = -cache.FPR;
-cache = Cache_LineSearch(cache, dir1);
-cache = Cache_LineSearch(cache, [], dir2);
+dir2 = -cache.Get_FPR();
+cache.Set_Directions(dir1);
+cache.Set_Directions([], dir2);
 
 taus = [1.0, 0.5, 0.25, 0.125];
 
@@ -45,16 +43,15 @@ for itau = 1:length(taus)
 
     tau = taus(itau);
 
-    cache_1 = Cache_SegmentFBE(cache, tau);
-    cache_2 = Cache_Init(prob, x+tau*dir1+(1-tau)*dir2, gam);
-    cache_2 = Cache_FBE(cache_2, gam);
+    cache_1 = cache.Get_CacheSegment(tau);
+    cache_2 = FBCache(prob, x+tau*dir1+(1-tau)*dir2, gam, ops);
 
-    assert(abs(cache_1.FBE - cache_2.FBE)/abs(cache_2.FBE) <= NUM_TOL_VAL);
+    assert(abs(cache_1.Get_FBE() - cache_2.Get_FBE())/abs(cache_2.Get_FBE()) <= NUM_TOL_VAL);
 
 end
 
-cache_1 = Cache_SegmentFBE(cache, 0.0);
-assert(norm(cache_1.x - cache.z, inf) <= 1e-12);
+cache_1 = cache.Get_CacheSegment(0.0);
+assert(norm(cache_1.Get_Point() - cache.Get_ProxGradStep(), inf) <= 1e-12);
 
 end
 end
