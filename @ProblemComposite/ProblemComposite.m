@@ -36,7 +36,7 @@ classdef ProblemComposite < handle
           prob.m1 = [size(prob.C1, 1), 1];
           prob.isthereC1 = true;
         end
-        [~, prob.q] = prob.callf1(sparse(zeros(prob.m1)));
+        [~, prob.q] = prob.callf1(zeros(prob.m1));
         prob.Q = @(x) prob.HessianQuadratic(x);
         if isempty(d1)
           prob.d1 = sparse(zeros(prob.m1));
@@ -81,11 +81,11 @@ classdef ProblemComposite < handle
       if isempty(D)
         prob.isthereD = false;
       else
-        diagDtD = diag(D*D');
-        if (max(diagDtD)-min(diagDtD))/max(diagDtD) > 10*eps || diagDtD(1) <= 10*eps
+        [flag_tf, mu_D] = prob.isTightFrame(D);
+        if ~flag_tf
           error('DD'' must be a positive multiple of the identity');
         end
-        prob.mu = diagDtD(1);
+        prob.mu = mu_D;
         prob.D = D;
         prob.isthereD = true;
       end
