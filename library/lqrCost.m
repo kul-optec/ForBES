@@ -40,43 +40,55 @@ function obj = lqrCost(x0, varargin)
         obj.A = varargin{4};
         obj.B = varargin{5};
         obj.N = varargin{6};
-        [obj.LRs, obj.Ks, obj.Ms, obj.Ls] = RiccatiFactor(obj.Q, obj.R, obj.Q_f, obj.A, obj.B, obj.N);
-        obj.makefconj = @() make_lqrCost_fconj(x0, obj.A, obj.B, obj.N, obj.LRs, obj.Ks, obj.Ms, obj.Ls);
+        % [obj.LRs, obj.Ks, obj.Ms, obj.Ls] = RiccatiFactor(obj.Q, obj.R, obj.Q_f, obj.A, obj.B, obj.N);
+        obj = RiccatiFactor(obj);
+        % obj.makefconj = @() make_lqrCost_fconj(x0, obj);
+        obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
     else
         obj = varargin{1};
-        obj.makefconj = @() make_lqrCost_fconj(x0, obj.A, obj.B, obj.N, obj.LRs, obj.Ks, obj.Ms, obj.Ls);
+        % obj.makefconj = @() make_lqrCost_fconj(x0, obj);
+        obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
     end
     obj.isConjQuadratic = 1;
 end
 
-function op = make_lqrCost_fconj(x0, A, B, N, LRs, Ks, Ms, Ls)
-    [n, m] = size(B);
-    op = @(w) RiccatiSolve(w, x0, A, B, LRs, Ks, Ms, Ls, int32(n), int32(m), int32(N));
+function [fcw, xu] = call_lqrCost_fconj(w, x0, obj)
+    [n_x, n_u] = size(obj.B);
+    [~, xu] = RiccatiSolve(w, x0, obj.A, obj.B, obj.LRs, obj.Ks, obj.Ms, obj.Ls, int32(n_x), int32(n_u), int32(obj.N));
+    fxu = 0;
+    for i=0:obj.N-1
+        x_i = xu(i*(n_x+n_u)+1:i*(n_x+n_u)+n_x);
+        u_i = xu(i*(n_x+n_u)+n_x+1:(i+1)*(n_x+n_u));
+        fxu = fxu + 0.5*(x_i'*(obj.Q*x_i) + u_i'*(obj.R*u_i));
+    end
+    x_N = xu(obj.N*(n_x+n_u)+1:end);
+    fxu = fxu + 0.5*(x_N'*(obj.Q_f*x_N));
+    fcw = w'*xu - fxu;
 end
 
-function [LRs, Ks, Ms, Ls] = RiccatiFactor(Q, R, Q_f, A, B, N)
-    n = size(Q,1);
-    m = size(R,1);
-    Ps = zeros(n, n, N+1);
-    Ps(:,:,N+1) = Q_f;
-    LRs = zeros(m, m, N);
-    Ss = zeros(m, n, N);
-    Ks = zeros(m, n, N);
-    Ms = zeros(m, n, N);
-    Ls = zeros(n, n, N);
-    for k = N:-1:1
-        Rbar = R+B'*(Ps(:,:,k+1)*B);
+function obj = RiccatiFactor(obj)
+    n = size(obj.Q,1);
+    m = size(obj.R,1);
+    Ps = zeros(n, n, obj.N+1);
+    Ps(:,:,obj.N+1) = obj.Q_f;
+    obj.LRs = zeros(m, m, obj.N);
+    obj.Ss = zeros(m, n, obj.N);
+    obj.Ks = zeros(m, n, obj.N);
+    obj.Ms = zeros(m, n, obj.N);
+    obj.Ls = zeros(n, n, obj.N);
+    for k = obj.N:-1:1
+        Rbar = obj.R + obj.B'*(Ps(:,:,k+1)*obj.B);
         Rbar = (Rbar+Rbar')/2;
         LR = chol(Rbar, 'lower');
-        LRs(:,:,k) = LR;
-        Ss(:,:,k) = B'*(Ps(:,:,k+1)*A);
-        Ks(:,:,k) = -(LR'\(LR\Ss(:,:,k)));
-        Ps(:,:,k) = Q + A'*(Ps(:,:,k+1)*A) + Ss(:,:,k)'*Ks(:,:,k);
-        Ps(:,:,k) = (Ps(:,:,k)+Ps(:,:,k)')/2;
+        obj.LRs(:,:,k) = LR;
+        obj.Ss(:,:,k) = obj.B'*(Ps(:,:,k+1)*obj.A);
+        obj.Ks(:,:,k) = -(LR'\(LR\obj.Ss(:,:,k)));
+        Ps(:,:,k) = obj.Q + obj.A'*(Ps(:,:,k+1)*obj.A) + obj.Ss(:,:,k)'*obj.Ks(:,:,k);
+        Ps(:,:,k) = (Ps(:,:,k) + Ps(:,:,k)')/2;
     end
-    for k = 1:N
-        LR = LRs(:,:,k);
-        Ms(:,:,k) = -(LR'\(LR\B'));
-        Ls(:,:,k) = (A+B*Ks(:,:,k))';
+    for k = 1:obj.N
+        LR = obj.LRs(:,:,k);
+        obj.Ms(:,:,k) = -(LR'\(LR\obj.B'));
+        obj.Ls(:,:,k) = (obj.A + obj.B*obj.Ks(:,:,k))';
     end
 end
