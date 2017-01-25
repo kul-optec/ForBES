@@ -42,13 +42,20 @@ function obj = distBox(lb, ub, weights)
         error('all weights must be nonnegative');
     end
     obj.makeprox = @() @(x, gam) call_distBox_prox(x, gam, lb, ub, weights);
+    obj.isQuadratic = false;
+    obj.isConjQuadratic = false;
 end
 
 function [prox, val] = call_distBox_prox(x, gam, lb, ub, weights)
     mu = gam*weights;
     prox = max(x-ub-mu, 0) - max(lb-x-mu, 0) + min(max(x, lb), ub);
     if nargout > 1
-        finw = ~isinf(weights);
-        val = sum(weights(finw).*abs(prox(finw)-min(max(prox(finw),lb(finw)),ub(finw))));
+        proj = max(lb, min(ub, prox));
+        if isscalar(weights)
+            val = sum(weights*abs(prox-proj));
+        else
+            finw = ~isinf(weights);
+            val = sum(weights(finw).*abs(prox(finw)-proj(finw)));
+        end
     end
 end
