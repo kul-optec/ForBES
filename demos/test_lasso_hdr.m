@@ -32,10 +32,10 @@ funHessian = @(x) A'*(A*x);
 Lf = eigs(funHessian, n, 1, 'LM', eigsOpt);
 
 opt.Lf = Lf;
-opt.maxit = 2000;
+opt.maxit = 5000;
 opt.memory = 5;
 opt.display = 1;
-opt.tol = 1e-8;
+opt.tol = 1e-4;
 
 %% define algorithms to run
 
@@ -43,7 +43,7 @@ opts = {};
 opts{end+1} = opt; opts{end}.solver = 'fbs'; opts{end}.variant = 'fast';
 opts{end+1} = opt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = opt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = opt; opts{end}.solver = 'zerofpr_new'; opts{end}.method = 'lbfgs';
+opts{end+1} = opt; opts{end}.solver = 'amls'; opts{end}.method = 'lbfgs';
 
 %% run algorithms
 
