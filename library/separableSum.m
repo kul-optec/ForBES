@@ -38,6 +38,7 @@ function obj = separableSum(objs, dims, idx)
     noL = 0;
     obj.isConvex = 1;
     obj.isQuadratic = 1;
+    obj.isConjQuadratic = 1;
     obj.hasHessian = 1;
     for i = 1:l
         if ~isfield(objs{i}, 'L'), noL = 1;
@@ -47,6 +48,9 @@ function obj = separableSum(objs, dims, idx)
         end
         if ~isfield(objs{i}, 'isQuadratic') || objs{i}.isQuadratic == 0
             obj.isQuadratic = 0;
+        end
+        if ~isfield(objs{i}, 'isConjQuadratic') || objs{i}.isConjQuadratic == 0
+            obj.isConjQuadratic = 0;
         end
         if ~isfield(objs{i}, 'hasHessian') || objs{i}.hasHessian == 0
             obj.hasHessian = 0;
