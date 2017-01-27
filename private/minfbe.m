@@ -129,7 +129,7 @@ end
 
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
-elseif opt.display >= 2 && mod(it,10) == 0
+elseif opt.display >= 2
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
 end
 
