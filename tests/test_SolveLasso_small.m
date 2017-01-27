@@ -52,7 +52,7 @@ opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'rbroyden';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
-    assert(outs{i}.iterations < opts{i}.maxit);
+    assert(outs{i}.flag == 0);
     assert(norm(outs{i}.x - out_fbs.x,inf)/(1+norm(out_fbs.x,inf)) <= ASSERT_TOL);
     fprintf('.');
 end
