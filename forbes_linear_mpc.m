@@ -1,71 +1,102 @@
 % FORBES_LINEAR_MPC
 %
-%   FORBES_LINEAR_MPC(A, B, Q, R, Q_N, g_x, L_x, g_u, L_u, opt)
+%   FORBES_LINEAR_MPC(A, B, Q, R, Q_N, g_x, L_x, g_u, L_u, opt) solves the
+%   linear model predictive control problem
+% 
+%   min. sum(x_{k}'*Q*x_{k} + u_{k}'*R*u_{k}, k=0,...,N-1) [stage cost]
+%            
+%        + x_{N}'*Q_N*x_{N}                                [final cost]
+% 
+%        + sum(g_s(L_s(x_{k}, u_{k})), k=0,...,N-1)        [stage penalty]
+% 
+%        + g_N(L_N(x_{N}))                                 [final penalty]
+% 
+%        + g_c(L_c(x, u)                                   [coupling term]
+%
+%   s.t. x_{k+1} = A x_{k} + B u_{k}, k = 0,...,N-1        [dynamics]
 
-function out = forbes_linear_mpc(x0, Q, R, Q_N, A, B, N, g_x, L_x, g_u, L_u, opt, out_prev)
+function out = forbes_linear_mpc(x0, Q, R, Q_N, A, B, N, g_s, L_s, g_N, L_N, g_c, L_c, opt, out_prev)
 
     t0 = tic();
 
     % Arguments parsing
 
-    if nargin < 7
+    if nargin < 11
       error('some mandatory arguments are missing');
     end
+    
+    if ~exist('opt','var'), opt = []; end
+    
+    if ~isfield(opt, 'mode'), opt.mode = 'ms'; end
+    
+    % Compute problem size
+    
+    n_x = size(A, 2);
+    n_u = size(B, 2);
 
-    n_x = size(Q, 1);
-    n_u = size(R, 1);
+    m_stage = size(L_s, 1);
+    m_stage_tot = N*m_stage;
+    m_final = size(L_N, 1);
+    
+    if opt.mode == 'ss' % Single shooting
+        
+        error('to be implemented');
+    
+    elseif opt.mode == 'ms' % Multiple shooting
 
-    if ~exist('g_x', 'var') || isempty(g_x), g_x = zeroFunction(); end
-    if ~exist('L_x', 'var') || isempty(L_x), L_x = speye(n_x); end
-    if ~exist('g_u', 'var') || isempty(g_u), g_u = zeroFunction(); end
-    if ~exist('L_u', 'var') || isempty(L_u), L_u = speye(n_u); end
+        f = lqrCost(x0, Q, R, Q_N, A, B, N);
+        blocks_g = {}; dims_g = {};
+        for k = 1:N, blocks_g{k} = g_s; dims_g{k} = m_stage; end
+        blocks_g{N+1} = g_N; dims_g{N+1} = m_final;
 
-    m_x = size(L_x, 1);
-    m_u = size(L_u, 1);
-    
-    % Compute total dimensions
-    
-    n_x_tot = (N+1)*n_x;
-    n_u_tot = N*n_u;
-    m_x_tot = (N+1)*m_x;
-    m_u_tot = N*m_u;
+        % Build big constraint matrix
 
-    % Problem setup and solution (multiple shooting)
+        diag_L = {};
+        for k = 1:N, diag_L{k} = L_s; end
+        diag_L{N+1} = L_N;
+        L = blkdiag(diag_L{:});
+        
+        % Add coupling term if present
+        
+        if exist('g_c', 'var') && ~isempty(g_c)
+            m_coupling = size(L_c, 1);
+            blocks_g{N+2} = g_c;
+            dims_g{N+2} = m_coupling;
+            L = [L; L_c];
+        end
+        
+        g = separableSum(blocks_g, dims_g);
 
-    f = lqrCost(x0, Q, R, Q_N, A, B, N);
-    g = separableSum({g_x, g_u}, {m_x_tot, m_u_tot});
-    
-    % Build big constraint matrix
-    
-    L = sparse(m_x_tot+m_u_tot, n_x_tot+n_u_tot);
-    for i = 0:N-1
-        base_i = i*m_x; base_j = i*(n_x+n_u);
-        L(base_i+(1:m_x), base_j+(1:n_x)) = L_x;
-        base_i = m_x_tot+i*m_u; base_j = i*(n_x+n_u)+n_x;
-        L(base_i+(1:m_u), base_j+(1:n_u)) = L_u;
-    end
-    base_i = N*m_x; base_j = N*(n_x+n_u);
-    L(base_i+(1:m_x), base_j+(1:n_x)) = L_x;
-    
-    % Now the problem to solve is
-    % 
-    %   minimize f(xu) + g(z) subject to L*xu = z
-    
-    if ~exist('out_prev', 'var') || isempty(out_prev)
-        y0 = zeros(m_x_tot+m_u_tot, 1);
+        % Now the problem to solve is
+        % 
+        %   minimize f(xu) + h(z) subject to big_L * xu = z
+
+        % Set starting (dual) point
+
+        if ~exist('out_prev', 'var') || isempty(out_prev)
+            y0 = zeros(size(L, 1), 1);
+        else
+            y0 = out_prev.y;
+        end
+
+        tpre = toc(t0);
+
+        out_forbes = forbes(f, g, y0, [], {L, -1, zeros(length(y0), 1)}, opt);
+
+        ttot = toc(t0);
+        
     else
-        y0 = out_prev.y;
+        
+        error('unknown mode');
+        
     end
-    
-    tpre = toc(t0);
-    
-    out_forbes = forbes(f, g, y0, [], {L, -1, zeros(m_x_tot+m_u_tot,1)}, opt);
-
-    ttot = toc(t0);
     
     out.xu = out_forbes.x1;
-    out.z = out_forbes.z;
-    out.y = out_forbes.y;
+    temp = reshape(out_forbes.x1(1:end-n_x), n_x+n_u, N);
+    out.x = [temp(1:n_x,:), out_forbes.x1(end-n_x+1:end)];
+    out.u = temp(n_x+1:end,:);
+    out.z = out_forbes.z; % slack variables
+    out.y = out_forbes.y; % dual variables
     out.solver = out_forbes;
     out.preprocess = tpre;
     out.time = ttot;
