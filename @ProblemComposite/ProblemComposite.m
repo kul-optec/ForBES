@@ -65,7 +65,7 @@ classdef ProblemComposite < handle
           prob.isthereC2 = true;
         end
         if isempty(d2)
-          prob.d2 = zeros(prob.m2);
+          prob.d2 = sparse(zeros(prob.m2));
         else
           prob.d2 = d2;
         end

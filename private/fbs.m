@@ -71,7 +71,7 @@ for it = 1:opt.maxit
             end
         else
             flagStop = opt.term(prob, it, gam, cache_0, cache_yk, ops);
-            if (opt.adaptive == 0 || it > 1) && flagStop
+            if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;
                 break;

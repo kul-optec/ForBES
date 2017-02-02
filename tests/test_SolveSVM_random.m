@@ -21,7 +21,7 @@ BA = diag(sparse(b))*A;
 Q = BA*BA';
 q = ones(size(A, 1), 1);
 opt_qp = optimoptions('quadprog','Display','off');
-[lambda_qp, fval_qp, flag_qp, output_qp] = quadprog(Q, -q, [], [], [], [], 0, mu, [], opt_qp);
+[lambda_qp, fval_qp, flag_qp, output_qp] = quadprog(Q, -q, [], [], [], [], zeros(m, 1), mu*ones(m, 1), [], opt_qp);
 x_qp = BA'*lambda_qp;
 
 f = quadLoss();
@@ -30,7 +30,7 @@ constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 
 TOL = 1e-12;
-ASSERT_TOLX = 1e-6;
+ASSERT_TOLX = 1e-4;
 ASSERT_TOLF = 1e-8;
 
 %% adaptive

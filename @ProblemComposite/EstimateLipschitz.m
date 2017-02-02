@@ -12,7 +12,7 @@ if prob.istheref1 && ~prob.istheref2
   eigsOpt.issym = 1;
   eigsOpt.tol = 1e-3;
   if prob.isthereC1
-    funHessian = @(x) prob.C1'*(prob.Q(prob.C1*x));
+    funHessian = @(x) vec(prob.C1'*(prob.Q(prob.C1*reshape(x, prob.n))));
     L = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
   else
     L = eigs(prob.Q, prod(prob.n), 1, 'LM', eigsOpt);
