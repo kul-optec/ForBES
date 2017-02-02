@@ -114,15 +114,6 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         lb_ext = [lb_ext; lx];
         ub_ext = [ub_ext; ux];
         m_ext = m + n;
-        % Scale inequality constraints
-        if opt.prescale
-%             scaling_A = 1./sum(A.^2, 2);
-%             scaling_A = 1./max(abs(A),[],2);
-            scale = 1./sqrt(diag(A_ext*(H\A_ext')));
-            A_ext = diag(sparse(scale))*A_ext;
-            lb_ext = scale.*lb_ext;
-            ub_ext = scale.*ub_ext;
-        end
         if flag_eq == 0
             f = quadratic(H, q);
             opt_eigs.issym = 1;
@@ -133,8 +124,28 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
                 out.msg = 'not strongly convex';
                 return;
             end
+            if opt.prescale
+                % Scale inequality constraints
+                scale = 1./sqrt(diag(A_ext*(H\A_ext')));
+                A_ext = diag(sparse(scale))*A_ext;
+                lb_ext = scale.*lb_ext;
+                ub_ext = scale.*ub_ext;
+            end
         else
             f = quadraticOverAffine(Aeq, beq, H, q);
+            if opt.prescale
+                scale = zeros(size(A_ext, 1), 1);
+                callfconj = f.makefconj();
+                [~, p] = callfconj(zeros(size(A_ext, 2),1));
+                for i = 1:size(A_ext, 1)
+                    [~, dgradi] = callfconj(A_ext(i, :)');
+                    scale(i) = 1/sqrt(A_ext(i, :)*(dgradi-p));
+                end
+                % Scale inequality constraints
+                A_ext = diag(sparse(scale))*A_ext;
+                lb_ext = scale.*lb_ext;
+                ub_ext = scale.*ub_ext;
+            end
         end
         g = indBox(lb_ext, ub_ext);
         constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
