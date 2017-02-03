@@ -4,6 +4,8 @@ function [dir, tau0, cache] = Direction_lbroyden(prob, opt, it, restart, sk, yk,
 
 sk = sk(:);
 yk = yk(:);
+
+[m, n] = size(v);
 v = v(:);
 
 if it == 1 || restart
@@ -50,5 +52,6 @@ else
 end
 
 tau0 = 1.0;
+dir = reshape(dir, m, n);
 
 end
