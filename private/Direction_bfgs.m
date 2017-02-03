@@ -10,19 +10,19 @@ v = v(:);
 
 if it == 1 || restart
     dir = -v;
-    cache.R = eye(prod(prob.n));
+    cache.H = eye(prod(prob.n));
 else
-    R = cache.R;
+    H = cache.H;
     YSk = yk'*sk;
-    Bs = R'*(R*sk);
+    Bs = H'*(H*sk);
     sBs = sk'*Bs;
     if YSk > 0
-        R = cholupdate(cholupdate(R,yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
+        H = cholupdate(cholupdate(H,yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
     else
         cache.cntSkip = cache.cntSkip+1;
     end
-    dir = -linsolve(R,linsolve(R,v,opt.optsL),opt.optsU);
-    cache.R = R;
+    dir = -linsolve(H,linsolve(H,v,opt.optsL),opt.optsU);
+    cache.H = H;
 end
 
 tau0 = 1.0;

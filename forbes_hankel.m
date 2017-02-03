@@ -38,7 +38,7 @@ function out = forbes_hankel(U, b, r, mu, tol, freq, opt, out1)
     opt.Lf = min(r+1,N-r+1); % squared norm of A
     opt.term = @(prob, it, gam, cache_0, cache_x, ops) terminate_hankel(it, freq, cache_x, b, mu, tol);
 
-    out = forbes(f, g, y0, [], {A, -1, 0}, opt);
+    out = forbes(f, g, y0, [], {A, -1, zeros(m, n)}, opt);
     
     G = -A*out.x1;
     nmEY = norm(out.x1-b,'fro')^2/2;

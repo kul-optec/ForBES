@@ -2,11 +2,15 @@ function out = classical(prob, opt, lsopt)
 
 % initialize operations counter
 
-ops = Ops_Init();
+ops = FBOperations();
+
+% get Lipschitz constant & adaptiveness
+
+[Lf, adaptive] = prob.Get_Lipschitz(opt);
 
 % initialize gamma
 
-gam = (1-opt.beta)/prob.Lf;
+gam = (1-opt.beta)/Lf;
 
 % display header
 
@@ -15,30 +19,25 @@ if opt.display >= 2
 end
 
 cacheDir.cntSkip = 0;
-hasGammaChanged = 0;
-
-cache_current = Cache_Init(prob, prob.x0, gam);
 
 t0 = tic();
 
+cache_current = FBCache(prob, prob.x0, gam, ops);
+restart = 0;
+
 for it = 1:opt.maxit
 
-    % compute FBE
-
-    [cache_current, ops1] = Cache_FBE(cache_current, gam);
-    ops = Ops_Sum(ops, ops1);
-
-    % store initial cache
+    % trace stuff
 
     if it == 1
         cache_0 = cache_current;
     end
 
-    % trace stuff
+    residual(1, it) = norm(cache_current.Get_FPR(), 'inf')/cache_current.Get_Gamma();
+    objective(1, it) = cache_current.Get_FBE();
 
     ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.FPR, 'inf')/gam;
-    objective(1, it) = cache_current.FBE;
+
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
     end
@@ -52,9 +51,9 @@ for it = 1:opt.maxit
         flagTerm = 1;
         break;
     end
-    if ~hasGammaChanged
+    if ~restart
         if ~opt.customTerm
-            if Cache_StoppingCriterion(cache_current, opt.tol)
+            if cache_current.Check_StoppingCriterion(opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
                 flagTerm = 0;
                 break;
@@ -69,16 +68,11 @@ for it = 1:opt.maxit
         end
     end
 
-    % compute gradient of the FBE
-
-    [cache_current, ops1] = Cache_GradFBE(cache_current, gam);
-    ops = Ops_Sum(ops, ops1);
-
     % compute pair (s, y) for quasi-Newton updates
 
     if it > 1
-        sk = cache_current.x - cache_previous.x;
-        yk = cache_current.gradFBE - cache_previous.gradFBE;
+        sk = cache_current.Get_Point() - cache_previous.Get_Point();
+        yk = cache_current.Get_GradFBE() - cache_previous.Get_GradFBE();
     else
         sk = [];
         yk = [];
@@ -87,23 +81,22 @@ for it = 1:opt.maxit
     % compute search direction and slope
 
     [dir, tau0, cacheDir] = ...
-        opt.methodfun(prob, opt, it, hasGammaChanged, sk, yk, cache_current.gradFBE, cacheDir);
-    slope = cache_current.gradFBE'*dir;
+        opt.methodfun(prob, opt, it, restart, sk, yk, cache_current.Get_GradFBE(), cacheDir);
+    slope = cache_current.Get_GradFBE()'*dir;
 
     % perform line search
 
-    [tau, cache_tau, ~, ops1, lsopt, flagLS] = ...
-        lsopt.linesearchfun(cache_current, dir, slope, tau0, lsopt, it, hasGammaChanged);
-    ops = Ops_Sum(ops, ops1);
+    [tau, cache_tau, ~, lsopt, flagLS] = ...
+        lsopt.linesearchfun(cache_current, dir, slope, tau0, lsopt, adaptive, it, restart);
 
     % prepare next iteration, store current solution
 
-    hasGammaChanged = 0;
+    restart = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
-        prob.Lf = prob.Lf*2; gam = gam/2;
-        hasGammaChanged = 1;
-        solution = cache_current.z;
+        gam = gam/2;
+        restart = 1;
+        solution = cache_current.Get_ProxGradStep();
     elseif flagLS > 0 % line-search failed
         flagTerm = 2;
         msgTerm = strcat(['line search failed at iteration ', num2str(it)]);
@@ -118,7 +111,7 @@ for it = 1:opt.maxit
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif opt.display >= 2
+    elseif opt.display >= 2 && mod(it,10) == 0
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e %7.4e %d\n', it, gam, residual(1,it), objective(1,it), norm(dir), slope, tau, flagLS);
     end
 
@@ -134,6 +127,7 @@ if opt.display == 1
 end
 
 % pack up results
+
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;

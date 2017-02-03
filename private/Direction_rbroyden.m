@@ -4,47 +4,70 @@ function [dir, tau0, cache] = Direction_rbroyden(prob, opt, it, restart, sk, yk,
 
 sk = sk(:);
 yk = yk(:);
+
+[m, n] = size(v);
 v = v(:);
 
-if it == 1 || restart || mod(it, opt.memory) == 1
+if it == 1 || restart
     dir = -v;
-    cache.LBroyden_mem = 0;
     cache.S = [];
-    cache.Y = [];
-    cache.W = [];
+    cache.HY = [];
+    cache.shy = [];
 else
+    sts = sk'*sk;
+    yts = yk'*sk;
+    yty = yk'*yk;
+    if opt.initialScaling
+        h = yts/yty;
+    else
+        h = 1;
+    end
+    dir = -h*v;
+    hy = h*yk;
+    for i=1:size(cache.S, 2)
+      	hy = hy + ((hy'*cache.S(:,i))/cache.shy(i)) * (cache.S(:,i)-cache.HY(:,i));
+      	dir = dir + ((dir'*cache.S(:,i))/cache.shy(i)) * (cache.S(:,i)-cache.HY(:,i));
+    end
+    shy = hy'*sk;
     % damping
-    if opt.bopt == 2 % enforces positive curvature along sk
-        sig = 0.1;
+    switch opt.modBroyden
+    case 1 % enforces positive curvature along sk
+        % compute theta_{k-1}; if not 1 then update HYk = H_{k-1}\tilde y_{k-1}
         prev_v = cache.prev_v;
-        prev_tau = cache.prev_tau;
-        sty = sk'*yk;
-        stv = sk'*prev_v;
-        if sty < sig*prev_tau*abs(stv)
-            theta = (1+sign(stv)*sig)*prev_tau*stv/(prev_tau*stv + sty);
-            yk = theta*yk - (1-theta)*prev_tau*prev_v;
+        prev_tau = norm(sk)/norm(cache.prev_dir);
+        delta = -prev_tau*(sk'*prev_v); % delta = \delta_{k-1} = <B_{k-1}s_{k-1}, s_{k-1}> = -tau*<s_{k-1},Rw^{k-1}>  (Rw^k = Rxold)
+        if yts < opt.deltaCurvature*abs(delta)
+            theta = (1-sign0(delta)*opt.deltaCurvature)*delta/(delta-yts);
+            hy = (1-theta)*sk + theta*hy;
+            shy = (1-theta)*sts + theta*shy;
         end
+    case 3 % nonsingularity
+    		% compute theta_{k-1}; if not 1 then update HYk = H_{k-1}\tilde y_{k-1}
+    		gam  = shy/sts;
+    		if abs(gam) < opt.thetaBar
+    			theta = (1-sign0(gam)*opt.thetaBar)/(1-gam);
+    			hy = (1-theta)*sk + theta*hy;
+    			shy = (1-theta)*sts + theta*shy;
+    		end
+    otherwise
+        error('not implemented');
     end
-    delta = 1; % diagonal of H0
-    if cache.LBroyden_mem == opt.memory, idx0 = 2;
-    else idx0 = 1; cache.LBroyden_mem = cache.LBroyden_mem+1; end
-    S0 = cache.S(:,idx0:end);
-    Y0 = cache.Y(:,idx0:end);
-    W0 = cache.W(:,idx0:end);
-    w = delta*yk;
-    dir = -delta*v;
-    for j = 1:size(W0, 2)
-        w = w + (S0(:,j)'*w)*W0(:,j);
-        dir = dir + (S0(:,j)'*dir)*W0(:,j);
+    dir = dir + ((dir'*sk)/shy) * (sk-hy);
+    % update buffer
+    if size(cache.S,2) < opt.memory
+      	cache.S = [cache.S, sk];
+      	cache.HY = [cache.HY, hy];
+      	cache.shy = [cache.shy, shy];
+    else
+      	cache.S  = [];
+      	cache.HY = [];
+      	cache.shy = [];
     end
-    wk = (sk-w)/(sk'*w);
-    dir = dir + (sk'*dir)*wk;
-    % update matrices S, Y, W
-    cache.S = [S0, sk];
-    cache.Y = [Y0, yk];
-    cache.W = [W0, wk];
 end
 
+cache.prev_v = v;
+cache.prev_dir = dir;
 tau0 = 1.0;
+dir = reshape(dir, m, n);
 
 end

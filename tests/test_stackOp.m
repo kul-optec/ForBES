@@ -1,3 +1,6 @@
+close all;
+clear;
+
 ASSERT_EPS = 1e-14;
 
 % two simple operators
@@ -44,7 +47,8 @@ callOpsStack = opsStack.makeop();
 for i = 1:100
     x = randn(2, 4);
     y1 = callOpsStack(x);
-    y2 = [vec(diag1.*x); vec(diag2.*x)];
+    y2 = [diag1.*x, diag2.*x];
+    y2 = y2(:);
     assert(norm(y1-y2, inf) <= ASSERT_EPS);
 end
 

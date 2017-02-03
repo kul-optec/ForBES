@@ -1,3 +1,6 @@
+close all;
+clear;
+
 ASSERT_EPS = 1e-14;
 
 % two simple operators
@@ -53,6 +56,7 @@ callOpsSumAdj = opsSum.makeadj();
 for i = 1:100
     y = randn(2, 4);
     x1 = callOpsSumAdj(y);
-    x2 = [vec(diag1.*y); vec(diag2.*y)];
+    x2 = [diag1.*y, diag2.*y];
+    x2 = x2(:);
     assert(norm(x1-x2, inf) <= ASSERT_EPS);
 end

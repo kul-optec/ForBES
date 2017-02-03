@@ -8,38 +8,32 @@ yk = yk(:);
 [m, n] = size(v);
 v = v(:);
 
-if it == 1 || restart % || mod(it, 5) == 1
+if it == 1 || restart
     dir = -v;
-    cache.R = eye(prod(prob.n));
+    cache.H = eye(prod(prob.n));
 else
-    R = cache.R;
+    H = cache.H;
     sts = sk'*sk;
-    if opt.bopt == 1 % enforces nonzero determinant
-        sig = 0.1;
+    switch opt.modBroyden
+    case 3 % absolute value of determinant (guarantees nonsingularity)
         prev_v = cache.prev_v;
-        prev_tau = cache.prev_tau;
-        gammak = ((R*yk)'*sk)/sts;
-        if abs(gammak) < sig,
-            theta = (1-sgn(gammak)*sig)/(1-gammak);
+        prev_tau = norm(sk)/norm(cache.prev_dir);
+        lam = sk'*(H*yk)/sts;
+        if abs(lam) < opt.thetaBar
+            theta = (1-sign0(lam)*opt.thetaBar)/(1-lam);
             yk = theta*yk - (1-theta)*prev_tau*prev_v;
         end
-    elseif opt.bopt == 2 % enforces positive curvature along sk
-        sig = 0.5;
-        prev_v = cache.prev_v;
-        prev_tau = cache.prev_tau;
-        sty = sk'*yk;
-        stv = sk'*prev_v;
-        if sty < sig*prev_tau*abs(stv)
-            theta = (1+sgn(stv)*sig)*prev_tau*stv/(prev_tau*stv + sty);
-            yk = theta*yk - (1-theta)*prev_tau*prev_v;
-        end
+    otherwise
+        error('not implemented');
     end
-    Ry = R*yk;
-    R = R + (sk-Ry)*(sk'*R)/(sk'*Ry);
-    dir = -R*v;
-    cache.R = R;
+    Hy = H*yk;
+    H = H + (sk-Hy)*(sk'*H)/(sk'*Hy);
+    dir = -H*v;
+    cache.H = H;
 end
 
+cache.prev_v = v;
+cache.prev_dir = dir;
 tau0 = 1.0;
 dir = reshape(dir, m, n);
 

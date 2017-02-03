@@ -1,3 +1,6 @@
+close all;
+clear;
+
 A = [1,  2, -1, -1; ...
     -2, -1,  0, -1; ...
     3,  0,  4, -1; ...
@@ -39,12 +42,13 @@ opts{end+1} = baseopt; opts{end}.solver = 'minfbe'; opts{end}.method = 'lbfgs'; 
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
-    assert(outs{i}.iterations < opts{i}.maxit);
+    assert(outs{i}.flag == 0);
     assert(outs{i}.objective(end) - out_fbs.objective(end) <= ASSERT_TOL);
     assert(norm(outs{i}.x - x_star,inf)/(1+norm(x_star,inf)) <= ASSERT_TOL);
     fprintf('.');

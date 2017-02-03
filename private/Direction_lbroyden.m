@@ -4,6 +4,8 @@ function [dir, tau0, cache] = Direction_lbroyden(prob, opt, it, restart, sk, yk,
 
 sk = sk(:);
 yk = yk(:);
+
+[m, n] = size(v);
 v = v(:);
 
 if it == 1 || restart
@@ -16,7 +18,7 @@ if it == 1 || restart
     cache.LBroyden_mem = 0;
 else
     % damping
-    if opt.bopt == 2 % enforces positive curvature along sk
+    if opt.modBroyden == 2 % enforces positive curvature along sk
         sig = 0.1;
         prev_v = cache.prev_v;
         prev_tau = cache.prev_tau;
@@ -50,5 +52,6 @@ else
 end
 
 tau0 = 1.0;
+dir = reshape(dir, m, n);
 
 end

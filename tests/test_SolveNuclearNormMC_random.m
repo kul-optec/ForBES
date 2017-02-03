@@ -1,3 +1,6 @@
+close all;
+clear;
+
 % rng(0, 'twister'); % uncomment this to control the random number generator
 
 m = 50; % number of rows
@@ -42,6 +45,11 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
 % opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking-nm';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, [], [], opts{i});

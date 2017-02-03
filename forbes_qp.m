@@ -8,10 +8,9 @@
 %                lb <= A*x <= ub
 %                lx <=   x <= ux
 %
-%   All arguments are optional except the first, and may be empty. If last
-%   argument out1 is specified, then the solution process is warm-started
-%   based on the output of a previous call.
-% 
+%   All arguments are optional and may be empty, except for the first.
+%   If last argument out1 is specified, then the solution process is
+%   warm-started based on the output of a previous call.
 
 function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
 
@@ -88,6 +87,10 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     if nargin < 10, opt = []; end
     if nargin < 11, out1 = []; end
     
+    if ~isfield(opt, 'prescale') || isempty(opt.prescale)
+        opt.prescale = true;
+    end
+    
     % Problem setup and solution
     
     if flag_ineq == 0 && flag_eq == 0
@@ -102,19 +105,15 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         tprep = toc(t0);
         out = forbes(f, g, x0, [], [], opt);
     else
-        % Scale inequality constraints
-        scaling_A = ones(size(A, 1), 1);
-%         scaling_A = 1./sum(A.^2, 2);
-%         scaling_A = 1./max(abs(A),[],2);
-        A_ext = diag(scaling_A)*A;
-        lb_ext = scaling_A.*lb;
-        ub_ext = scaling_A.*ub;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%% This should be done only if necessary
+        A_ext = A;
+        lb_ext = lb;
+        ub_ext = ub;
+        % Extend inequality constraints so as to include bounds on x
+        % (This should only be done if necessary)
         A_ext = [A_ext; speye(n)];
         lb_ext = [lb_ext; lx];
         ub_ext = [ub_ext; ux];
         m_ext = m + n;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if flag_eq == 0
             f = quadratic(H, q);
             opt_eigs.issym = 1;
@@ -125,14 +124,36 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
                 out.msg = 'not strongly convex';
                 return;
             end
+            if opt.prescale
+                % Scale inequality constraints
+                scale = 1./sqrt(diag(A_ext*(H\A_ext')));
+                A_ext = diag(sparse(scale))*A_ext;
+                lb_ext = scale.*lb_ext;
+                ub_ext = scale.*ub_ext;
+            end
         else
             f = quadraticOverAffine(Aeq, beq, H, q);
+            if opt.prescale
+                scale = zeros(size(A_ext, 1), 1);
+                callfconj = f.makefconj();
+                [~, p] = callfconj(zeros(size(A_ext, 2),1));
+                for i = 1:size(A_ext, 1)
+                    [~, dgradi] = callfconj(A_ext(i, :)');
+                    scale(i) = 1/sqrt(A_ext(i, :)*(dgradi-p));
+                end
+                % Scale inequality constraints
+                A_ext = diag(sparse(scale))*A_ext;
+                lb_ext = scale.*lb_ext;
+                ub_ext = scale.*ub_ext;
+            end
         end
         g = indBox(lb_ext, ub_ext);
         constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
         if isempty(out1)
+            % cold start
             y0 = zeros(m_ext, 1);
         else
+            % warm start
             opt.Lf = out1.solver.dual.prob.Lf;
             y0 = [out1.y_ineq; out1.y_bnd];
         end
