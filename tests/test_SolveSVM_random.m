@@ -29,9 +29,9 @@ g = hingeLoss(mu, b);
 constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 
-TOL = 1e-12;
+TOL = 1e-8;
 ASSERT_TOLX = 1e-4;
-ASSERT_TOLF = 1e-8;
+ASSERT_TOLF = 1e-6;
 
 %% adaptive
 

@@ -20,9 +20,9 @@ g = indPos();
 constr = {A, 1, b};
 y0 = zeros(m, 1);
 
-TOL = 1e-8;
-ASSERT_TOLX = 1e-6;
-ASSERT_TOLF = 1e-10;
+TOL = 1e-6;
+ASSERT_TOLX = 1e-4;
+ASSERT_TOLF = 1e-6;
 
 % run solvers
 

@@ -18,7 +18,7 @@ if ~isfield(opt, 'useHessian') || isempty(opt.useHessian), opt.useHessian = fals
 if ~isfield(opt, 'modBroyden') || isempty(opt.modBroyden), opt.modBroyden = 3; end
 if ~isfield(opt, 'deltaCurvature') || isempty(opt.deltaCurvature), opt.deltaCurvature = 1e-6; end
 if ~isfield(opt, 'thetaBar') || isempty(opt.thetaBar), opt.thetaBar = 1e-4; end
-if ~isfield(opt, 'initialScaling') || isempty(opt.initialScaling), opt.initialScaling = 1; end
+if ~isfield(opt, 'initialScaling') || isempty(opt.initialScaling), opt.initialScaling = 0; end
 if ~isfield(opt, 'memory') || isempty(opt.memory), opt.memory = 10; end
 
 opt.optsL.UT = true;
