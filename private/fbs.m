@@ -94,7 +94,7 @@ for it = 1:opt.maxit
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif opt.display >= 2 && mod(it,100) == 0
+    elseif (opt.display == 2 && mod(it,100) == 0) || opt.display >= 3 
         fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
     end
 

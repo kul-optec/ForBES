@@ -116,7 +116,7 @@ for it = 1:opt.maxit
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif opt.display >= 2 && mod(it,10) == 0
+    elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3 
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e %7.4e %d\n', it, gam, residual(1,it), objective(1,it), norm(dir), slope, tau, flagLS);
     end
 
