@@ -14,7 +14,6 @@ if it == 1 || restart
     cache.HY = [];
     cache.shy = [];
 else
-    sts = sk'*sk;
     yts = yk'*sk;
     yty = yk'*yk;
     if opt.initialScaling
@@ -45,16 +44,16 @@ else
         end
     case 3 % nonsingularity
     		% compute theta_{k-1}; if not 1 then update HYk = H_{k-1}\tilde y_{k-1}
-    		gam  = shy/sts;
+    		gam  = shy/ni;
     		if abs(gam) < opt.thetaBar
     			theta = (1-sign0(gam)*opt.thetaBar)/(1-gam);
-    			hy = (1-theta)*sk + theta*hy;
-    			shy = (1-theta)*sts + theta*shy;
+    			hy = theta*(sk-hy); % now hy is s - H\tilde y
+    			shy = (1-theta)*ni + theta*shy;
     		end
     otherwise
         error('not implemented');
     end
-    dir = dir + ((dir'*sk)/shy) * (u-hy);
+    dir = dir + ((dir'*u)/shy) * hy;
     % update buffer
     if size(cache.S,2) < opt.memory
       	cache.S = [cache.S, u];
