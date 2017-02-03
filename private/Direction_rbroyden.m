@@ -28,7 +28,9 @@ else
       	hy = hy + ((hy'*cache.S(:,i))/cache.shy(i)) * (cache.S(:,i)-cache.HY(:,i));
       	dir = dir + ((dir'*cache.S(:,i))/cache.shy(i)) * (cache.S(:,i)-cache.HY(:,i));
     end
-    shy = hy'*sk;
+    u = opt.metric(sk);
+    ni = sk'*u;
+    shy = hy'*u;
     % damping
     switch opt.modBroyden
     case 1 % enforces positive curvature along sk
@@ -52,10 +54,10 @@ else
     otherwise
         error('not implemented');
     end
-    dir = dir + ((dir'*sk)/shy) * (sk-hy);
+    dir = dir + ((dir'*sk)/shy) * (u-hy);
     % update buffer
     if size(cache.S,2) < opt.memory
-      	cache.S = [cache.S, sk];
+      	cache.S = [cache.S, u];
       	cache.HY = [cache.HY, hy];
       	cache.shy = [cache.shy, shy];
     else
