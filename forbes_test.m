@@ -9,6 +9,7 @@ fprintf('%40s', 'sumOp... ');                       tic(); test_sumOp;          
 fprintf('%40s', 'stackOp... ');                     tic(); test_stackOp;                      fprintf('OK (%5.2f s)\n', toc());
 fprintf('%40s', 'separableSum... ');                tic(); test_separableSum;                 fprintf('OK (%5.2f s)\n', toc());
 fprintf('%40s', 'quadratic... ');                   tic(); test_quadratic;                    fprintf('OK (%5.2f s)\n', toc());
+fprintf('%40s', 'lqrCost... ');                   tic(); test_lqrCost;                    fprintf('OK (%5.2f s)\n', toc());
 
 fprintf('* testing solver utilities:\n');
 
