@@ -1,4 +1,22 @@
-% restarted Broyden method
+% DIRECTION_RBROYDEN computes search directions according to the restarted
+% modified broyden method.
+%
+%   Parameters:
+%
+%       prob: ForBES problem object (class ProblemComposite)
+%       opt: ForBES options object (struct)
+%       it: iteration number (1-based)
+%       restart: flag indicating that the method should be restarted
+%       sk, yk: pair used to perform the update
+%       v: vector to be multiplied by the Jacobian approximation (e.g., current residual)
+%       cache: object containint the method's memory (struct)
+%
+%   Return values:
+%
+%       dir: the computed direction
+%       tau0: the initial stepsize to be tried
+%       cache: the updated method's memory
+% 
 
 function [dir, tau0, cache] = Direction_rbroyden(prob, opt, it, restart, sk, yk, v, cache)
 
@@ -43,13 +61,13 @@ else
             shy = (1-theta)*sts + theta*shy;
         end
     case 3 % nonsingularity
-    		% compute theta_{k-1}; if not 1 then update HYk = H_{k-1}\tilde y_{k-1}
-    		gam  = shy/ni;
-    		if abs(gam) < opt.thetaBar
-    			theta = (1-sign0(gam)*opt.thetaBar)/(1-gam);
-    			hy = theta*(sk-hy); % now hy is s - H\tilde y
-    			shy = (1-theta)*ni + theta*shy;
-    		end
+		% compute theta_{k-1}; if not 1 then update HYk = H_{k-1}\tilde y_{k-1}
+		gam  = shy/ni;
+		if abs(gam) < opt.thetaBar
+			theta = (1-sign0(gam)*opt.thetaBar)/(1-gam);
+			hy = theta*(sk-hy); % now hy is s - H\tilde y
+			shy = (1-theta)*ni + theta*shy;
+		end
     otherwise
         error('not implemented');
     end
