@@ -66,13 +66,25 @@ end
 
 % Test with reference state
 
-% xref = randn(n_x, 1);
-%
-% f = lqrCost(x0, Q, R, Q_N, A, B, N, xref);
-%
-% for i=1:N_TESTS
-%     x = randn(N*(n_x+n_u)+n_x, 1);
-%     [fc_x, grad_fc_x] = call_fc(x);
-%     % evaluate some other way
-%     % test equivalence
-% end
+xref = randn(n_x, 1);
+tran = [repmat([Q*xref; zeros(n_u, 1)], N, 1); Q_N*xref];
+f = lqrCost(x0, Q, R, Q_N, A, B, N, xref);
+call_fc = f.makefconj();
+
+for i=1:N_TESTS
+    y = randn(N*(n_x+n_u)+n_x, 1);
+    [fc_y, grad_fc_y] = call_fc(y);
+    % test conjugate subgradient theorem
+    fx = 0.5*((grad_fc_y-tran)'*H*(grad_fc_y-tran));
+    assert(abs(grad_fc_y'*y - fx - fc_y) <= 1e-12*(1+abs(fc_y)));
+    % evaluate gradient numerically
+    grad_fc_y_num = numdiff(call_fc, y);
+    assert(norm(grad_fc_y-grad_fc_y_num, 'inf') <= 1e-6*(1+norm(grad_fc_y, 'inf')));
+    % evaluate by solving a QP
+%     opt_qp = optimoptions('quadprog','Display','off');
+%     [grad_fc_y_qp] = quadprog(H,-y,[],[],A_eq,b_eq,[],[],[],opt_qp);
+%     fc_y_qp = y'*grad_fc_y_qp - 0.5*(grad_fc_y_qp'*H*grad_fc_y_qp);
+    % test equivalence
+%     assert(abs(fc_y-fc_y_qp) <= 1e-8);
+%     assert(norm(grad_fc_y-grad_fc_y_qp, 'inf') <= 1e-8);
+end

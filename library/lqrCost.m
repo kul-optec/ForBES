@@ -63,21 +63,29 @@ function obj = lqrCost(x0, varargin)
         obj.N = varargin{6};
         obj = RiccatiFactor(obj);
         if length(varargin) >= 7
-            obj.xref = varargin{7};
-            b = [repmat(obj.Q*obj.xref, N, 1); obj.Q_f*obj.xref];
-            obj.makefconj = @() @(w) call_lqrCost_fconj(w+b, x0, obj);
+            xref = varargin{7};
+            % a reference state different from zero results in a linear
+            % tilting of f, plus the addition of a constant: record these
+            % tilting & constant so to take into account for them when
+            % computing the conjugate
+            obj.tilt = [repmat([obj.Q*xref; zeros(size(obj.R, 1), 1)], obj.N, 1); obj.Q_f*xref];
+            obj.diff = (obj.N+1)/2*norm(xref)^2;
         else
-            obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
+            obj.tilt = 0;
+            obj.diff = 0;
         end
+        obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
     else
         obj = varargin{1};
         if length(varargin) == 2
-            obj.xref = varargin{2};
-            b = [repmat(obj.Q*obj.xref, N, 1); obj.Q_f*obj.xref];
-            obj.makefconj = @() @(w) call_lqrCost_fconj(w+b, x0, obj);
+            xref = varargin{2};
+            obj.tilt = [repmat([obj.Q*xref; zeros(size(obj.R, 1), 1)], obj.N, 1); obj.Q_f*xref];
+            obj.diff = (obj.N+1)/2*norm(xref)^2;
         else
-            obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
+            obj.tilt = 0;
+            obj.diff = 0;
         end
+        obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
     end
     obj.isQuadratic = 0;
     obj.isConjQuadratic = 1;
@@ -85,7 +93,7 @@ end
 
 function [fcw, xu] = call_lqrCost_fconj(w, x0, obj)
     [n_x, n_u] = size(obj.B);
-    [~, xu] = RiccatiSolve(w, x0, obj.A, obj.B, obj.LRs, obj.Ks, obj.Ms, obj.Ls, int32(n_x), int32(n_u), int32(obj.N));
+    [~, xu] = RiccatiSolve(w+obj.tilt, x0, obj.A, obj.B, obj.LRs, obj.Ks, obj.Ms, obj.Ls, int32(n_x), int32(n_u), int32(obj.N));
     fxu = 0;
     for i=0:obj.N-1
         x_i = xu(i*(n_x+n_u)+1:i*(n_x+n_u)+n_x);
@@ -94,7 +102,7 @@ function [fcw, xu] = call_lqrCost_fconj(w, x0, obj)
     end
     x_N = xu(obj.N*(n_x+n_u)+1:end);
     fxu = fxu + 0.5*(x_N'*(obj.Q_f*x_N));
-    fcw = w'*xu - fxu;
+    fcw = (w+obj.tilt)'*xu - fxu - obj.diff;
 end
 
 function obj = RiccatiFactor(obj)
