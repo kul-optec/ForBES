@@ -69,16 +69,20 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     end
 
     if nargin < 8 || isempty(lx)
+        flag_lx = 0;
         lx = -inf(n, 1);
     else
+        flag_lx = 1;
         if isscalar(lx)
             lx = lx*ones(n, 1);
         end
     end
     
     if nargin < 9 || isempty(ux)
+        flag_ux = 0;
         ux = +inf(n, 1);
     else
+        flag_ux = 1;
         if isscalar(ux)
             ux = ux*ones(n, 1);
         end
@@ -108,13 +112,16 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         A_ext = A;
         lb_ext = lb;
         ub_ext = ub;
+        m_ext = m;
         % Extend inequality constraints so as to include bounds on x
-        % (This should only be done if necessary)
-        A_ext = [A_ext; speye(n)];
-        lb_ext = [lb_ext; lx];
-        ub_ext = [ub_ext; ux];
-        m_ext = m + n;
-        if flag_eq == 0
+        % (if necessary)
+        if flag_lx || flag_ux
+            A_ext = [A_ext; speye(n)];
+            lb_ext = [lb_ext; lx];
+            ub_ext = [ub_ext; ux];
+            m_ext = m_ext + n;
+        end
+        if flag_eq == 0 % NO equality constraints
             f = quadratic(H, q);
             opt_eigs.issym = 1;
             opt_eigs.tol = 1e-3;
@@ -131,7 +138,7 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
                 lb_ext = scale.*lb_ext;
                 ub_ext = scale.*ub_ext;
             end
-        else
+        else % YES equality constraints
             f = quadraticOverAffine(Aeq, beq, H, q);
             if opt.prescale
                 scale = zeros(size(A_ext, 1), 1);
@@ -139,7 +146,12 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
                 [~, p] = callfconj(zeros(size(A_ext, 2),1));
                 for i = 1:size(A_ext, 1)
                     [~, dgradi] = callfconj(A_ext(i, :)');
-                    scale(i) = 1/sqrt(A_ext(i, :)*(dgradi-p));
+                    w = A_ext(i, :)*(dgradi-p);
+                    if w >= 1e-14
+                        scale(i) = 1/sqrt(w);
+                    else
+                        scale(i) = 1;
+                    end
                 end
                 % Scale inequality constraints
                 A_ext = diag(sparse(scale))*A_ext;
