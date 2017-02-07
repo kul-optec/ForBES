@@ -60,19 +60,29 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     n_u = size(mpc_prob.B, 2);
 
     m_stage = size(mpc_prob.L_s, 1);
-    m_final = size(mpc_prob.L_N, 1);
     
     % Make objective term f
 
     if isempty(mpc_prob.xref)
         f = lqrCost(mpc_prob.x0, mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
-            mpc_prob.A, mpc_prob.B,mpc_prob. N);
+            mpc_prob.A, mpc_prob.B, mpc_prob.N);
+        mpc_prob.xref = zeros(n_x, 1);
     else
         f = lqrCost(mpc_prob.x0, mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
             mpc_prob.A, mpc_prob.B, mpc_prob.N, mpc_prob.xref);
     end
 
     % Build big constraint matrix
+    
+    if isfield(mpc_prob, 'x_N_ellipse')
+        % Call LQR to get solution of Riccati equation
+        [K, S, E] = dlqr(mpc_prob.A, mpc_prob.B, mpc_prob.Q, mpc_prob.R);
+        P = chol(S); % S = P'*P
+        alpha = mpc_prob.x_N_ellipse;
+        mpc_prob.L_N = [0, 0, 0, 0; 0, 0, 0, 0; P];
+    end
+    
+    m_final = size(mpc_prob.L_N, 1);
 
     diag_L = {};
     for k = 1:mpc_prob.N
@@ -110,16 +120,25 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
         xu_max = [xu_max; mpc_prob.s_max];
         w = [w; mpc_prob.stage_w];
     end
-    xu_min = [xu_min; mpc_prob.x_N_min];
-    xu_max = [xu_max; mpc_prob.x_N_max];
-    w = [w; mpc_prob.final_w];
-
-    xu_min_scaled = scale.*xu_min;
-    xu_max_scaled = scale.*xu_max;
     
-    w_scaled = w./scale;
-    
-    g = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
+    if isfield(mpc_prob, 'x_N_ellipse')
+        % Case where ellipsoidal final constraint is selected
+        xu_min_scaled = scale(1:mpc_prob.N*m_stage).*xu_min;
+        xu_max_scaled = scale(1:mpc_prob.N*m_stage).*xu_max;
+        w_scaled = w./scale(1:mpc_prob.N*m_stage);
+        g_s = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
+        g_N = indSOC([0; 0; P*mpc_prob.xref]-[(1+alpha)/2; (1-alpha)/2; zeros(n_x, 1)]);
+        g = separableSum({g_s, g_N}, {mpc_prob.N*m_stage, 2+n_x});
+    else
+        % Case where ordinary (soft/hard) final constraint is selected
+        xu_min = [xu_min; mpc_prob.x_N_min];
+        xu_max = [xu_max; mpc_prob.x_N_max];
+        w = [w; mpc_prob.final_w];
+        xu_min_scaled = scale.*xu_min;
+        xu_max_scaled = scale.*xu_max;
+        w_scaled = w./scale;
+        g = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
+    end
 
     % Now the problem to solve is
     %
@@ -143,7 +162,7 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     temp = reshape(out_forbes.x1(1:end-n_x), n_x+n_u, mpc_prob.N);
     out.x = [temp(1:n_x,:), out_forbes.x1(end-n_x+1:end)];
     out.u = temp(n_x+1:end,:);
-    out.z = out_forbes.z; % slack variables
+    out.z = out_forbes.z;
     out.y = out_forbes.y; % dual variables
     out.solver = out_forbes;
     out.preprocess = tpre;
