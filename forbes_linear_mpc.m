@@ -29,11 +29,12 @@
 % 
 %   and
 % 
-%       mpc_prob.stage_const = 'soft'/'hard'
-%       mpc_prob.stage_const_param = penalty parameter in case of 'soft'
+%       mpc_prob.stage_w = [w_1, ..., w_{m_s}], the weights to apply
+%       to the linear penalty for each constraint violation (+inf: hard
+%       constraint)
 % 
-%       mpc_prob.final_const = 'soft'/'hard'
-%       mpc_prob.final_const_param = penalty parameter in case of 'soft'
+%       mpc_prob.final_w = [w_1, ..., w_{m_N}], analogous to the
+%       previous case
 % 
 
 % function out = forbes_linear_mpc(x0, xref, Q, R, Q_N, A, B, N, g, L, opt, out_prev)
@@ -103,39 +104,22 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     
     L_scaled = sparse(diag(scale))*L;
 
-    xu_s_min = []; xu_s_max = [];
+    xu_min = []; xu_max = []; w = [];
     for k=0:mpc_prob.N-1
-        xu_s_min = [xu_s_min; mpc_prob.s_min];
-        xu_s_max = [xu_s_max; mpc_prob.s_max];
+        xu_min = [xu_min; mpc_prob.s_min];
+        xu_max = [xu_max; mpc_prob.s_max];
+        w = [w; mpc_prob.stage_w];
     end
+    xu_min = [xu_min; mpc_prob.x_N_min];
+    xu_max = [xu_max; mpc_prob.x_N_max];
+    w = [w; mpc_prob.final_w];
 
-    xu_s_min_scaled = scale(1:end-m_final).*xu_s_min;
-    xu_s_max_scaled = scale(1:end-m_final).*xu_s_max;
+    xu_min_scaled = scale.*xu_min;
+    xu_max_scaled = scale.*xu_max;
     
-    x_N_min_scaled = scale(end-m_final+1:end).*mpc_prob.x_N_min;
-    x_N_max_scaled = scale(end-m_final+1:end).*mpc_prob.x_N_max;
+    w_scaled = w./scale;
     
-    switch mpc_prob.stage_const
-        case 'soft'
-            mu = mpc_prob.stage_const_param;
-            mu_scaled = mu./scale(1:end-m_final);
-            g_s = distBox(xu_s_min_scaled, xu_s_max_scaled, mu_scaled);
-        case 'hard'
-            g_s = indBox(xu_s_scaled, xu_s_scaled);
-        otherwise
-    end
-    
-    switch mpc_prob.final_const
-        case 'soft'
-            mu = mpc_prob.final_const_param;
-            mu_scaled = mu./scale(end-m_final+1:end);
-            g_N = distBox(x_N_min_scaled, x_N_max_scaled, mu_scaled);
-        case 'hard'
-            g_N = indBox(x_N_min_scaled, x_N_max_scaled);
-        otherwise
-    end
-    
-    g = separableSum({g_s, g_N}, {mpc_prob.N*m_stage, m_final});
+    g = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
 
     % Now the problem to solve is
     %
