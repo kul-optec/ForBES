@@ -1,8 +1,16 @@
 function out = minfbe(prob, opt, lsopt)
 
-% initialize operations counter
+% initialize output stuff
 
-ops = FBOperations();
+if opt.report
+    residual = zeros(1, opt.maxit);
+    objective = zeros(1, opt.maxit);
+    ts = zeros(1, opt.maxit);
+    % initialize operations counter
+    ops = FBOperations();
+else
+    ops = [];
+end
 
 % get Lipschitz constant & adaptiveness
 
@@ -34,15 +42,17 @@ for it = 1:opt.maxit
     end
 
     % trace stuff
+    
+    solution = cache_current.Get_ProxGradStep();
 
-    objective(1, it) = cache_current.Get_FBE(); %cache_current.FBE;
-    ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_current.Get_FPR(), 'inf')/cache_current.Get_Gamma();
+    if opt.report
+        objective(1, it) = cache_current.Get_FBE();
+        ts(1, it) = toc(t0);
+        residual(1, it) = norm(cache_current.Get_FPR(), 'inf')/cache_current.Get_Gamma();
+    end
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
     end
-
-    solution = cache_current.Get_ProxGradStep();
 
     % check for termination
 
@@ -141,9 +151,11 @@ out.flag = flagTerm;
 out.x = solution;
 out.iterations = it;
 out.operations = ops;
-out.residual = residual(1, 1:it);
-out.objective = objective(1, 1:it);
-out.ts = ts(1, 1:it);
+if opt.report
+    out.residual = residual(1, 1:it);
+    out.objective = objective(1, 1:it);
+    out.ts = ts(1, 1:it);
+end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.skip = cache_dir.cntSkip;

@@ -26,7 +26,7 @@ prob = cache.prob;
 if prob.istheref1
     if prob.isthereC1
         cache.gradf1x = prob.C1'*cache.gradf1res1x;
-        cache.ops.addC1();
+        if cache.flagOps, cache.ops.addC1(); end
     end
 else
     cache.gradf1x = 0.0;
@@ -41,7 +41,7 @@ if prob.istheref2
             cache.gradf2res2x = gradf2res2x;
         end
         cache.gradf2x = prob.C2'*gradf2res2x;
-        cache.ops.addC2();
+        if cache.flagOps, cache.ops.addC2(); end
     else
         if prob.useHessian
             [~, gradf2res2x, cache.Hessf2res2x] = prob.callf2(cache.res2x);
@@ -51,7 +51,7 @@ if prob.istheref2
         end
         cache.gradf2x = gradf2res2x;
     end
-    cache.ops.addgradf2();
+    if cache.flagOps, cache.ops.addgradf2(); end
 else
     cache.gradf2x = 0.0;
 end

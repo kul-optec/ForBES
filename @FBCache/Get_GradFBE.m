@@ -18,18 +18,20 @@ if ~cache.flagGradFBE || gam0 ~= gam
             C1FPR = prob.C1*cache.FPR;
             QC1FPR = prob.Q(C1FPR);
             C1tQC1diff = prob.C1'*QC1FPR;
-            cache.ops.addC1();
-            cache.ops.addC1(); % yes, twice
+            if cache.flagOps
+                cache.ops.addC1();
+                cache.ops.addC1(); % yes, twice
+            end
         else
             C1tQC1diff = prob.Q(cache.FPR);
         end
-        cache.ops.addgradf1();
+        if cache.flagOps, cache.ops.addgradf1(); end
         HFPR = HFPR + C1tQC1diff;
     end
     if prob.istheref2
         if prob.isthereC2
             C2FPR = prob.C2*cache.FPR;
-            cache.ops.addC2();
+            if cache.flagOps, cache.ops.addC2(); end
         else
             C2FPR = cache.FPR;
         end
@@ -39,7 +41,7 @@ if ~cache.flagGradFBE || gam0 ~= gam
             % imaginary trick
             res2xepsFPR = cache.res2x + 1e-100i*C2FPR;
             [~, gradf2res2xepsd] = prob.callf2(res2xepsFPR);
-            cache.ops.addgradf2();
+            if cache.flagOps, cache.ops.addgradf2(); end
             HC2FPR = imag(gradf2res2xepsd)/1e-100;
             % forward differences
     %             res2xepsdiff = cache.res2x + 1e-8*C2diff;
@@ -49,7 +51,7 @@ if ~cache.flagGradFBE || gam0 ~= gam
         end
         if prob.isthereC2
             HFPR = HFPR + (prob.C2'*HC2FPR);
-            cache.ops.addC2();
+            if cache.flagOps, cache.ops.addC2(); end
         else
             HFPR = HFPR + HC2FPR;
         end

@@ -21,7 +21,7 @@ classdef FBCache < handle
     flagEvalf, flagGradStep, flagProxGradStep, flagFBE, flagGradFBE
     flagLineSearch1, flagLineSearch2
     % operation counter
-    ops
+    ops, flagOps
   end
   methods
     function cache = FBCache(myprob, myx, mygam, myops)
@@ -35,7 +35,13 @@ classdef FBCache < handle
       cache.flagGradFBE = false;
       cache.flagLineSearch1 = false;
       cache.flagLineSearch2 = false;
-      cache.ops = myops;
+      if nargin < 4 || isempty(myops)
+          cache.ops = [];
+          cache.flagOps = false;
+      else
+          cache.ops = myops;
+          cache.flagOps = true;
+      end
     end
   end
 end

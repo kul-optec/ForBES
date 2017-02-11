@@ -1,8 +1,16 @@
 function out = amls(prob, opt, varargin)
 
-% initialize operations counter
+% initialize output stuff
 
-ops = FBOperations();
+if opt.report
+    residual = zeros(1, opt.maxit);
+    objective = zeros(1, opt.maxit);
+    ts = zeros(1, opt.maxit);
+    % initialize operations counter
+    ops = FBOperations();
+else
+    ops = [];
+end
 
 % get Lipschitz constant & adaptiveness
 
@@ -22,12 +30,10 @@ cacheDir.cntSkip = 0;
 
 flagTerm = 0;
 
-MAXIMUM_Lf = 1e14;
-
-t0 = tic();
-
 cache_x = FBCache(prob, prob.x0, gam, ops);
 restart = 0;
+
+t0 = tic();
 
 for it = 1:opt.maxit
 
@@ -43,18 +49,15 @@ for it = 1:opt.maxit
     if it == 1
         cache_0 = cache_x;
     end
-
-    ts(1, it) = toc(t0);
-    residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+    
+    if opt.report
+        objective(1,it) = cache_x.Get_FBE();
+        residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+        ts(1, it) = toc(t0);
+    end
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
-
-    % compute FBE at current point
-    % (this should count zero operations)
-    % will be used as threshold for the line-search
-
-    objective(1,it) = cache_x.Get_FBE();
 
     % check for termination
 
@@ -144,6 +147,8 @@ for it = 1:opt.maxit
 
 end
 
+time = toc(t0);
+
 if it == opt.maxit
     msgTerm = 'exceeded maximum iterations';
     flagTerm = 1;
@@ -167,10 +172,13 @@ else
 end
 out.iterations = it;
 out.operations = ops;
-out.residual = residual(1, 1:it);
-out.objective = objective(1, 1:it);
-out.ts = ts(1, 1:it);
+if opt.report
+    out.residual = residual(1, 1:it);
+    out.objective = objective(1, 1:it);
+    out.ts = ts(1, 1:it);
+end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
+out.time = time;
 
 end

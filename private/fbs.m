@@ -4,9 +4,16 @@ MAXIMUM_Lf = 1e14;
 
 % initialize output stuff
 
-residual = zeros(1, opt.maxit);
-ts = zeros(1, opt.maxit);
-objective = zeros(1, opt.maxit);
+if opt.report
+    residual = zeros(1, opt.maxit);
+    objective = zeros(1, opt.maxit);
+    ts = zeros(1, opt.maxit);
+    % initialize operations counter
+    ops = FBOperations();
+else
+    ops = [];
+end
+
 msgTerm = '';
 record = [];
 
@@ -15,10 +22,6 @@ record = [];
 if opt.display >= 2
     fprintf('\n%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.');
 end
-
-% initialize operations counter
-
-ops = FBOperations();
 
 % get Lipschitz constant & adaptiveness
 
@@ -54,9 +57,11 @@ for it = 1:opt.maxit
         gam = cache_yk.Get_Gamma();
     end
 
-    objective(1, it) = cache_yk.Get_FBE();
-    residual(1, it) = norm(cache_yk.Get_FPR(), 'inf')/cache_yk.Get_Gamma();
-    ts(1, it) = toc(t0);
+    if opt.report
+        objective(1, it) = cache_yk.Get_FBE();
+        residual(1, it) = norm(cache_yk.Get_FPR(), 'inf')/cache_yk.Get_Gamma();
+        ts(1, it) = toc(t0);
+    end
 
     if opt.toRecord
         record = [record, opt.record(prob, it, cache_yk.Get_Gamma(), cache_0, cache_yk, ops)];
@@ -100,6 +105,8 @@ for it = 1:opt.maxit
 
 end
 
+time = toc(t0);
+
 if it == opt.maxit
     msgTerm = [msgTerm, 'exceeded maximum iterations'];
     flagTerm = 1;
@@ -119,9 +126,12 @@ out.flag = flagTerm;
 out.x = cache_yk.Get_ProxGradStep();
 out.iterations = it;
 out.operations = ops;
-out.residual = residual(1, 1:it);
-out.objective = objective(1, 1:it);
-out.ts = ts(1, 1:it);
+if opt.report
+    out.residual = residual(1, 1:it);
+    out.objective = objective(1, 1:it);
+    out.ts = ts(1, 1:it);
+end
 out.record = record;
 out.gam = gam;
 out.adaptive = adaptive;
+out.time = time;

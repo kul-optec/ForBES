@@ -27,11 +27,13 @@ if prob.istheref2
         [f2xt, gradf2res2xt] = prob.callf2(cachet.res2x);
         cachet.gradf2res2x = gradf2res2xt;
     end
-    cache.ops.addf2();
-    cache.ops.addgradf2();
+    if cache.flagOps
+        cache.ops.addf2();
+        cache.ops.addgradf2();
+    end
     if prob.isthereC2
         gradf2xt = prob.C2'*gradf2res2xt;
-        cache.ops.addC2();
+        if cache.flagOps, cache.ops.addC2(); end
     else
         gradf2xt = gradf2res2xt;
     end
@@ -57,8 +59,10 @@ if prob.isthereD
 else
     [cachet.z, cachet.gz] = prob.callg(cachet.y, gam);
 end
-cache.ops.addproxg();
-cache.ops.addg();
+if cache.flagOps
+    cache.ops.addproxg();
+    cache.ops.addg();
+end
 cachet.FPR = cachet.x-cachet.z;
 
 cachet.flagProxGradStep = true;

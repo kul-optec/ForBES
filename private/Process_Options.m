@@ -11,6 +11,7 @@ if ~isfield(opt, 'maxit') || isempty(opt.maxit), opt.maxit = 10000; end
 if ~isfield(opt, 'beta') || isempty(opt.beta), opt.beta = 0.05; end
 if ~isfield(opt, 'variant'), opt.variant = ''; end
 if ~isfield(opt, 'display') || isempty(opt.display), opt.display = 2; end
+if ~isfield(opt, 'report') || isempty(opt.report), opt.report = 1; end
 if ~isfield(opt, 'useHessian') || isempty(opt.useHessian), opt.useHessian = false; end
 if ~isfield(opt, 'metric') || isempty(opt.metric), opt.metric = @(x) x; end
 

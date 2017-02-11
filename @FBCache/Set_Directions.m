@@ -15,14 +15,16 @@ if nargin > 1 && ~isempty(dir1)
             cache.C1dir1 = prob.C1*dir1;
             cache.QC1dir1 = prob.Q(cache.C1dir1);
             cache.C1tQC1dir1 = prob.C1'*cache.QC1dir1;
-            cache.ops.addC1();
-            cache.ops.addC1(); % yes, twice
+            if cache.flagOps
+                cache.ops.addC1();
+                cache.ops.addC1(); % yes, twice
+            end
         else
             cache.C1dir1 = dir1;
             cache.QC1dir1 = prob.Q(cache.C1dir1);
             cache.C1tQC1dir1 = cache.QC1dir1;
         end
-        cache.ops.addgradf1();
+        if cache.flagOps, cache.ops.addgradf1(); end
         cache.f1linear1 = cache.gradf1x(:)'*dir1(:);
         cache.f1quad1 = cache.C1dir1(:)'*cache.QC1dir1(:);
     end
@@ -30,7 +32,7 @@ if nargin > 1 && ~isempty(dir1)
     if prob.istheref2
         if prob.isthereC2
             cache.C2dir1 = prob.C2*dir1;
-            cache.ops.addC2();
+            if cache.flagOps, cache.ops.addC2(); end
         else
             cache.C2dir1 = dir1;
         end
@@ -53,14 +55,16 @@ if nargin > 2 && ~isempty(dir2)
             cache.C1dir2 = prob.C1*dir2;
             cache.QC1dir2 = prob.Q(cache.C1dir2);
             cache.C1tQC1dir2 = prob.C1'*cache.QC1dir2;
-            cache.ops.addC1();
-            cache.ops.addC1(); % yes, twice
+            if cache.flagOps
+                cache.ops.addC1();
+                cache.ops.addC1(); % yes, twice
+            end
         else
             cache.C1dir2 = dir2;
             cache.QC1dir2 = prob.Q(cache.C1dir2);
             cache.C1tQC1dir2 = cache.QC1dir2;
         end
-        cache.ops.addgradf1();
+        if cache.flagOps, cache.ops.addgradf1(); end
         cache.f1linear2 = cache.gradf1x(:)'*dir2(:);
         cache.f1quad2 = cache.C1dir2(:)'*cache.QC1dir2(:);
         cache.f1cross = cache.QC1dir1(:)'*cache.C1dir2(:);
@@ -69,7 +73,7 @@ if nargin > 2 && ~isempty(dir2)
     if prob.istheref2
         if prob.isthereC2
             cache.C2dir2 = prob.C2*dir2;
-            cache.ops.addC2();
+            if cache.flagOps, cache.ops.addC2(); end
         else
             cache.C2dir2 = dir2;
         end

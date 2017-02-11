@@ -20,8 +20,10 @@ if ~cache.flagProxGradStep || gam0 ~= gam
     else
       [cache.z, cache.gz] = prob.callg(cache.y, gam);
     end
-    cache.ops.addproxg();
-    cache.ops.addg();
+    if cache.flagOps
+        cache.ops.addproxg();
+        cache.ops.addg();
+    end
     cache.FPR = cache.x-cache.z;
     cache.normFPR = norm(cache.FPR(:));
     cache.gam = gam;

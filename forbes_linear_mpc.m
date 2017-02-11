@@ -50,7 +50,7 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
 
     if ~exist('opt','var'), opt = []; end
     
-    if ~isfield('opt','prescale') || isempty(opt.prescale)
+    if ~isfield(opt,'prescale') || isempty(opt.prescale)
         opt.prescale = 1;
     end
 
@@ -63,7 +63,7 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     
     % Make objective term f
 
-    if isempty(mpc_prob.xref)
+    if ~isfield(mpc_prob, 'xref') || isempty(mpc_prob.xref)
         f = lqrCost(mpc_prob.x0, mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
             mpc_prob.A, mpc_prob.B, mpc_prob.N);
         mpc_prob.xref = zeros(n_x, 1);
@@ -75,11 +75,8 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     % Build big constraint matrix
     
     if isfield(mpc_prob, 'x_N_ellipse')
-        % Call LQR to get solution of Riccati equation
-        [K, S, E] = dlqr(mpc_prob.A, mpc_prob.B, mpc_prob.Q, mpc_prob.R);
-        P = chol(S); % S = P'*P
-        alpha = mpc_prob.x_N_ellipse;
-        mpc_prob.L_N = [0, 0, 0, 0; 0, 0, 0, 0; P];
+        mpc_prob.L_N = mpc_prob.x_N_ellipse{1};
+        alpha = mpc_prob.x_N_ellipse{2};
     end
     
     m_final = size(mpc_prob.L_N, 1);
@@ -111,8 +108,6 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     end
 
     % Scale nonsmooth term & equality constraints matrix
-    
-    L_scaled = sparse(diag(scale))*L;
 
     xu_min = []; xu_max = []; w = [];
     for k=0:mpc_prob.N-1
@@ -127,8 +122,11 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
         xu_max_scaled = scale(1:mpc_prob.N*m_stage).*xu_max;
         w_scaled = w./scale(1:mpc_prob.N*m_stage);
         g_s = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
-        g_N = indSOC([0; 0; P*mpc_prob.xref]-[(1+alpha)/2; (1-alpha)/2; zeros(n_x, 1)]);
-        g = separableSum({g_s, g_N}, {mpc_prob.N*m_stage, 2+n_x});
+        % do not scale final constraint
+        scale_N = mean(scale(end-m_final+1:end));
+        scale(end-m_final+1:end) = scale_N;
+        g_N = indBall_l2(scale_N*sqrt(2*alpha), scale_N*mpc_prob.xref);
+        g = separableSum({g_s, g_N}, {mpc_prob.N*m_stage, n_x});
     else
         % Case where ordinary (soft/hard) final constraint is selected
         xu_min = [xu_min; mpc_prob.x_N_min];
@@ -139,6 +137,8 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
         w_scaled = w./scale;
         g = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
     end
+    
+    L_scaled = sparse(diag(scale))*L;
 
     % Now the problem to solve is
     %
@@ -164,8 +164,9 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     out.u = temp(n_x+1:end,:);
     out.z = out_forbes.z;
     out.y = out_forbes.y; % dual variables
-    out.solver = out_forbes;
+    out.forbes = out_forbes;
     out.preprocess = tpre;
     out.time = ttot;
+    out.scaling = scale;
 
 end

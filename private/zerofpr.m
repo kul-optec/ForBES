@@ -1,8 +1,16 @@
 function out = zerofpr(prob, opt, lsopt)
 
-% initialize operations counter
+% initialize output stuff
 
-ops = FBOperations();
+if opt.report
+    residual = zeros(1, opt.maxit);
+    objective = zeros(1, opt.maxit);
+    ts = zeros(1, opt.maxit);
+    % initialize operations counter
+    ops = FBOperations();
+else
+    ops = [];
+end
 
 % get Lipschitz constant & adaptiveness
 
@@ -46,16 +54,15 @@ for it = 1:opt.maxit
         cache_0 = cache_x;
     end
 
-    residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
-    ts(1, it) = toc(t0);
+    if opt.report
+        objective(1,it) = cache_x.Get_FBE();
+        residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+        ts(1, it) = toc(t0);
+    end
 
     if opt.toRecord
         record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
     end
-
-    % compute FBE at current point
-
-    objective(1,it) = cache_x.Get_FBE();
 
     % check for termination
 
@@ -82,8 +89,6 @@ for it = 1:opt.maxit
         sk = [];
         yk = [];
     end
-
-    cache_xbar.Get_ProxGradStep();
 
     [dir, tau0, cacheDir] = ...
         opt.methodfun(prob, opt, it, restart, sk, yk, cache_xbar.Get_FPR(), cacheDir);
@@ -134,9 +139,11 @@ out.flag = flagTerm;
 out.x = cache_x.Get_ProxGradStep();
 out.iterations = it;
 out.operations = ops;
-out.residual = residual(1, 1:it);
-out.objective = objective(1, 1:it);
-out.ts = ts(1, 1:it);
+if opt.report
+    out.residual = residual(1, 1:it);
+    out.objective = objective(1, 1:it);
+    out.ts = ts(1, 1:it);
+end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.adaptive = adaptive;
