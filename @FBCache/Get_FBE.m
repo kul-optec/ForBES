@@ -1,19 +1,17 @@
-function FBE = Get_FBE(cache, gam)
+function FBE = Get_FBE(cache)
 
-if nargin < 2
-    gam = cache.gam;
+if cache.flagFBE == true
+    FBE = cache.FBE;
+    return;
 end
 
-gam0 = cache.gam;
-
-if ~cache.flagProxGradStep || gam0 ~= gam
-    cache.Get_ProxGradStep(gam);
+if cache.flagProxGradStep == false
+    cache.Get_ProxGradStep();
 end
 
-if ~cache.flagFBE || gam0 ~= gam
-    cache.FBE = cache.fx + cache.gz - cache.gradfx(:)'*cache.FPR(:) + (0.5/gam)*(cache.normFPR^2);
-    cache.gam = gam;
-    cache.flagFBE = true;
-end
+gam = cache.gam;
 
+cache.FBE = cache.fx + cache.gz - cache.gradfx(:)'*cache.FPR(:) + (0.5/gam)*(cache.normFPR^2);
+
+cache.flagFBE = true;
 FBE = cache.FBE;

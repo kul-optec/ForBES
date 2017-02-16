@@ -18,7 +18,7 @@ x0 = zeros(n, 1);
 
 x_star = [-3.877278911564627e-01; 0; 0; 2.174149659863943e-02; 6.168435374149660e-01];
 
-ASSERT_TOL = 1e-8;
+ASSERT_TOL = 1e-6;
 
 baseopt.display = 2;
 baseopt.tol = 1e-8;

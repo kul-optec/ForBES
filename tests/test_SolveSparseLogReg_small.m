@@ -18,12 +18,12 @@ x0 = zeros(n, 1);
 
 x_star = [0; 0; 2.114635341704963e-01; 0; 2.845881348733116e+00];
 
-ASSERT_TOL = 1e-8;
+ASSERT_TOL = 1e-6;
 
 %% adaptive
 
 baseopt.display = 0;
-baseopt.tol = 1e-12;
+baseopt.tol = 1e-8;
 baseopt.maxit = 5000;
 
 opt_fbs = baseopt; opt_fbs.solver = 'fbs'; opt_fbs.variant = 'basic';

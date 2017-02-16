@@ -18,7 +18,8 @@ classdef FBCache < handle
     f1linear2, f1quad2, lindir2
     f1cross
     % flags
-    flagEvalf, flagGradStep, flagProxGradStep, flagFBE, flagGradFBE
+    flagEvalf, flagGradf, flagGradStep, flagProxGradStep,
+    flagFBE, flagGradFBE
     flagLineSearch1, flagLineSearch2
     % operation counter
     ops, flagOps
@@ -29,6 +30,7 @@ classdef FBCache < handle
       cache.x = myx;
       cache.gam = mygam;
       cache.flagEvalf = false;
+      cache.flagGradf = false;
       cache.flagGradStep = false;
       cache.flagProxGradStep = false;
       cache.flagFBE = false;

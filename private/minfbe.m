@@ -23,6 +23,7 @@ gam = (1-opt.beta)/Lf;
 % display header
 
 if opt.display >= 2
+    fprintf('\n%s', opt.name);
     fprintf('\n%6s%11s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||dir||', 'slope', 'tau');
 end
 
@@ -58,7 +59,7 @@ for it = 1:opt.maxit
         residual(1, it) = norm(cache_current.Get_FPR(), 'inf')/cache_current.Get_Gamma();
     end
     if opt.toRecord
-        record(:, it) = opt.record(prob, it, gam, cache_0, cache_current, ops);
+        record(:, it) = opt.record(prob, it, cache_0, cache_current);
     end
 
     % check for termination
@@ -71,7 +72,7 @@ for it = 1:opt.maxit
                 break;
             end
         else
-            flagStop = opt.term(prob, it, gam, cache_0, cache_current, ops);
+            flagStop = opt.term(prob, it, cache_0, cache_current);
             if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;

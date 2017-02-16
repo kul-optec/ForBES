@@ -1,35 +1,30 @@
-function z = Get_ProxGradStep(cache, gam)
+function z = Get_ProxGradStep(cache)
 
-if nargin < 2
-    gam = cache.gam;
+if cache.flagProxGradStep == true
+    z = cache.z;
+    return;
 end
 
-gam0 = cache.gam;
-
-if ~cache.flagGradStep || gam0 ~= gam
-    cache.Get_GradStep(gam);
+if cache.flagGradStep == false
+    cache.Get_GradStep();
 end
 
 prob = cache.prob;
+gam = cache.gam;
 
-if ~cache.flagProxGradStep || gam0 ~= gam
-    if prob.isthereD
-      mugam = prob.mu*gam;
-      [z, cache.gz] = prob.callg(prob.D*cache.y, mugam);
-      cache.z = cache.y + prob.D'*(z - prob.D*cache.y)/prob.mu;
-    else
-      [cache.z, cache.gz] = prob.callg(cache.y, gam);
-    end
-    if cache.flagOps
-        cache.ops.addproxg();
-        cache.ops.addg();
-    end
-    cache.FPR = cache.x-cache.z;
-    cache.normFPR = norm(cache.FPR(:));
-    cache.gam = gam;
-    cache.flagProxGradStep = true;
-    cache.flagFBE = false;
-    cache.flagGradFBE = false;
+if prob.isthereD
+    mugam = prob.mu*gam;
+    [z, cache.gz] = prob.callg(prob.D*cache.y, mugam);
+    cache.z = cache.y + prob.D'*(z - prob.D*cache.y)/prob.mu;
+else
+    [cache.z, cache.gz] = prob.callg(cache.y, gam);
 end
+if cache.flagOps
+    cache.ops.addproxg();
+    cache.ops.addg();
+end
+cache.FPR = cache.x-cache.z;
+cache.normFPR = norm(cache.FPR(:));
 
+cache.flagProxGradStep = true;
 z = cache.z;

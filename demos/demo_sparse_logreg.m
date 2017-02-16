@@ -5,8 +5,8 @@ clear;
 
 rng(0, 'twister'); % uncomment this to control the random number generator
 
-m = 2000;
-n = 50000;
+m = 200;
+n = 5000;
 x_orig = sprandn(n, 1, 20/n);
 A = sprandn(m, n, 500/n);
 b = 2*(rand(m,1) <= 1./(1+exp(-A*x_orig))) - 1;
@@ -17,7 +17,7 @@ f = logLoss(1/m);
 aff = {diag(sparse(b))*A, zeros(m, 1)};
 g = l1Norm(lam);
 x0 = zeros(n, 1);
-opt.maxit = 10000;
+opt.maxit = 5000;
 opt.tol = 1e-6;
 opt.adaptive = 1;
 opt.display = 1;

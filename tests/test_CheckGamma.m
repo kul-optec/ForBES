@@ -14,7 +14,9 @@ prob = ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
 
 ops = FBOperations();
 
-gam = 10.0/200;
+Lf = norm(A)^2;
+
+gam = 10/Lf;
 bet = 0.05;
 
 cache = FBCache(prob, x0, gam, ops);
@@ -22,9 +24,9 @@ cache = FBCache(prob, x0, gam, ops);
 
 assert(flag == 0);
 
-gam = 1.0/200;
+gam = 0.9/Lf;
 
-cache = FBCache(prob, x0, gam, ops);
+cache.Set_Gamma(gam);
 [flag, ~] = cache.Check_Gamma(bet);
 
 assert(flag == 1);
@@ -50,7 +52,7 @@ assert(flag == 0);
 
 gam = 1.0/600;
 
-cache = FBCache(prob, x0, gam, ops);
+cache.Set_Gamma(gam);
 [flag, ~] = cache.Check_Gamma(bet);
 
 assert(flag == 1);

@@ -1,4 +1,4 @@
-function out = amls(prob, opt, varargin)
+function out = nama(prob, opt, varargin)
 
 % initialize output stuff
 
@@ -23,24 +23,26 @@ gam = (1-opt.beta)/Lf;
 % display header
 
 if opt.display >= 2
+    fprintf('\n%s', opt.name);
     fprintf('\n%6s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||d||', 'tau');
 end
 
 cacheDir.cntSkip = 0;
 
 flagTerm = 0;
+restart1 = 0;
+restart2 = 0;
 
 cache_x = FBCache(prob, prob.x0, gam, ops);
-restart = 0;
 
 t0 = tic();
 
 for it = 1:opt.maxit
-
+    
     % backtracking on gamma
 
     if adaptive
-        [restart, ~] = cache_x.Backtrack_Gamma(opt.beta);
+        [restart1, ~] = cache_x.Backtrack_Gamma(opt.beta);
         gam = cache_x.Get_Gamma();
     end
 
@@ -56,12 +58,12 @@ for it = 1:opt.maxit
         ts(1, it) = toc(t0);
     end
     if opt.toRecord
-        record(:, it) = opt.record(prob, it, gam, cache_0, cache_x, ops);
+        record(:, it) = opt.record(prob, it, cache_0, cache_x);
     end
 
     % check for termination
 
-    if ~restart
+    if ~(restart1 || restart2)
         if ~opt.customTerm
             if cache_x.Check_StoppingCriterion(opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
@@ -69,7 +71,7 @@ for it = 1:opt.maxit
                 break;
             end
         else
-            flagStop = opt.term(prob, it, gam, cache_0, cache_x, ops);
+            flagStop = opt.term(prob, it, cache_0, cache_x);
             if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;
@@ -80,13 +82,13 @@ for it = 1:opt.maxit
 
     % compute search direction and slope
 
-    if it == 1 || restart
+    if it == 1 || restart1 || restart2
         sk = [];
         yk = [];
     end
 
     [dir_QN, ~, cacheDir] = ...
-        opt.methodfun(prob, opt, it, restart, sk, yk, cache_x.Get_FPR(), cacheDir);
+        opt.methodfun(prob, opt, it, restart1 || restart2, sk, yk, cache_x.Get_FPR(), cacheDir);
     dir_FB = -cache_x.Get_FPR();
 
     % perform line search
@@ -95,12 +97,12 @@ for it = 1:opt.maxit
     cache_x.Set_Directions(dir_QN);
     cache_w = cache_x.Get_CacheLine(tau, 1);
     if adaptive
-        [restart, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
+        [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
         gam = cache_x.Get_Gamma();
     else
         cache_wbar = [];
     end
-    if restart, continue; end
+    if restart2, continue; end
     if cache_w.Get_FBE() > cache_x.Get_FBE()
         cache_x.Set_Directions([], dir_FB);
     end
@@ -113,13 +115,13 @@ for it = 1:opt.maxit
         tau = tau/2;
         cache_w = cache_x.Get_CacheSegment(tau);
         if adaptive
-            [restart, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
+            [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
             gam = cache_x.Get_Gamma();
-            if restart, break; end
+            if restart2, break; end
         end
     end
-    if restart, continue; end
-    restart = 0;
+    if restart2, continue; end
+    restart2 = 0;
     if flagTerm
         break;
     end

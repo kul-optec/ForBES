@@ -20,6 +20,7 @@ record = [];
 % display stuff
 
 if opt.display >= 2
+    fprintf('\n%s', opt.name);
     fprintf('\n%6s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.');
 end
 
@@ -64,7 +65,7 @@ for it = 1:opt.maxit
     end
 
     if opt.toRecord
-        record = [record, opt.record(prob, it, cache_yk.Get_Gamma(), cache_0, cache_yk, ops)];
+        record = [record, opt.record(prob, it, cache_0, cache_yk)];
     end
 
     if ~hasGammaChanged
@@ -75,7 +76,7 @@ for it = 1:opt.maxit
                 break;
             end
         else
-            flagStop = opt.term(prob, it, gam, cache_0, cache_yk, ops);
+            flagStop = opt.term(prob, it, cache_0, cache_yk);
             if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;

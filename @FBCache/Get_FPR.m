@@ -1,13 +1,9 @@
-function FPR = Get_FPR(cache, gam)
+function FPR = Get_FPR(cache)
 
-if nargin < 2
-    gam = cache.gam;
+if cache.flagProxGradStep == true
+    FPR = cache.FPR;
+    return;
 end
 
-gam0 = cache.gam;
-
-if ~cache.flagProxGradStep || gam0 ~= gam
-    cache.Get_ProxGradStep(gam);
-end
-
+cache.Get_ProxGradStep();
 FPR = cache.FPR;
