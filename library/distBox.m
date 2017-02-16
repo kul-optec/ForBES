@@ -44,6 +44,7 @@ function obj = distBox(lb, ub, weights)
     obj.makeprox = @() @(x, gam) call_distBox_prox(x, gam, lb, ub, weights);
     obj.isQuadratic = false;
     obj.isConjQuadratic = false;
+    obj.isConvex = true;
 end
 
 function [prox, val] = call_distBox_prox(x, gam, lb, ub, weights)

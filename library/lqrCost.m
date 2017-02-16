@@ -87,6 +87,7 @@ function obj = lqrCost(x0, varargin)
         end
         obj.makefconj = @() @(w) call_lqrCost_fconj(w, x0, obj);
     end
+    obj.isConvex = 1;
     obj.isQuadratic = 0;
     obj.isConjQuadratic = 1;
 end

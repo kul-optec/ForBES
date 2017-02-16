@@ -3,9 +3,9 @@ clear;
 
 % rng(0, 'twister'); % uncomment this to control the random number generator
 
-m = 50; % number of rows
-n = 50; % number of column of the original matrix M
-d = 1000/(m*n); % density of coefficients sampled from M
+m = 30; % number of rows
+n = 30; % number of column of the original matrix M
+d = 0.5; % density of coefficients sampled from M
 r = 5; % rank of M
 r_target = 3;
 
@@ -20,14 +20,15 @@ f = quadLoss(P(:), B(:));
 g = indRankBall(m, n, r_target);
 x0 = zeros(m*n, 1);
 
-ASSERT_TOL = 1e-8;
+ASSERT_TOL = 1e-5;
 
 %% run methods
 
 baseopt.display = 0;
-baseopt.tol = 1e-10;
-baseopt.maxit = 10000;
+baseopt.tol = 1e-6;
+baseopt.maxit = 1000;
 baseopt.Lf = 1;
+baseopt.report = 1;
 
 opts = {};
 outs = {};
@@ -41,7 +42,7 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyde
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, x0, [], [], opts{i});
-    assert(outs{i}.iterations < opts{i}.maxit);
-    assert(norm(outs{i}.residual(end), 'inf') <= ASSERT_TOL);
+    assert(outs{i}.solver.iterations < opts{i}.maxit);
+    assert(norm(outs{i}.solver.residual(end), 'inf') <= ASSERT_TOL);
     fprintf('.');
 end

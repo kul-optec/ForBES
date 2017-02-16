@@ -3,6 +3,7 @@ function obj = conjugate(f)
         obj = [];
         return;
     end
+    obj.isConvex = true;
     obj.isQuadratic = f.isConjQuadratic;
     obj.isConjQuadratic = f.isQuadratic;
     obj.hasHessian = 0;

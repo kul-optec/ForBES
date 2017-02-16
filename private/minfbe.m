@@ -34,6 +34,13 @@ cache_current = FBCache(prob, prob.x0, gam, ops);
 t0 = tic();
 
 for it = 1:opt.maxit
+    
+    % backtracking on gamma
+
+    if adaptive
+        [restart, ~] = cache_current.Backtrack_Gamma(opt.beta);
+        gam = cache_current.Get_Gamma();
+    end
 
     % store initial cache
 
@@ -104,7 +111,6 @@ for it = 1:opt.maxit
     restart = 0;
     if flagLS == -1 % gam was too large
         cache_previous = cache_current;
-        gam = gam/2;
         restart = 1;
         solution = cache_current.Get_ProxGradStep();
     elseif flagLS > 0 % line-search failed

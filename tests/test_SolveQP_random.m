@@ -44,15 +44,15 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbfgs';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'lbroyden'; opts{end}.linesearch = 'backtracking';
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
-opts{end+1} = baseopt; opts{end}.solver = 'amls'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'nama'; opts{end}.method = 'bfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'nama'; opts{end}.method = 'lbfgs'; opts{end}.linesearch = 'backtracking';
+opts{end+1} = baseopt; opts{end}.solver = 'nama'; opts{end}.method = 'broyden'; opts{end}.linesearch = 'backtracking';
 
 for i = 1:length(opts)
     outs{end+1} = forbes(f, g, y0, [], constr, opts{i});
     assert(outs{i}.flag == 0);
     assert(norm(A*outs{i}.x1 + outs{i}.z - b, 'inf') <= 10*TOL);
-    assert(abs(outs{i}.dual.objective(end) + f_star)/(1+abs(f_star)) <= ASSERT_TOLF);
+    assert(abs(outs{i}.solver.objective(end) + f_star)/(1+abs(f_star)) <= ASSERT_TOLF);
     assert(norm(outs{i}.x1 - x_star, inf)/(1+norm(x_star, inf)) <= ASSERT_TOLX);
     fprintf('.');
 end

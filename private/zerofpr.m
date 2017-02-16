@@ -48,12 +48,6 @@ for it = 1:opt.maxit
         cache_xbar = FBCache(prob, x_bar, cache_x.Get_Gamma(), ops);
     end
 
-    % trace stuff
-
-    if it == 1
-        cache_0 = cache_x;
-    end
-
     if opt.report
         objective(1,it) = cache_x.Get_FBE();
         residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
@@ -120,6 +114,8 @@ for it = 1:opt.maxit
 
 end
 
+time = toc(t0);
+
 if it == opt.maxit
     msgTerm = 'exceeded maximum iterations';
     flagTerm = 1;
@@ -147,3 +143,4 @@ end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.adaptive = adaptive;
+out.time = time;

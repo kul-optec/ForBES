@@ -6,7 +6,7 @@ if prob.flagLipschitzConstant
   return;
 end
 
-if prob.istheref1 && ~prob.istheref2
+if prob.istheref1 && ~prob.istheref2 && prob.f1.isConvex
   % if the smooth term is purely quadratic
   % then compute L 'exactly'
   eigsOpt.issym = 1;
@@ -15,7 +15,8 @@ if prob.istheref1 && ~prob.istheref2
     funHessian = @(x) vec(prob.C1'*(prob.Q(prob.C1*reshape(x, prob.n))));
     L = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
   else
-    L = eigs(prob.Q, prod(prob.n), 1, 'LM', eigsOpt);
+    funHessian = @(x) vec(prob.Q(reshape(x, prob.n)));
+    L = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
   end
   exact = true;
   prob.Lf = L;
