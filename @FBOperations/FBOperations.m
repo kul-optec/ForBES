@@ -1,3 +1,9 @@
+% FBOPERATIONS
+%
+%   Class holding counters that keep track of how many operations of the
+%   various kinds are executed. For example, FBCache uses an FBOPERATIONS
+%   object when evaluating proximal gradient operations, the FBE and so on.
+
 classdef FBOperations < handle
   properties
     C1, f1, gradf1

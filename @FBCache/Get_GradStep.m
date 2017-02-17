@@ -1,3 +1,8 @@
+% GET_GRADSTEP(cache)
+%
+%   Returns the gradient step y = x - gam*gradf(x), where x and gam are
+%   stored in cache.
+
 function y = Get_GradStep(cache)
 
 if cache.flagGradStep == true

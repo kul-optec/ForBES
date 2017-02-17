@@ -1,3 +1,8 @@
+% GET_GRADF(cache)
+%
+%   Returns the gradient of f, the smooth term of the problem, at the point x
+%   to which cache refers.
+
 function gradfx = Get_Gradf(cache)
 
 if cache.flagGradf == true

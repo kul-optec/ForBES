@@ -1,3 +1,8 @@
+% FBCACHE
+%
+%   Class implementing forward-backward operations for a composite optimization
+%   problem, i.e., an object of type ProblemComposite.
+
 classdef FBCache < handle
   properties
     % cache parameters

@@ -1,3 +1,7 @@
+% SET_GAMMA(cache, gam)
+%
+%   Sets a new stepsize gam for cache.
+
 function Set_Gamma(cache, gam)
 
 cache.gam = gam;

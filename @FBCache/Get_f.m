@@ -1,3 +1,8 @@
+% GET_F(cache)
+%
+%   Returns the value of f, the smooth term of the problem, evaluated at x, the
+%   point to which cache refers.
+
 function fx = Get_f(cache)
 
 if cache.flagEvalf

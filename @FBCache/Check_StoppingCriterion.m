@@ -1,4 +1,15 @@
-function stop = Check_StoppingCriterion(cache, tol, cache_prev)
+% CHECK_STOPPINGCRITERION(cache, tol)
+%
+%   Checks whether the default stopping criterion is satisfied by cache
+%   with tolerance tol. Right now the default stopping criterion is
+%
+%       norm(x-z, inf)/gam <= tol
+%
+%   where x is the point to which cache refers, z is the proximal gradient point
+%   with stepsize gam. In words, the normalized (by gam) fixed-point residual
+%   should be smaller than a tolerance in the infinity norm.
+
+function stop = Check_StoppingCriterion(cache, tol)
 
 % Absolute stopping criterion on the fixed point residual
 normInfFPR = norm(cache.Get_FPR(), 'inf')/cache.gam;

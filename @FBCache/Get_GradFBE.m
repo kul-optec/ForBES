@@ -1,3 +1,8 @@
+% GET_GRADFBE(cache)
+%
+%   Returns the gradient of the FBE, the Forward-Backward Envelope, at the
+%   point x to which cache refers.
+
 function gradFBE = Get_GradFBE(cache)
 
 if cache.flagGradFBE == true
