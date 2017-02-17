@@ -27,7 +27,7 @@ function [t, cachet, cachet1, lsopt, exitflag] = LineSearch_Backtracking...
     end
 
     if exitflag == 0 && adaptive
-        [isGammaOK, cachet1] = cache.Check_Gamma(lsopt.beta);
-        exitflag = ~isGammaOK;
+        [flag, cachet1] = cachet.Backtrack_Gamma(lsopt.beta);
+        exitflag = -1*flag;
     end
 end
