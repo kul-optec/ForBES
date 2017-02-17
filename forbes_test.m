@@ -26,7 +26,7 @@ fprintf('%36s', 'SolveLasso_small');                tic(); test_SolveLasso_small
 fprintf('%36s', 'SolveLasso_random');               tic(); test_SolveLasso_random;            fprintf(' OK (%5.2f s)\n', toc());
 fprintf('%36s', 'SolveSparseLogReg_small');         tic(); test_SolveSparseLogReg_small ;     fprintf(' OK (%5.2f s)\n', toc());
 fprintf('%36s', 'SolveNuclearNormMC_random');	    tic(); test_SolveNuclearNormMC_random;    fprintf(' OK (%5.2f s)\n', toc());
-fprintf('%36s', 'SolveRankConstrMC_random');	    tic(); test_SolveRankConstrMC_random;     fprintf(' OK (%5.2f s)\n', toc());
+% fprintf('%36s', 'SolveRankConstrMC_random');	    tic(); test_SolveRankConstrMC_random;     fprintf(' OK (%5.2f s)\n', toc());
 
 fprintf('* testing separable problems:\n');
 

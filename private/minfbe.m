@@ -43,7 +43,7 @@ for it = 1:opt.maxit
     end
 
     % trace stuff
-    
+
     solution = cache_current.Get_ProxGradStep();
 
     if opt.report
@@ -93,7 +93,7 @@ for it = 1:opt.maxit
 
     [dir, tau0, cache_dir] = ...
         opt.methodfun(prob, opt, it, restart, sk, yk, cache_current.Get_GradFBE(), cache_dir);
-    slope = cache_current.Get_GradFBE()'*dir;
+    slope = vec(cache_current.Get_GradFBE())'*dir(:);
 
     % perform line search
 
@@ -103,23 +103,19 @@ for it = 1:opt.maxit
     % prepare next iteration, store current solution
 
     restart = 0;
+    cache_previous = cache_current;
+    solution = cache_current.Get_ProxGradStep();
     if flagLS == -1 % gam was too large
-        cache_previous = cache_current;
         gam = cache_tau.Get_Gamma();
         cache_current.Set_Gamma(gam);
         restart = 1;
-        solution = cache_current.Get_ProxGradStep();
     elseif flagLS > 0 % line-search failed
-        cache_previous = cache_current;
         cache_current = FBCache(prob, cache_current.Get_ProxGradStep(), gam, ops);
-        solution = cache_current.Get_Point();
     else
-        cache_previous = cache_current;
         if ~isempty(cache_tau1)
-            solution = cache_current.Get_ProxGradStep();
             cache_current = cache_tau1;
+            % so that something about the new iterate has already been computed
         else
-            solution = cache_tau.Get_ProxGradStep();
             cache_current = FBCache(prob, cache_tau.Get_ProxGradStep(), gam, ops);
         end
     end
@@ -128,7 +124,7 @@ for it = 1:opt.maxit
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3 
+    elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e %7.4e %d\n', it, gam, residual(1,it), objective(1,it), norm(dir), slope, tau, flagLS);
     end
 
