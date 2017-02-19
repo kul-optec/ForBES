@@ -130,6 +130,8 @@ for it = 1:opt.maxit
 
 end
 
+time = toc(t0);
+
 if it == opt.maxit
     flagTerm = 1;
     msgTerm = 'exceeded maximum iterations';
@@ -157,3 +159,4 @@ end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.skip = cache_dir.cntSkip;
+out.time = time;
