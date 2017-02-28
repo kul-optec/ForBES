@@ -54,6 +54,10 @@ for it = 1:opt.maxit
         residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
         ts(1, it) = toc(t0);
     end
+    
+    if it == 1
+        cache_0 = cache_x;
+    end
 
     if opt.toRecord
         record(:, it) = opt.record(prob, it, cache_0, cache_x);
