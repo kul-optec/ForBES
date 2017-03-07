@@ -39,8 +39,8 @@ opt.solverfun = str2func(opt.solver);
 
 % Sets default method if not specified
 
-solver2method = containers.Map({'fbs', 'classical', 'minfbe', 'zerofpr', 'nama'}, ...
-                               {'',    'lbfgs',     'lbfgs',  'lbfgs',   'lbfgs'});
+solver2method = containers.Map({'fbs', 'classical', 'minfbe', 'zerofpr', 'nama', 'zerofpr2'}, ...
+                               {'',    'lbfgs',     'lbfgs',  'lbfgs',   'lbfgs', 'lbfgs'});
 if ~isfield(opt, 'method') || isempty(opt.method)
    opt.method = solver2method(opt.solver);
 end
@@ -53,9 +53,13 @@ if strcmp(opt.solver, 'classical')
     method2linesearch = containers.Map( ...
         {'sd',     'bfgs',       'lbfgs',      'cg-desc',    'cg-prp',     'cg-dyhs',    'bb',                 'broyden',    'lbroyden',   'rbroyden'}, ...
         {'armijo', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'nonmonotone-armijo', 'lemarechal', 'lemarechal', 'lemarechal'});
+elseif strcmp(opt.solver, 'fbs')
+    method2linesearch = @(s) '';
 elseif strcmp(opt.solver, 'minfbe')
     method2linesearch = @(s) 'backtracking';
 elseif strcmp(opt.solver, 'zerofpr')
+    method2linesearch = @(s) 'backtracking';
+elseif strcmp(opt.solver, 'zerofpr2')
     method2linesearch = @(s) 'backtracking';
 elseif strcmp(opt.solver, 'nama')
     method2linesearch = @(s) 'backtracking';

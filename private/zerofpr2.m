@@ -1,4 +1,4 @@
-function out = nama(prob, opt, varargin)
+function out = zerofpr2(prob, opt, varargin)
 
 % initialize output stuff
 
@@ -19,6 +19,7 @@ end
 % initialize gamma and sigma
 
 gam = (1-opt.beta)/Lf;
+sig = opt.beta/(4*gam);
 
 % display header
 
@@ -44,6 +45,7 @@ for it = 1:opt.maxit
     if adaptive
         [restart1, ~] = cache_x.Backtrack_Gamma(opt.beta);
         gam = cache_x.Get_Gamma();
+        sig = opt.beta/(4*gam);
     end
 
     % trace stuff
@@ -96,17 +98,12 @@ for it = 1:opt.maxit
     tau = 1.0; % this *must* be 1.0 for this line-search to work
     cache_x.Set_Directions(dir_QN);
     cache_w = cache_x.Get_CacheLine(tau, 1);
-    if adaptive
-        [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
-        gam = cache_x.Get_Gamma();
-    else
-        cache_wbar = [];
-    end
-    if restart2, continue; end
-    if cache_w.Get_FBE() > cache_x.Get_FBE()
+    cache_wbar = [];
+    ls_ref = cache_x.Get_FBE() - sig*cache_x.Get_NormFPR()^2;
+    if cache_w.Get_FBE() > ls_ref
         cache_x.Set_Directions([], dir_FB);
     end
-    while cache_w.Get_FBE() > cache_x.Get_FBE()
+    while cache_w.Get_FBE() > ls_ref
         if tau <= 1e-14
             msgTerm = 'line search failed';
             flagTerm = 3;
@@ -114,14 +111,7 @@ for it = 1:opt.maxit
         end
         tau = tau/2;
         cache_w = cache_x.Get_CacheSegment(tau);
-        if adaptive
-            [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
-            gam = cache_x.Get_Gamma();
-            if restart2, break; end
-        end
     end
-    if restart2, continue; end
-    restart2 = 0;
     if flagTerm
         break;
     end
@@ -133,11 +123,7 @@ for it = 1:opt.maxit
 
     % update iterate
 
-    if ~isempty(cache_wbar)
-        cache_x = cache_wbar;
-    else
-        cache_x = FBCache(prob, cache_w.Get_ProxGradStep(), gam, ops);
-    end
+    cache_x = cache_w;
 
     % display stuff
 

@@ -100,7 +100,7 @@ for it = 1:opt.maxit
 
     if opt.display == 1
         Util_PrintProgress(it);
-    elseif (opt.display == 2 && mod(it,100) == 0) || opt.display >= 3 
+    elseif (opt.display == 2 && mod(it,100) == 0) || opt.display >= 3
         res_curr = norm(cache_yk.Get_FPR(), 'inf')/cache_yk.Get_Gamma();
         obj_curr = cache_yk.Get_FBE();
         fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
