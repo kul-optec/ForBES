@@ -110,6 +110,8 @@ for it = 1:opt.maxit
         if tau <= 1e-14
             msgTerm = 'line search failed';
             flagTerm = 3;
+            % next line is for debugging purposes in case the code reaches this
+            % cache_xbar = FBCache(prob, cache_x.Get_ProxGradStep(), gam, []);
             break;
         end
         tau = tau/2;
