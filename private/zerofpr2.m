@@ -30,7 +30,9 @@ end
 
 cacheDir.cntSkip = 0;
 
-flagTerm = 0;
+msgTerm = 'exceeded maximum iterations';
+flagTerm = 1;
+
 restart1 = 0;
 restart2 = 0;
 
@@ -104,18 +106,15 @@ for it = 1:opt.maxit
         cache_x.Set_Directions([], dir_FB);
     end
     while cache_w.Get_FBE() > ls_ref
-        if tau <= 1e-14
-            msgTerm = 'line search failed';
-            flagTerm = 3;
+        if tau <= 1e-3
+            % simply do forward-backward step if line-search fails
+            cache_w = FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
             % next line is for debugging purposes in case the code reaches this
             % cache_xbar = FBCache(prob, cache_x.Get_ProxGradStep(), gam, []);
             break;
         end
         tau = tau/2;
         cache_w = cache_x.Get_CacheSegment(tau);
-    end
-    if flagTerm
-        break;
     end
 
     % store pair (s, y) to compute next direction
@@ -140,11 +139,6 @@ for it = 1:opt.maxit
 end
 
 time = toc(t0);
-
-if it == opt.maxit
-    msgTerm = 'exceeded maximum iterations';
-    flagTerm = 1;
-end
 
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
