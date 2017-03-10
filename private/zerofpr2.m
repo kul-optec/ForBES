@@ -100,7 +100,6 @@ for it = 1:opt.maxit
     tau = 1.0; % this *must* be 1.0 for this line-search to work
     cache_x.Set_Directions(dir_QN);
     cache_w = cache_x.Get_CacheLine(tau, 1);
-    cache_wbar = [];
     ls_ref = cache_x.Get_FBE() - sig*cache_x.Get_NormFPR()^2;
     if cache_w.Get_FBE() > ls_ref
         cache_x.Set_Directions([], dir_FB);

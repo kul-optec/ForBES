@@ -115,7 +115,9 @@ for it = 1:opt.maxit
     if opt.display == 1
         Util_PrintProgress(it);
     elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3
-        fprintf('%6d %7.4e %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it), tau);
+        res_curr = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+        obj_curr = cache_x.Get_FBE();
+        fprintf('%6d %7.4e %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr, tau);
     end
 
 end
@@ -130,7 +132,9 @@ end
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
 elseif opt.display >= 2
-    fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, residual(1,it), objective(1,it));
+    res_curr = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+    obj_curr = cache_x.Get_FBE();
+    fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end
 
 % pack up results

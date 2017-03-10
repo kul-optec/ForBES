@@ -100,7 +100,7 @@ for it = 1:opt.maxit
     cache_w = cache_x.Get_CacheLine(tau, 1);
     if adaptive
         [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
-        gam = cache_x.Get_Gamma();
+        gam = cache_w.Get_Gamma();
     else
         cache_wbar = [];
     end
@@ -120,7 +120,7 @@ for it = 1:opt.maxit
         cache_w = cache_x.Get_CacheSegment(tau);
         if adaptive
             [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
-            gam = cache_x.Get_Gamma();
+            gam = cache_w.Get_Gamma();
             if restart2, break; end
         end
     end
