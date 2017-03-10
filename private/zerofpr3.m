@@ -104,22 +104,17 @@ for it = 1:opt.maxit
     % perform line search
 
     tau = 1.0; % this *must* be 1.0 for this line-search to work
-    cache_x.Set_Directions(dir_QN);
-    cache_w = cache_x.Get_CacheLine(tau, 1);
+    cache_xbar.Set_Directions(dir_QN - dir_FB);
+    cache_w = cache_xbar.Get_CacheLine(tau, 1);
     ls_ref = cache_x.Get_FBE() - sig*cache_x.Get_NormFPR()^2;
-    if cache_w.Get_FBE() > ls_ref
-        cache_x.Set_Directions([], dir_FB);
-    end
     while cache_w.Get_FBE() > ls_ref
         if tau <= 1e-3
-            % simply do forward-backward step if line-search fails
-            cache_w = FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
-            % next line is for debugging purposes in case the code reaches this
-            % cache_xbar = FBCache(prob, cache_x.Get_ProxGradStep(), gam, []);
+            % simply accept forward-backward step if line-search fails
+            cache_w = cache_xbar;
             break;
         end
         tau = tau/2;
-        cache_w = cache_x.Get_CacheSegment(tau);
+        cache_w = cache_xbar.Get_CacheLine(tau, 1);
     end
 
     % update iterate
@@ -133,7 +128,7 @@ for it = 1:opt.maxit
     if opt.display == 1
         Util_PrintProgress(it);
     elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3
-        res_curr = norm(cache_x.Get_FPR(), 'inf')/gamma;
+        res_curr = norm(cache_x.Get_FPR(), 'inf')/gam;
         obj_curr = cache_x.Get_FBE();
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr, norm(dir_QN), tau);
     end
@@ -145,7 +140,7 @@ time = toc(t0);
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
 elseif opt.display >= 2
-    res_curr = norm(cache_x.Get_FPR(), 'inf')/gamma;
+    res_curr = norm(cache_x.Get_FPR(), 'inf')/gam;
     obj_curr = cache_x.Get_FBE();
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end
