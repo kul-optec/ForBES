@@ -57,7 +57,7 @@ for it = 1:opt.maxit
 
     if opt.report
         objective(1, it) = cache_x.Get_FBE();
-        residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+        residual(1, it) = norm(cache_x.Get_FPR(), 'inf')/gam;
         ts(1, it) = toc(t0);
     end
     if opt.toRecord
@@ -133,7 +133,7 @@ for it = 1:opt.maxit
     if opt.display == 1
         Util_PrintProgress(it);
     elseif (opt.display == 2 && mod(it,10) == 0) || opt.display >= 3
-        res_curr = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+        res_curr = norm(cache_x.Get_FPR(), 'inf')/gamma;
         obj_curr = cache_x.Get_FBE();
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr, norm(dir_QN), tau);
     end
@@ -145,7 +145,7 @@ time = toc(t0);
 if opt.display == 1
     Util_PrintProgress(it, flagTerm);
 elseif opt.display >= 2
-    res_curr = norm(cache_x.Get_FPR(), 'inf')/cache_x.Get_Gamma();
+    res_curr = norm(cache_x.Get_FPR(), 'inf')/gamma;
     obj_curr = cache_x.Get_FBE();
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end

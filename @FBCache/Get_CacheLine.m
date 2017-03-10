@@ -61,6 +61,7 @@ if nargin < 4 || ~cachet.flagGradStep
     cachet.gradfx = gradfxt;
     cachet.y = cachet.x - gam*gradfxt;
 
+    cachet.flagGradf = true;
     cachet.flagGradStep = true;
 end
 
