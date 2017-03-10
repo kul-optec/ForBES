@@ -104,7 +104,10 @@ for it = 1:opt.maxit
     else
         cache_wbar = [];
     end
-    if restart2, continue; end
+    if restart2
+        cache_x.Set_Gamma(gam);
+        continue;
+    end
     if cache_w.Get_FBE() > cache_x.Get_FBE()
         cache_x.Set_Directions([], dir_FB);
     end
@@ -124,7 +127,10 @@ for it = 1:opt.maxit
             if restart2, break; end
         end
     end
-    if restart2, continue; end
+    if restart2
+        cache_x.Set_Gamma(gam);
+        continue;
+    end
     restart2 = 0;
 
     % store pair (s, y) to compute next direction
