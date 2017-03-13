@@ -1,4 +1,4 @@
-function out = zerofpr2(prob, opt, varargin)
+function out = zerofpr2(prob, opt, lsopt)
 
 % initialize output stuff
 
@@ -28,13 +28,14 @@ if opt.display >= 2
     fprintf('\n%6s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||d||', 'tau');
 end
 
+nonmonotone = strcmp(opt.linesearch, 'backtracking-nm');
+
 cacheDir.cntSkip = 0;
 
 msgTerm = 'exceeded maximum iterations';
 flagTerm = 1;
 
-restart1 = 0;
-restart2 = 0;
+restart = 0;
 
 cache_x = FBCache(prob, prob.x0, gam, ops);
 
@@ -45,7 +46,7 @@ for it = 1:opt.maxit
     % backtracking on gamma
 
     if adaptive
-        [restart1, ~] = cache_x.Backtrack_Gamma(opt.beta);
+        [restart, ~] = cache_x.Backtrack_Gamma(opt.beta);
         gam = cache_x.Get_Gamma();
         sig = opt.beta/(4*gam);
     end
@@ -67,7 +68,7 @@ for it = 1:opt.maxit
 
     % check for termination
 
-    if ~(restart1 || restart2)
+    if ~restart
         if ~opt.customTerm
             if cache_x.Check_StoppingCriterion(opt.tol)
                 msgTerm = 'reached optimum (up to tolerance)';
@@ -86,13 +87,13 @@ for it = 1:opt.maxit
 
     % compute search direction and slope
 
-    if it == 1 || restart1 || restart2
+    if it == 1 || restart
         sk = [];
         yk = [];
     end
 
     [dir_QN, ~, cacheDir] = ...
-        opt.methodfun(prob, opt, it, restart1 || restart2, sk, yk, cache_x.Get_FPR(), cacheDir);
+        opt.methodfun(prob, opt, it, restart, sk, yk, cache_x.Get_FPR(), cacheDir);
     dir_FB = -cache_x.Get_FPR();
 
     % perform line search
@@ -101,10 +102,20 @@ for it = 1:opt.maxit
     cache_x.Set_Directions(dir_QN);
     cache_w = cache_x.Get_CacheLine(tau, 1);
     ls_ref = cache_x.Get_FBE() - sig*cache_x.Get_NormFPR()^2;
-    if cache_w.Get_FBE() > ls_ref
+    
+    if ~nonmonotone || it == 1 || restart
+        lsopt.Q = 1;
+        lsopt.C = ls_ref;
+    else
+        newQ = lsopt.eta*lsopt.Q+1;
+        lsopt.C = (lsopt.eta*lsopt.Q*lsopt.C + ls_ref)/newQ;
+        lsopt.Q = newQ;
+    end
+    
+    if cache_w.Get_FBE() > lsopt.C
         cache_x.Set_Directions([], dir_FB);
     end
-    while cache_w.Get_FBE() > ls_ref
+    while cache_w.Get_FBE() > lsopt.C
         if tau <= 1e-3
             % simply do forward-backward step if line-search fails
             cache_w = FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
@@ -167,5 +178,6 @@ end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.time = time;
+out.cacheDir = cacheDir;
 
 end
