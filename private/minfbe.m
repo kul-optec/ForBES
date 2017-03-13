@@ -158,5 +158,5 @@ if opt.report
 end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
-out.skip = cache_dir.cntSkip;
 out.time = time;
+out.cacheDir = cache_dir;

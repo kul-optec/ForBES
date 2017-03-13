@@ -154,3 +154,4 @@ if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.adaptive = adaptive;
 out.time = time;
+out.cacheDir = cacheDir;

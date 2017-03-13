@@ -188,5 +188,6 @@ end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.time = time;
+out.cacheDir = cacheDir;
 
 end
