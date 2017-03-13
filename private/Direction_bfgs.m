@@ -14,9 +14,9 @@ if it == 1 || restart
 else
     H = cache.H;
     YSk = yk'*sk;
-    Bs = H'*(H*sk);
-    sBs = sk'*Bs;
     if YSk > 0
+        Bs = H'*(H*sk);
+        sBs = sk'*Bs;
         H = cholupdate(cholupdate(H,yk/sqrt(YSk)),Bs/sqrt(sBs),'-');
     else
         cache.cntSkip = cache.cntSkip+1;
