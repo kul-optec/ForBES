@@ -23,6 +23,7 @@ gam = (1-opt.beta)/Lf;
 % display header
 
 if opt.display >= 2
+    fprintf('\n%s', opt.name);
     fprintf('%6s%11s%11s%11s%11s%11s%11s\n', 'iter', 'gamma', 'optim.', 'object.', '||dir||', 'slope', 'tau');
 end
 
