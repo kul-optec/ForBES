@@ -46,6 +46,7 @@ function obj = quadLoss(w, p)
             obj.makefconj = @() @(x) call_squaredWeightedDistance_conj(x, 1./w, p);
         end
     end
+    obj.makeprox = @() @(x, gam) call_squaredWeightedDistance_prox(x, gam, w);
 end
 
 function [v, g, H] = call_squaredWeightedDistance(x, w, p)
@@ -63,4 +64,10 @@ function [v, g, H] = call_squaredWeightedDistance_conj(y, w, p)
     if nargout >= 3
         H = @(x) w.*x;
     end
+end
+
+function [prox, val] = call_squaredWeightedDistance_prox(x, gam, w)
+    wgam = w.*gam;
+    prox = x./(1+wgam);
+    val = ((w.*prox)'*prox)/2;
 end
