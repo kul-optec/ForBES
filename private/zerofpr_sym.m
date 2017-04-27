@@ -1,4 +1,4 @@
-function out = zerofpr3(prob, opt, varargin)
+function out = zerofpr_sym(prob, opt, varargin)
 
 % initialize output stuff
 

@@ -99,6 +99,32 @@ for it = 1:opt.maxit
 
     [tau, cache_tau, cache_tau1, lsopt, flagLS] = ...
         lsopt.linesearchfun(cache_current, dir, slope, tau0, lsopt, adaptive, it, restart);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%% DEBUG CODE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+%     if isfield(opt, 'JR')
+%         if ~exist('out'), out = struct(); end
+%         if ~isfield(out, 'superlinJR'), out.superlinJR = []; end
+%         out.superlinJR(end+1) = norm(cache_current.Get_GradFBE() + opt.JR*dir)/norm(dir);
+%     end
+%     
+%     if isfield(opt, 'H')
+%         if ~exist('out'), out = struct(); end
+%         if ~isfield(out, 'superlinH'), out.superlinH = []; end
+%         out.superlinH(end+1) = norm(cache_current.Get_GradFBE() + opt.H*dir)/norm(dir);
+%     end
+%     
+%     if isfield(opt, 'M')
+%         if ~exist('out'), out = struct(); end
+%         if ~isfield(out, 'superlinM'), out.superlinM = []; end
+%         out.superlinM(end+1) = norm(opt.M*dir)/norm(dir);
+%     end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % prepare next iteration, store current solution
 

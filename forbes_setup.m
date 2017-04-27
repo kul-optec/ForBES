@@ -1,12 +1,15 @@
 % Add ForBES directory to MATLAB's path
 forbes_path = fileparts(mfilename('fullpath'));
 library_path = fullfile(forbes_path, 'library');
-cones_path = fullfile(forbes_path, 'cones');
 private_path = fullfile(forbes_path, 'private');
+utils_path = fullfile(forbes_path, 'utils');
+cones_path = fullfile(forbes_path, 'cones');
 disp(['Adding ForBES directory to MATLAB path: ', forbes_path]);
 addpath(forbes_path);
 disp(['Adding ForBES library to MATLAB path: ', library_path]);
 addpath(library_path);
+disp(['Adding ForBES utils to MATLAB path: ', library_path]);
+addpath(utils_path);
 addpath(cones_path);
 savepath;
 

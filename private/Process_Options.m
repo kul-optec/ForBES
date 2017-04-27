@@ -39,10 +39,12 @@ opt.solverfun = str2func(opt.solver);
 
 % Sets default method if not specified
 
-solver2method = containers.Map({'fbs', 'classical', 'minfbe', 'zerofpr', 'nama', 'zerofpr2', 'zerofpr3'}, ...
-                               {'',    'lbfgs',     'lbfgs',  'lbfgs',   'lbfgs', 'lbfgs', 'lbfgs'});
 if ~isfield(opt, 'method') || isempty(opt.method)
-   opt.method = solver2method(opt.solver);
+    if strcmp(opt.solver, 'fbs')
+        opt.method = '';
+    else
+        opt.method = 'lbfgs';
+    end
 end
 opt.methodfun = str2func(strcat('Direction_', lower(opt.method)));
 if ~isfield(opt, 'memopt'), opt.memopt = 1; end
@@ -51,22 +53,12 @@ if ~isfield(opt, 'memopt'), opt.memopt = 1; end
 
 if strcmp(opt.solver, 'classical')
     method2linesearch = containers.Map( ...
-        {'sd',     'bfgs',       'lbfgs',      'cg-desc',    'cg-prp',     'cg-dyhs',    'bb',                 'broyden',    'lbroyden',   'rbroyden'}, ...
-        {'armijo', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'nonmonotone-armijo', 'lemarechal', 'lemarechal', 'lemarechal'});
+        {'sd',     'bfgs',       'bfgs_naive', 'lbfgs',      'cg-desc',    'cg-prp',     'cg-dyhs',    'bb',                 'broyden',    'lbroyden',   'rbroyden'}, ...
+        {'armijo', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'lemarechal', 'nonmonotone-armijo', 'lemarechal', 'lemarechal', 'lemarechal'});
 elseif strcmp(opt.solver, 'fbs')
     method2linesearch = @(s) '';
-elseif strcmp(opt.solver, 'minfbe')
-    method2linesearch = @(s) 'backtracking';
-elseif strcmp(opt.solver, 'zerofpr')
-    method2linesearch = @(s) 'backtracking';
-elseif strcmp(opt.solver, 'zerofpr2')
-    method2linesearch = @(s) 'backtracking';
-elseif strcmp(opt.solver, 'zerofpr3')
-    method2linesearch = @(s) 'backtracking';
-elseif strcmp(opt.solver, 'nama')
-    method2linesearch = @(s) 'backtracking';
 else
-    method2linesearch = @(s) '';
+    method2linesearch = @(s) 'backtracking';
 end
 if ~isfield(opt, 'linesearch') || isempty(opt.linesearch)
     opt.linesearch = method2linesearch(opt.method);
