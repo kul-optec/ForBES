@@ -13,7 +13,7 @@ end
 
 function [prox, val] = call_indBall_l0_prox(x, N)
     prox = x;
-    [~, I] = sort(prox, 'descend');
+    [~, I] = sort(abs(prox), 'descend');
     prox(I(N+1:end)) = 0;
     val = 0;
 end
