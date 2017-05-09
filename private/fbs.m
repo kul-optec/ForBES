@@ -54,7 +54,7 @@ for it = 1:opt.maxit
     hasGammaChanged = false;
 
     if adaptive
-        [hasGammaChanged, ~] = cache_yk.Backtrack_Gamma(opt.beta);
+        [hasGammaChanged, ~] = cache_yk.Backtrack_Gamma(0.0);
         gam = cache_yk.Get_Gamma();
     end
 

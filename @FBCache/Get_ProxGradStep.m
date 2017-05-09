@@ -3,10 +3,11 @@
 %   Returns the proximal gradient point z = prox_{gam*g}(x - gam*gradf(x)),
 %   where x and gam are stored in cache.
 
-function z = Get_ProxGradStep(cache)
+function [z, gz] = Get_ProxGradStep(cache)
 
 if cache.flagProxGradStep == true
     z = cache.z;
+    gz = cache.gz;
     return;
 end
 
@@ -33,3 +34,4 @@ cache.normFPR = norm(cache.FPR(:));
 
 cache.flagProxGradStep = true;
 z = cache.z;
+gz = cache.gz;
