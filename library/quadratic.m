@@ -30,10 +30,9 @@ function obj = quadratic(Q, q)
     obj.hasHessian = 1;
     if isa(Q, 'function_handle')
         obj.makef = @() @(x) call_quadratic_fun_handle(Q, q, x);
-        obj.Q = Q;
     else
         obj.makef = @() @(x) call_quadratic_fun_matrix(Q, q, x);
-        obj.Q = @(x) Q*x;
+        obj.makeprox = @() make_quadratic_prox(Q, q);
     end
     obj.makefconj = @() make_quadratic_conj(Q, q);
 end
@@ -75,3 +74,22 @@ function [v, g] = call_quadratic_dense_conj(L, q, y)
     v = 0.5*(y-q)'*g;
 end
 
+function prox = make_quadratic_prox(Q, q)
+    clear prox_quadratic;
+    prox = @(x, gam) prox_quadratic(x, gam, Q, q);
+end
+
+function [p, v] = prox_quadratic(x, gam, Q, q)
+    % using persistent variables
+    % bad practice, dirty trick, I'm ashamed of myself
+    persistent stored_gam stored_L;
+    if isempty(stored_gam) || isempty(stored_L) || gam ~= stored_gam
+        % factor matrix when gam changes (or at the first call)
+        stored_gam = gam;
+        n = length(x);
+        I = speye(n);
+        stored_L = chol(I + gam*Q); % do differently for sparse?
+    end
+    p = stored_L\(stored_L'\(x - gam*q));
+    v = 0.5*(p'*(Q*p)) + q'*p; % can we save something here?
+end
