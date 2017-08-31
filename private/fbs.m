@@ -8,11 +8,10 @@ if opt.report
     residual = zeros(1, opt.maxit);
     objective = zeros(1, opt.maxit);
     ts = zeros(1, opt.maxit);
-    % initialize operations counter
-    ops = FBOperations();
-else
-    ops = [];
 end
+
+% initialize operations counter
+ops = FBOperations();
 
 msgTerm = '';
 record = [];
