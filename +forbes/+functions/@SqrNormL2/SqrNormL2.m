@@ -12,6 +12,9 @@ classdef SqrNormL2 < forbes.functions.Proximable
         function p = is_convex(obj)
             p = true;
         end
+        function p = is_strongly_convex(obj)
+            p = all(obj.w > 0);
+        end
         function p = is_quadratic(obj)
             p = true;
         end

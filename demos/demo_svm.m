@@ -24,8 +24,8 @@ lam = 0.1 * norm((1-ratio)*sum(A(b==1,:),1) + ratio*sum(A(b==-1,:),1), 'inf');
 
 fprintf('%d instances, %d features, nnz(A) = %d\n', size(A, 1), size(A, 2), nnz(A));
 
-f = quadLoss(lam, zeros(n+1, 1));
-g = hingeLoss(1, b);
+f = forbes.functions.SqrNormL2(lam);
+g = forbes.functions.HingeLoss(1, b);
 constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 opt.maxit = 10000;

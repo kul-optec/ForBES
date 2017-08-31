@@ -20,7 +20,7 @@ gam = cache.gam;
 
 if prob.isthereD
     mugam = prob.mu*gam;
-    [z, cache.gz] = prob.callg(prob.D*cache.y, mugam);
+    [z, cache.gz] = prob.g.prox(prob.D*cache.y, mugam);
     cache.z = cache.y + prob.D'*(z - prob.D*cache.y)/prob.mu;
 else
     [cache.z, cache.gz] = prob.g.prox(cache.y, gam);

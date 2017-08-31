@@ -10,9 +10,6 @@ function [prob, id] = Process_Problem(fs, gs, init, aff, constr)
     if ~isa(fs, 'cell'), fs = {fs}; end
     if ~isa(gs, 'cell'), gs = {gs}; end
 
-%     for i = 1:M, fs{i} = Process_Function(fs{i}); end
-%     for i = 1:N, gs{i} = Process_Function(gs{i}); end
-
     if ~isempty(aff)
         if isa(aff, 'double') || isa(aff, 'struct')
             aff = {aff};
@@ -44,7 +41,12 @@ function [prob, id] = Process_Problem(fs, gs, init, aff, constr)
             error('constraint doesn''t match the number of fs');
         end
         [f1, A1, f2, A2, g, B, b] = combineTermsSeparable(fs, gs, constr);
-        prob = forbes.problems.ProblemComposite(conjugate(f1), -A1', [], conjugate(f2), -A2', [], conjugate(g), -B', b, init);
+        f1c = [];
+        f2c = [];
+        if ~isempty(f1), f1c = forbes.functions.Conjugate(f1); end
+        if ~isempty(f2), f2c = forbes.functions.Conjugate(f2); end
+        gc = forbes.functions.Conjugate(g);
+        prob = forbes.problems.ProblemComposite(f1c, -A1', [], f2c, -A2', [], gc, -B', b, init);
     end
 
 end
@@ -55,9 +57,9 @@ function [idx_quad, idx_nonquad] = splitSmooth(fs, conj)
     idx_nonquad = [];
 
     for i = 1:length(fs)
-        if ~conj && fs{i}.is_quadratic() %isfield(fs{i}, 'isQuadratic') && fs{i}.isQuadratic
+        if ~conj && fs{i}.is_quadratic()
             idx_quad(end+1) = i;
-        elseif conj && fs{i}.is_generalized_quadratic() && fs{i}.is_strongly_convex() %isfield(fs{i}, 'isConjQuadratic') && fs{i}.isConjQuadratic
+        elseif conj && fs{i}.is_generalized_quadratic() && fs{i}.is_strongly_convex()
             idx_quad(end+1) = i;
         else
             idx_nonquad(end+1) = i;
@@ -78,7 +80,7 @@ function [f1, C1, d1, f2, C2, d2, g] = combineTermsComposite(fs, gs, aff)
     if N > 1
         dims = {};
         for j=1:N, dims{j} = size(aff{1,j},2); end
-        g = separableSum(gs, dims);
+        g = forbes.functions.SeparableSum(gs, dims);
     else
         g = gs{1};
     end
@@ -110,7 +112,7 @@ function [f1, C1, d1, f2, C2, d2, g] = combineTermsComposite(fs, gs, aff)
         if length(idx_nonquad) > 1
             dims = {};
             for i=1:length(idx_nonquad), dims{i} = size(aff1{idx_nonquad(i),1},1); end
-            f2 = separableSum(fs(idx_nonquad), dims);
+            f2 = forbes.functions.SeparableSum(fs(idx_nonquad), dims);
         else
             f2 = fs{idx_nonquad(1)};
         end
@@ -132,9 +134,13 @@ function [f1, A1, f2, A2, g, B, b] = combineTermsSeparable(fs, gs, constr)
     M = length(fs);
     N = length(gs);
 
-    dims = {};
-    for j=1:N, dims{j} = size(constr{j,M+1},2); end
-    g = separableSum(gs, dims);
+    if N > 1
+        dims = {};
+        for j=1:N, dims{j} = size(constr{j,M+1},2); end
+        g = forbes.functions.SeparableSum(gs, dims);
+    else
+        g = gs{1};
+    end
     B = blkdiag(constr{:,M+1});
 
     constr1 = {};
@@ -144,15 +150,23 @@ function [f1, A1, f2, A2, g, B, b] = combineTermsSeparable(fs, gs, constr)
 
     [idx_quad, idx_nonquad] = splitSmooth(fs, 1);
     if ~isempty(idx_quad)
-        dims = {};
-        for i=1:length(idx_quad), dims{i} = size(constr1{idx_quad(i)},2); end
-        f1 = separableSum(fs(idx_quad), dims);
+        if length(idx_quad) > 1
+            dims = {};
+            for i=1:length(idx_quad), dims{i} = size(constr1{idx_quad(i)},2); end
+            f1 = forbes.functions.SeparableSum(fs(idx_quad), dims);
+        else
+            f1 = fs{idx_quad(1)};
+        end
         A1 = horzcat(constr1{idx_quad});
     end
     if ~isempty(idx_nonquad)
-        dims = {};
-        for i=1:length(idx_nonquad), dims{i} = size(constr1{idx_nonquad(i)},2); end
-        f2 = separableSum(fs(idx_nonquad), dims);
+        if length(idx_nonquad) > 1
+            dims = {};
+            for i=1:length(idx_nonquad), dims{i} = size(constr1{idx_nonquad(i)},2); end
+            f2 = forbes.functions.SeparableSum(fs(idx_nonquad), dims);
+        else
+            f2 = fs{idx_nonquad(1)};
+        end
         A2 = horzcat(constr1{idx_nonquad});
     end
     b = vertcat(constr{:,end});

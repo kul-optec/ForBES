@@ -2,13 +2,12 @@
 
 classdef IndRankBall < forbes.functions.Proximable
     properties
-        m, n % matrix size
         r % ball radius
         method % indicates which svd to use
     end
     methods
-        function obj = IndRankBall(m, n, r, method)
-            if nargin < 4
+        function obj = IndRankBall(r, method)
+            if nargin < 2
                 method = 'svds';
             end
             switch method
@@ -19,8 +18,6 @@ classdef IndRankBall < forbes.functions.Proximable
                 otherwise
                     error('unknown method');
             end
-            obj.m = m;
-            obj.n = n;
             obj.r = r;
         end
     end
