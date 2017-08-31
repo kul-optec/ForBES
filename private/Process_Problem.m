@@ -10,8 +10,8 @@ function [prob, id] = Process_Problem(fs, gs, init, aff, constr)
     if ~isa(fs, 'cell'), fs = {fs}; end
     if ~isa(gs, 'cell'), gs = {gs}; end
 
-    for i = 1:M, fs{i} = Process_Function(fs{i}); end
-    for i = 1:N, gs{i} = Process_Function(gs{i}); end
+%     for i = 1:M, fs{i} = Process_Function(fs{i}); end
+%     for i = 1:N, gs{i} = Process_Function(gs{i}); end
 
     if ~isempty(aff)
         if isa(aff, 'double') || isa(aff, 'struct')
@@ -31,7 +31,7 @@ function [prob, id] = Process_Problem(fs, gs, init, aff, constr)
     if isempty(constr)
         id = 1;
         [f1, C1, d1, f2, C2, d2, g] = combineTermsComposite(fs, gs, aff);
-        prob = ProblemComposite(f1, C1, d1, f2, C2, d2, g, [], [], init);
+        prob = forbes.problems.ProblemComposite(f1, C1, d1, f2, C2, d2, g, [], [], init);
     else
         id = 2;
         if ~isa(constr, 'cell')
@@ -44,7 +44,7 @@ function [prob, id] = Process_Problem(fs, gs, init, aff, constr)
             error('constraint doesn''t match the number of fs');
         end
         [f1, A1, f2, A2, g, B, b] = combineTermsSeparable(fs, gs, constr);
-        prob = ProblemComposite(conjugate(f1), -A1', [], conjugate(f2), -A2', [], conjugate(g), -B', b, init);
+        prob = forbes.problems.ProblemComposite(conjugate(f1), -A1', [], conjugate(f2), -A2', [], conjugate(g), -B', b, init);
     end
 
 end
@@ -55,9 +55,9 @@ function [idx_quad, idx_nonquad] = splitSmooth(fs, conj)
     idx_nonquad = [];
 
     for i = 1:length(fs)
-        if ~conj && isfield(fs{i}, 'isQuadratic') && fs{i}.isQuadratic
+        if ~conj && fs{i}.is_quadratic() %isfield(fs{i}, 'isQuadratic') && fs{i}.isQuadratic
             idx_quad(end+1) = i;
-        elseif conj && isfield(fs{i}, 'isConjQuadratic') && fs{i}.isConjQuadratic
+        elseif conj && fs{i}.is_generalized_quadratic() && fs{i}.is_strongly_convex() %isfield(fs{i}, 'isConjQuadratic') && fs{i}.isConjQuadratic
             idx_quad(end+1) = i;
         else
             idx_nonquad(end+1) = i;

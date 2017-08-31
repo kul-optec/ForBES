@@ -19,8 +19,8 @@ B = full(M.*P);
 
 lam = 1e0;
 
-f = quadLoss(P(:), B(:));
-g = nuclearNorm(m, n, lam);
+f = forbes.functions.LeastSquares(diag(sparse(P(:))), B(:));
+g = forbes.functions.NormNuclear(m, n, lam);
 x0 = zeros(m*n, 1);
 opt.maxit = 1000;
 opt.tol = 1e-6;

@@ -11,7 +11,7 @@ if opt.report
 end
 
 % initialize operations counter
-ops = FBOperations();
+ops = forbes.fbe.FBOperations();
 
 msgTerm = '';
 record = [];
@@ -44,7 +44,7 @@ for it = 1:opt.maxit
         yk = xk;
     end
 
-    cache_yk = FBCache(prob, yk, gam, ops);
+    cache_yk = forbes.fbe.FBCache(prob, yk, gam, ops);
 
     if it == 1
         cache_0 = cache_yk;

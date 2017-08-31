@@ -13,9 +13,9 @@ b = 2*(rand(m,1) <= 1./(1+exp(-A*x_orig))) - 1;
 lam_max = norm(0.5*(A'*b),'inf')/m;
 lam = 0.1*lam_max;
 
-f = logLoss(1/m);
-aff = {diag(sparse(b))*A, zeros(m, 1)};
-g = l1Norm(lam);
+f = forbes.functions.LogisticLoss(1/m);
+aff = {diag(sparse(b))*A, 0};
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
 opt.tol = 1e-6;

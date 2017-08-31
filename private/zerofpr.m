@@ -6,11 +6,10 @@ if opt.report
     residual = zeros(1, opt.maxit);
     objective = zeros(1, opt.maxit);
     ts = zeros(1, opt.maxit);
-    % initialize operations counter
-    ops = FBOperations();
-else
-    ops = [];
 end
+
+% initialize operations counter
+ops = forbes.fbe.FBOperations();
 
 % get Lipschitz constant & adaptiveness
 
@@ -34,7 +33,7 @@ flagTerm = 0;
 
 t0 = tic();
 
-cache_x = FBCache(prob, prob.x0, gam, ops);
+cache_x = forbes.fbe.FBCache(prob, prob.x0, gam, ops);
 restart = 0;
 
 for it = 1:opt.maxit
@@ -47,7 +46,7 @@ for it = 1:opt.maxit
         sig = opt.beta/(4*gam);
     else
         x_bar = cache_x.Get_ProxGradStep();
-        cache_xbar = FBCache(prob, x_bar, cache_x.Get_Gamma(), ops);
+        cache_xbar = forbes.fbe.FBCache(prob, x_bar, cache_x.Get_Gamma(), ops);
     end
 
     if opt.report

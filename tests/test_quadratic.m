@@ -11,7 +11,7 @@ Q = rand(n,n);
 Q = Q'*Q + 1e-1*eye(n);
 q = randn(n, 1);
 
-f = quadratic(Q, q);
+f = forbes.functions.Quadratic(Q, q);
 
 call_f = f.makef();
 call_fc = f.makefconj();
