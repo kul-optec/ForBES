@@ -62,13 +62,18 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
     m_stage = size(mpc_prob.L_s, 1);
     
     % Make objective term f
-
-    if ~isfield(mpc_prob, 'xref') || isempty(mpc_prob.xref)
-        f = lqrCost(mpc_prob.x0, mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
+    
+    if nargin >= 3 && ~isempty(out_prev)
+        f = out_prev.forbes.prob.f1.f;
+        f.set_x0(mpc_prob.x0);
+    elseif ~isfield(mpc_prob, 'xref') || isempty(mpc_prob.xref)
+        f = forbes.functions.LQRCost(mpc_prob.x0, ...
+            mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
             mpc_prob.A, mpc_prob.B, mpc_prob.N);
         mpc_prob.xref = zeros(n_x, 1);
     else
-        f = lqrCost(mpc_prob.x0, mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
+        f = forbes.functions.LQRCost(mpc_prob.x0, ...
+            mpc_prob.Q, mpc_prob.R, mpc_prob.Q_N, ...
             mpc_prob.A, mpc_prob.B, mpc_prob.N, mpc_prob.xref);
     end
 
@@ -92,10 +97,10 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
 
     if opt.prescale
         scale = zeros(size(L, 1), 1);
-        callfconj = f.makefconj();
-        [~, p] = callfconj(zeros(size(L, 2),1));
+        fc = forbes.functions.Conjugate(f);
+        [p, ~] = fc.gradient(zeros(size(L, 2),1));
         for i = 1:size(L, 1)
-            [~, dgradi] = callfconj(L(i, :)');
+            [dgradi, ~] = fc.gradient(L(i, :)');
             w = L(i, :)*(dgradi-p);
             if w >= 1e-14
                 scale(i) = 1/sqrt(w);
@@ -121,12 +126,12 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
         xu_min_scaled = scale(1:mpc_prob.N*m_stage).*xu_min;
         xu_max_scaled = scale(1:mpc_prob.N*m_stage).*xu_max;
         w_scaled = w./scale(1:mpc_prob.N*m_stage);
-        g_s = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
+        g_s = forbes.functions.DistBoxL1(xu_min_scaled, xu_max_scaled, w_scaled);
         % do not scale final constraint
         scale_N = mean(scale(end-m_final+1:end));
         scale(end-m_final+1:end) = scale_N;
-        g_N = indBall_l2(scale_N*sqrt(2*alpha), scale_N*mpc_prob.xref);
-        g = separableSum({g_s, g_N}, {mpc_prob.N*m_stage, n_x});
+        g_N = forbes.functions.IndBallL2(scale_N*sqrt(2*alpha), scale_N*mpc_prob.xref);
+        g = forbes.functions.SeparableSum({g_s, g_N}, {mpc_prob.N*m_stage, n_x});
     else
         % Case where ordinary (soft/hard) final constraint is selected
         xu_min = [xu_min; mpc_prob.x_N_min];
@@ -135,7 +140,7 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
         xu_min_scaled = scale.*xu_min;
         xu_max_scaled = scale.*xu_max;
         w_scaled = w./scale;
-        g = distBox(xu_min_scaled, xu_max_scaled, w_scaled);
+        g = forbes.functions.DistBoxL1(xu_min_scaled, xu_max_scaled, w_scaled);
     end
     
     L_scaled = sparse(diag(scale))*L;
@@ -146,7 +151,7 @@ function out = forbes_linear_mpc(mpc_prob, opt, out_prev)
 
     % Set starting (dual) point
 
-    if ~exist('out_prev', 'var') || isempty(out_prev)
+    if nargin < 3 || isempty(out_prev)
         y0 = zeros(size(L_scaled, 1), 1);
     else
         y0 = out_prev.y;

@@ -58,5 +58,11 @@ classdef LQRCost < forbes.functions.Proximable
         function set_x0(obj, x0)
             obj.x0 = x0;
         end
+        function p = is_strongly_convex(obj)
+            p = true;
+        end
+        function p = is_generalized_quadratic(obj)
+            p = true;
+        end
     end
 end
