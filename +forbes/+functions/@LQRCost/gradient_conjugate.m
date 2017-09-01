@@ -1,6 +1,6 @@
 function [xu, fcw] = gradient_conjugate(obj, w)
     [n_x, n_u] = size(obj.B);
-    [~, xu] = RiccatiSolve(w+obj.tilt, obj.x0, obj.A, obj.B, obj.LRs, obj.Ks, obj.Ms, obj.Ls, int32(n_x), int32(n_u), int32(obj.N));
+    [~, xu] = forbes.utils.RiccatiSolve(w+obj.tilt, obj.x0, obj.A, obj.B, obj.LRs, obj.Ks, obj.Ms, obj.Ls, int32(n_x), int32(n_u), int32(obj.N));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Less efficient
 %     fxu = 0;

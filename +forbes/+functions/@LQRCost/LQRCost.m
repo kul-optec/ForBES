@@ -24,10 +24,6 @@ classdef LQRCost < forbes.functions.Proximable
                 obj.diff = 0;
             end
             obj.RiccatiFactor();
-            if exist('RiccatiSolve') ~= 3
-                RiccatiPath = fileparts(mfilename('fullpath'));
-                mex('-outdir', RiccatiPath, [RiccatiPath, '/RiccatiSolve.c'])
-            end
         end
         function RiccatiFactor(obj)
             n = size(obj.Q,1);
