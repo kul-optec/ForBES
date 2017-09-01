@@ -7,7 +7,7 @@ end
 prob = cache.prob;
 gam = cache.gam;
 
-cachet = FBCache(cache.prob, cache.x + tau*cache.dir1 + (1-tau)*cache.dir2, cache.gam, cache.ops);
+cachet = forbes.fbe.FBCache(cache.prob, cache.x + tau*cache.dir1 + (1-tau)*cache.dir2, cache.gam, cache.ops);
 
 fxt = 0;
 gradfxt = 0;
@@ -22,9 +22,9 @@ end
 if prob.istheref2
     cachet.res2x = cache.res2x + tau*cache.C2dir1 + (1-tau)*cache.C2dir2;
     if prob.useHessian
-        [f2xt, gradf2res2xt, cachet.Hessf2res2x] = prob.callf2(cachet.res2x);
+        [gradf2res2xt, f2xt, cachet.Hessf2res2x] = prob.f2.gradient(cachet.res2x);
     else
-        [f2xt, gradf2res2xt] = prob.callf2(cachet.res2x);
+        [gradf2res2xt, f2xt] = prob.f2.gradient(cachet.res2x);
         cachet.gradf2res2x = gradf2res2xt;
     end
     if cache.flagOps
@@ -54,10 +54,10 @@ cachet.flagGradStep = true;
 
 if prob.isthereD
     mugam = prob.mu*gam;
-    [z, cachet.gz] = prob.callg(prob.D*cachet.y, mugam);
+    [z, cachet.gz] = prob.g.prox(prob.D*cachet.y, mugam);
     cachet.z = cachet.y + prob.D'*(z - prob.D*cachet.y)/prob.mu;
 else
-    [cachet.z, cachet.gz] = prob.callg(cachet.y, gam);
+    [cachet.z, cachet.gz] = prob.g.prox(cachet.y, gam);
 end
 if cache.flagOps
     cache.ops.addproxg();

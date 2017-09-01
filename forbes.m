@@ -31,6 +31,35 @@
 %   the constraint, i.e., constr = {A, B, b}. the options are specified in
 %   the opt structure (more on this later).
 %
+%   General forms of problems
+%   -------------------------
+%
+%   More general forms of problems are formulated as follows, when multiple
+%   variables, terms, constraints are involved:
+%
+%   (1b)     minimize  f_1(C_11 x_1 + ... + C_1M x_M + d_1)
+%                    + ...
+%                    + f_N(C_N1 x_1 + ... + C_NM x_M + d_N)
+%                    + g_M(x_1) + ... + g_M(x_M)
+%
+%   solved with FORBES(fs, gs, aff) where
+%
+%         fs = {f_1, ..., f_N}
+%         gs = {g_1, ..., g_N}
+%         aff = {C_11, ..., C_1M, d_1; ...; C_N1, ..., C_NM, d_N}
+%
+%   (2b)     minimize   f_1(x_1) + ... + f_N(x_N)
+%                     + g_1(z_1) + ... + g_M(z_M)
+%          subject to   A_11 x_1 + ... + A_1N x_N + B_1 z_1 = b_1
+%                                 [...]
+%                       A_M1 x_1 + ... + A_MN x_N + B_M z_M = b_M
+%
+%   solved with FORBES(fs, gs, [], coeff) where
+%
+%         fs = {f_1, ..., f_N}
+%         gs = {g_1, ..., g_N}
+%         coeff = {A_11, ..., A_1N, B_1, b_1; ...; A_M1, ..., A_MN, B_M, b_M}
+%
 %   Functions and linear mappings
 %   -----------------------------
 %

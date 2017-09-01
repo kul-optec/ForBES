@@ -26,5 +26,50 @@ classdef SeparableSum < forbes.functions.Proximable
             obj.idx = idx;
             obj.dimsum = dimsum;
         end
+        function p = is_quadratic(obj)
+            p = true;
+            for i = 1:length(obj.fs)
+                if ~obj.fs{i}.is_quadratic()
+                    p = false;
+                    break;
+                end
+            end
+        end
+        function p = is_convex(obj)
+            p = true;
+            for i = 1:length(obj.fs)
+                if ~obj.fs{i}.is_convex()
+                    p = false;
+                    break;
+                end
+            end
+        end
+        function p = is_strongly_convex(obj)
+            p = true;
+            for i = 1:length(obj.fs)
+                if ~obj.fs{i}.is_strongly_convex()
+                    p = false;
+                    break;
+                end
+            end
+        end
+        function p = is_generalized_quadratic(obj)
+            p = true;
+            for i = 1:length(obj.fs)
+                if ~obj.fs{i}.is_generalized_quadratic()
+                    p = false;
+                    break;
+                end
+            end
+        end
+        function p = is_smooth(obj)
+            p = true;
+            for i = 1:length(obj.fs)
+                if ~obj.fs{i}.is_smooth()
+                    p = false;
+                    break;
+                end
+            end
+        end
     end
 end

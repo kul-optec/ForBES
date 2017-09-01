@@ -99,7 +99,7 @@ function [f1, C1, d1, f2, C2, d2, g] = combineTermsComposite(fs, gs, aff)
         if length(idx_quad) > 1
             dims = {};
             for i=1:length(idx_quad), dims{i} = size(aff1{idx_quad(i),1},1); end
-            f1 = separableSum(fs(idx_quad), dims);
+            f1 = forbes.functions.SeparableSum(fs(idx_quad), dims);
         else
             f1 = fs{idx_quad(1)};
         end

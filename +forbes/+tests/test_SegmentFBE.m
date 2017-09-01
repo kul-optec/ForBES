@@ -11,13 +11,13 @@ b = [1; 2; 3];
 
 %% Lasso
 
-f = quadLoss(1, zeros(m,1));
+f = forbes.functions.SqrNormL2();
 lam = 1.0;
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = ones(n, 1);
 
-prob = ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
-ops = FBOperations();
+prob = forbes.problems.ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
+ops = forbes.fbe.FBOperations();
 
 gams = [10.0/200, 5.0/200, 2.0/200, 1.0/200];
 
@@ -28,7 +28,7 @@ x = randn(n, 1);
 for igam = 1:length(gams)
 
 gam = gams(igam);
-cache = FBCache(prob, x, gam, ops);
+cache = forbes.fbe.FBCache(prob, x, gam, ops);
 
 for idir = 1:10 % try several random directions
 
@@ -44,7 +44,7 @@ for itau = 1:length(taus)
     tau = taus(itau);
 
     cache_1 = cache.Get_CacheSegment(tau);
-    cache_2 = FBCache(prob, x+tau*dir1+(1-tau)*dir2, gam, ops);
+    cache_2 = forbes.fbe.FBCache(prob, x+tau*dir1+(1-tau)*dir2, gam, ops);
 
     assert(abs(cache_1.Get_FBE() - cache_2.Get_FBE())/abs(cache_2.Get_FBE()) <= NUM_TOL_VAL);
 

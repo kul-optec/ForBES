@@ -5,21 +5,21 @@ b = [1; 2; 3];
 
 %% Lasso
 
-f = quadLoss(1, zeros(m,1));
+f = forbes.functions.SqrNormL2();
 lam = 1.0;
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = ones(n, 1);
 
-prob = ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
+prob = forbes.problems.ProblemComposite(f, A, -b, [], [], [], g, [], [], x0);
 
-ops = FBOperations();
+ops = forbes.fbe.FBOperations();
 
 Lf = norm(A)^2;
 
 gam = 10/Lf;
 bet = 0.05;
 
-cache = FBCache(prob, x0, gam, ops);
+cache = forbes.fbe.FBCache(prob, x0, gam, ops);
 [flag, ~] = cache.Check_Gamma(bet);
 
 assert(flag == 0);
@@ -33,19 +33,19 @@ assert(flag == 1);
 
 %% Sparse logistic regression
 
-f = logLoss(3.0);
+f = forbes.functions.LogisticLoss(3.0);
 lam = 10.0;
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = ones(n, 1);
 
-prob = ProblemComposite([], [], [], f, A, -b, g, [], [], x0);
+prob = forbes.problems.ProblemComposite([], [], [], f, A, -b, g, [], [], x0);
 
-ops = FBOperations();
+ops = forbes.fbe.FBOperations();
 
 gam = 100.0/600;
 bet = 0.05;
 
-cache = FBCache(prob, x0, gam, ops);
+cache = forbes.fbe.FBCache(prob, x0, gam, ops);
 [flag, ~] = cache.Check_Gamma(bet);
 
 assert(flag == 0);

@@ -43,17 +43,17 @@ b_eq = zeros((N+1)*n_x, 1);
 
 % Test with no reference (zero reference)
 
-f = lqrCost(x0, Q, R, Q_N, A, B, N);
-call_fc = f.makefconj();
+f = forbes.functions.LQRCost(x0, Q, R, Q_N, A, B, N);
+fc = forbes.functions.Conjugate(f);
 
 for i=1:N_TESTS
     y = randn(N*(n_x+n_u)+n_x, 1);
-    [fc_y, grad_fc_y] = call_fc(y);
+    [grad_fc_y, fc_y] = fc.gradient(y);
     % test conjugate subgradient theorem
     fx = 0.5*(grad_fc_y'*H*grad_fc_y);
     assert(abs(grad_fc_y'*y - fx - fc_y) <= 1e-12*(1+abs(fc_y)));
     % evaluate gradient numerically
-    grad_fc_y_num = numdiff(call_fc, y);
+    grad_fc_y_num = forbes.utils.numdiff(@(x) fc.call(x), y);
     assert(norm(grad_fc_y-grad_fc_y_num, 'inf') <= 1e-6*(1+norm(grad_fc_y, 'inf')));
     % evaluate by solving a QP
 %     opt_qp = optimoptions('quadprog','Display','off');
@@ -68,17 +68,17 @@ end
 
 xref = randn(n_x, 1);
 tran = [repmat([Q*xref; zeros(n_u, 1)], N, 1); Q_N*xref];
-f = lqrCost(x0, Q, R, Q_N, A, B, N, xref);
-call_fc = f.makefconj();
+f = forbes.functions.LQRCost(x0, Q, R, Q_N, A, B, N, xref);
+fc = forbes.functions.Conjugate(f);
 
 for i=1:N_TESTS
     y = randn(N*(n_x+n_u)+n_x, 1);
-    [fc_y, grad_fc_y] = call_fc(y);
+    [grad_fc_y, fc_y] = fc.gradient(y);
     % test conjugate subgradient theorem
     fx = 0.5*((grad_fc_y-tran)'*H*(grad_fc_y-tran));
     assert(abs(grad_fc_y'*y - fx - fc_y) <= 1e-12*(1+abs(fc_y)));
     % evaluate gradient numerically
-    grad_fc_y_num = numdiff(call_fc, y);
+    grad_fc_y_num = forbes.utils.numdiff(@(x) fc.call(x), y);
     assert(norm(grad_fc_y-grad_fc_y_num, 'inf') <= 1e-6*(1+norm(grad_fc_y, 'inf')));
     % evaluate by solving a QP
 %     opt_qp = optimoptions('quadprog','Display','off');
