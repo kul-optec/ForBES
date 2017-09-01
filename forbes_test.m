@@ -57,10 +57,20 @@ fprintf('%36s', 'SolveSparseLogReg_small'); tic();
 forbes.tests.test_SolveSparseLogReg_small;
 fprintf(' OK (%5.2f s)\n', toc());
 
-% fprintf('%36s', 'SolveNuclearNormMC_random');	    tic(); test_SolveNuclearNormMC_random;    fprintf(' OK (%5.2f s)\n', toc());
-% % fprintf('%36s', 'SolveRankConstrMC_random');	    tic(); test_SolveRankConstrMC_random;     fprintf(' OK (%5.2f s)\n', toc());
-%
-% fprintf('* testing separable problems:\n');
-%
-% fprintf('%36s', 'SolveSVM_random');                 tic(); test_SolveSVM_random;              fprintf(' OK (%5.2f s)\n', toc());
-% fprintf('%36s', 'SolveQP_random');                  tic(); test_SolveQP_random;               fprintf(' OK (%5.2f s)\n', toc());
+fprintf('%36s', 'SolveNuclearNormMC_random'); tic();
+forbes.tests.test_SolveNuclearNormMC_random;
+fprintf(' OK (%5.2f s)\n', toc());
+
+% fprintf('%36s', 'SolveRankConstrMC_random'); tic();
+% forbes.tests.test_SolveRankConstrMC_random;
+% fprintf(' OK (%5.2f s)\n', toc());
+
+fprintf('* testing separable problems:\n');
+
+fprintf('%36s', 'SolveSVM_random'); tic();
+forbes.tests.test_SolveSVM_random;
+fprintf(' OK (%5.2f s)\n', toc());
+
+fprintf('%36s', 'SolveQP_random'); tic();
+forbes.tests.test_SolveQP_random;
+fprintf(' OK (%5.2f s)\n', toc());

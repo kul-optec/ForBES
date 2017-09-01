@@ -15,8 +15,8 @@ q = -Q*x_star - A'*y_star;
 b = [A(1:act,:)*x_star; A(act+1:end,:)*x_star + rand(m-act,1)];
 f_star = 0.5*(x_star'*(Q*x_star)) + q'*x_star;
 
-f = quadratic(Q, q);
-g = indPos();
+f = forbes.functions.Quadratic(Q, q);
+g = forbes.functions.IndPos();
 constr = {A, 1, b};
 y0 = zeros(m, 1);
 

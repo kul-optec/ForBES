@@ -16,9 +16,10 @@ M = U*V';
 P = sprand(m, n, d) ~= 0; % sampling pattern
 B = full(M.*P);
 
-f = quadLoss(P(:), B(:));
-g = indRankBall(m, n, r_target);
-x0 = zeros(m*n, 1);
+f = forbes.functions.SqrNormL2(P);
+aff = {1, -B};
+g = forbes.functions.IndRankBall(r_target);
+x0 = zeros(m, n);
 
 ASSERT_TOL = 1e-5;
 
@@ -41,7 +42,7 @@ opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyde
 opts{end+1} = baseopt; opts{end}.solver = 'zerofpr'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking-nm';
 
 for i = 1:length(opts)
-    outs{end+1} = forbes(f, g, x0, [], [], opts{i});
+    outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
     assert(outs{i}.solver.iterations < opts{i}.maxit);
     assert(norm(outs{i}.solver.residual(end), 'inf') <= ASSERT_TOL);
     fprintf('.');

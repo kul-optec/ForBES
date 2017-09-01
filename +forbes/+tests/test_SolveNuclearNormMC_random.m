@@ -15,10 +15,11 @@ M = U*V';
 P = sprand(m, n, d) ~= 0; % sampling pattern
 B = full(M.*P);
 
-f = quadLoss(P(:), B(:));
+f = forbes.functions.SqrNormL2(P);
+aff = {1, -B};
 lam = 2;
-g = nuclearNorm(m, n, lam, 'inexact');
-x0 = zeros(m*n, 1);
+g = forbes.functions.NuclearNorm(lam, 'inexact');
+x0 = zeros(m, n);
 
 ASSERT_TOL = 1e-5;
 
@@ -30,7 +31,7 @@ baseopt.maxit = 1000;
 baseopt.Lf = 1;
 
 opt_fbs = baseopt; opt_fbs.solver = 'fbs'; opt_fbs.variant = 'basic';
-out_fbs = forbes(f, g, x0, [], [], opt_fbs);
+out_fbs = forbes(f, g, x0, aff, [], opt_fbs);
 
 assert(out_fbs.solver.iterations < baseopt.maxit);
 
@@ -52,7 +53,7 @@ opts{end+1} = baseopt; opts{end}.solver = 'nama'; opts{end}.method = 'lbroyden';
 opts{end+1} = baseopt; opts{end}.solver = 'nama'; opts{end}.method = 'rbroyden'; opts{end}.linesearch = 'backtracking';
 
 for i = 1:length(opts)
-    outs{end+1} = forbes(f, g, x0, [], [], opts{i});
+    outs{end+1} = forbes(f, g, x0, aff, [], opts{i});
     assert(outs{i}.solver.iterations < opts{i}.maxit);
     assert(norm(outs{i}.x - out_fbs.x,inf)/(1+norm(out_fbs.x,inf)) <= ASSERT_TOL);
     fprintf('.');

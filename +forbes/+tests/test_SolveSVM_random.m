@@ -24,8 +24,8 @@ opt_qp = optimoptions('quadprog','Display','off');
 [lambda_qp, fval_qp, flag_qp, output_qp] = quadprog(Q, -q, [], [], [], [], zeros(m, 1), mu*ones(m, 1), [], opt_qp);
 x_qp = BA'*lambda_qp;
 
-f = quadLoss();
-g = hingeLoss(mu, b);
+f = forbes.functions.SqrNormL2();
+g = forbes.functions.HingeLoss(mu, b);
 constr = {A, -1, zeros(m, 1)};
 y0 = zeros(m, 1);
 
