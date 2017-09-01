@@ -9,7 +9,7 @@ if opt.report
 end
 
 % initialize operations counter
-ops = FBOperations();
+ops = forbes.fbe.FBOperations();
 
 % get Lipschitz constant & adaptiveness
 
@@ -34,7 +34,7 @@ flagTerm = 1;
 restart1 = 0;
 restart2 = 0;
 
-cache_x = FBCache(prob, prob.x0, gam, ops);
+cache_x = forbes.fbe.FBCache(prob, prob.x0, gam, ops);
 
 t0 = tic();
 
@@ -113,7 +113,7 @@ for it = 1:opt.maxit
     while cache_w.Get_FBE() > cache_x.Get_FBE()
         if tau <= 1e-3
             % simply do forward-backward step if line-search fails
-            cache_w = FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
+            cache_w = forbes.fbe.FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
             % next line is for debugging purposes in case the code reaches this
             % cache_xbar = FBCache(prob, cache_x.Get_ProxGradStep(), gam, []);
             break;
@@ -142,7 +142,7 @@ for it = 1:opt.maxit
     if ~isempty(cache_wbar)
         cache_x = cache_wbar;
     else
-        cache_x = FBCache(prob, cache_w.Get_ProxGradStep(), gam, ops);
+        cache_x = forbes.fbe.FBCache(prob, cache_w.Get_ProxGradStep(), gam, ops);
     end
 
     % display stuff

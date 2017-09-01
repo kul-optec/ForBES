@@ -9,10 +9,10 @@ n = 200;
 A = randn(m, n);
 b = randn(m, 1);
 
-f = quadLoss();
+f = forbes.functions.SqrNormL2();
 aff = {A, -b};
 lam = 0.3*norm(A'*b, 'inf');
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 
 ASSERT_TOL = 1e-6;

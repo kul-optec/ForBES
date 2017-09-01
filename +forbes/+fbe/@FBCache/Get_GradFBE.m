@@ -45,7 +45,7 @@ if prob.istheref2
     else
         % imaginary trick
         res2xepsFPR = cache.res2x + 1e-100i*C2FPR;
-        [~, gradf2res2xepsd] = prob.callf2(res2xepsFPR);
+        [gradf2res2xepsd, ~] = prob.f2.gradient(res2xepsFPR);
         if cache.flagOps, cache.ops.addgradf2(); end
         HC2FPR = imag(gradf2res2xepsd)/1e-100;
         % forward differences

@@ -10,10 +10,10 @@ b = [1, 2, 3, 4]';
 
 [m, n] = size(A);
 
-f = quadLoss();
+f = forbes.functions.SqrNormL2();
 aff = {A, -b};
 lam = 0.1*norm(A'*b, 'inf');
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 
 x_star = [-3.877278911564627e-01; 0; 0; 2.174149659863943e-02; 6.168435374149660e-01];

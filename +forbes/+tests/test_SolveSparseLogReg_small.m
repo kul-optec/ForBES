@@ -10,10 +10,10 @@ b = [1, 2, 3, 4]';
 
 [m, n] = size(A);
 
-f = logLoss(1.0);
+f = forbes.functions.LogisticLoss(1.0);
 aff = {A, -b};
 lam = 0.1;
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 
 x_star = [0; 0; 2.114635341704963e-01; 0; 2.845881348733116e+00];
