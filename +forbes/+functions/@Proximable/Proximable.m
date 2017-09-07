@@ -1,5 +1,28 @@
 classdef Proximable < handle
+    properties
+        cnt_prox
+        cnt_gradient
+    end
     methods
+        function obj = Proximable()
+            obj.cnt_prox = 0;
+            obj.cnt_gradient = 0;
+        end
+        function reset(obj)
+            obj.cnt_prox = 0;
+            obj.cnt_gradient = 0;
+        end
+        function v = call(obj, x)
+            [~, v] = obj.gradient(x);
+        end
+        function [p, v] = prox(obj, x, gamma)
+            [p, v] = obj.compute_prox(x, gamma);
+            obj.cnt_prox = obj.cnt_prox + 1;
+        end
+        function [g, v] = gradient(obj, x)
+            [g, v] = obj.compute_gradient(x);
+            obj.cnt_gradient = obj.cnt_gradient + 1;
+        end
         function p = is_prox_accurate(obj)
             p = true;
         end
