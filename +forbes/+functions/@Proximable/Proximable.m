@@ -59,6 +59,9 @@ classdef Proximable < handle
         function p = has_hessian(obj)
             p = false;
         end
+        function p = is_null(obj)
+            p = false;
+        end
     end
     methods (Static)
         function mu = get_gram_diagonal(M)

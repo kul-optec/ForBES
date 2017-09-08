@@ -10,5 +10,8 @@ classdef Zero < forbes.functions.Proximable
         function p = is_quadratic(obj)
             p = true;
         end
+        function p = is_null(obj)
+            p = true;
+        end
     end
 end

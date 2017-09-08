@@ -26,7 +26,7 @@ function stop = iterate(obj)
             if f_Axbark > uppbnd + 1e-6*abs(f_Axk)
                 reset = true;
                 obj.Lf = 2*obj.Lf;
-                obj.gam = (1-obj.bet)/obj.Lf;
+                obj.gam = (1-obj.opt.bet)/obj.Lf;
                 [obj.xbark, g_xbark] = obj.g.prox(obj.xk - obj.gam*At_gradf_Axk, obj.gam);
                 obj.FPR_xk = obj.xk - obj.xbark;
                 normFPR_xk = norm(obj.FPR_xk, 'fro');
@@ -119,7 +119,7 @@ function stop = iterate(obj)
                 if f_Awbark > uppbnd + 1e-6*abs(f_Awk)
                     reset = true;
                     obj.Lf = 2*obj.Lf;
-                    obj.gam = (1-obj.bet)/obj.Lf;
+                    obj.gam = (1-obj.opt.bet)/obj.Lf;
                     [wbark, g_wbark] = obj.g.prox(obj.wk - obj.gam*At_gradf_Awk, obj.gam);
                     FPR_wk = obj.wk - obj.wbark;
                     normFPR_wk = norm(FPR_wk, 'fro');

@@ -21,7 +21,7 @@ function initialize(obj, f, A, g, x0)
             obj.adaptive = ~f.is_quadratic();
         end
         if ~f.is_quadratic() || obj.adaptive
-            obj.Lf = forbes.utils.lipschitz_uppbnd(f, A, x0);
+            obj.Lf = forbes.utils.lipschitz_lowbnd(f, A, x0);
         else
             obj.Lf = forbes.utils.lipschitz_quadratic(f, A, x0);
         end
