@@ -1,10 +1,13 @@
 function stop = iterate(obj)
-    A1xk = obj.A1*obj.xk;
-    [gradf1_A1xk, f1_A1xk] = obj.f1.gradient(A1xk);
-    A2xk = obj.A2*obj.xk;
-    [gradf2_A2xk, f2_A2xk] = obj.f2.gradient(A2xk);
-    At_gradf_Axk = obj.A1'*gradf1_A1xk + obj.A2'*gradf2_A2xk;
-    f_Axk = f1_A1xk + f2_A2xk;
+    % TODO: optimize
+    if obj.it == 0 || ~obj.adaptive
+        obj.A1xk = obj.A1*obj.xk;
+        [obj.gradf1_A1xk, obj.f1_A1xk] = obj.f1.gradient(obj.A1xk);
+        obj.A2xk = obj.A2*obj.xk;
+        [obj.gradf2_A2xk, obj.f2_A2xk] = obj.f2.gradient(obj.A2xk);
+    end
+    At_gradf_Axk = obj.A1'*obj.gradf1_A1xk + obj.A2'*obj.gradf2_A2xk;
+    f_Axk = obj.f1_A1xk + obj.f2_A2xk;
     [obj.xbark, g_xbark] = obj.g.prox(obj.xk - obj.gam*At_gradf_Axk, obj.gam);
 
     obj.FPR_xk = obj.xk - obj.xbark;
@@ -20,8 +23,8 @@ function stop = iterate(obj)
         while f_Axbark > uppbnd
             A1xbark = obj.A1*obj.xbark;
             A2xbark = obj.A2*obj.xbark;
-            [~, f1_A1xbark] = obj.f1.gradient(A1xbark);
-            [~, f2_A2xbark] = obj.f2.gradient(A2xbark);
+            [gradf1_A1xbark, f1_A1xbark] = obj.f1.gradient(A1xbark);
+            [gradf2_A2xbark, f2_A2xbark] = obj.f2.gradient(A2xbark);
             f_Axbark = f1_A1xbark + f2_A2xbark;
             if f_Axbark > uppbnd + 1e-6*abs(f_Axk)
                 reset = true;
@@ -33,6 +36,9 @@ function stop = iterate(obj)
                 uppbnd = f_Axk - At_gradf_Axk(:)'*obj.FPR_xk(:) + 0.5/obj.gam*normFPR_xk^2;
             end
         end
+    else
+        A1xbark = 0.0;
+        A2xbark = 0.0;
     end
 
     if obj.stop()
@@ -59,14 +65,13 @@ function stop = iterate(obj)
     tau = 1.0;
 
     xkdk = obj.xk + dk;
-    A1xkdk = A1xk + obj.A1*dk;
-    A2xkdk = A2xk + obj.A2*dk;
+    A1xkdk = obj.A1xk + obj.A1*dk;
+    A2xkdk = obj.A2xk + obj.A2*dk;
     [gradf1_A1xkdk, f1_A1xkdk] = obj.f1.gradient(A1xkdk);
     A1t_gradf1_A1xkdk = obj.A1'*gradf1_A1xkdk;
 
     lin_coeff = 0.0;
     quad_coeff = 0.0;
-    A2xbark = 0.0;
     A1t_gradf1_A1xbark = 0.0;
 
     for lsit = 1:obj.opt.maxbacktrack
@@ -74,7 +79,7 @@ function stop = iterate(obj)
         A2wk = (1-tau)*A2xbark + tau*A2xkdk;
         A1t_gradf1_A1wk = (1-tau)*A1t_gradf1_A1xbark + tau*A1t_gradf1_A1xkdk;
 
-        % Explanation of next line.
+        % Explanation of next (and some of previous) line(s).
         %
         % Function f1 is quadratic, therefore the following expansion is exact:
         %
@@ -113,8 +118,8 @@ function stop = iterate(obj)
             while f_Awbark > uppbnd
                 A1wbark = obj.A1*wbark;
                 A2wbark = obj.A2*wbark;
-                [~, f1_A1wbark] = obj.f1.gradient(A1wbark);
-                [~, f2_A2wbark] = obj.f2.gradient(A2wbark);
+                [gradf1_A1wbark, f1_A1wbark] = obj.f1.gradient(A1wbark);
+                [gradf2_A2wbark, f2_A2wbark] = obj.f2.gradient(A2wbark);
                 f_Awbark = f1_A1wbark + f2_A2wbark;
                 if f_Awbark > uppbnd + 1e-6*abs(f_Awk)
                     reset = true;
@@ -133,12 +138,22 @@ function stop = iterate(obj)
         if FBE_wk <= FBE_xk
             xk_backup = obj.xk;
             obj.xk = wbark;
+            if obj.adaptive
+                obj.A1xk = A1wbark;
+                obj.gradf1_A1xk = gradf1_A1wbark;
+                obj.f1_A1xk = f1_A1wbark;
+                obj.A2xk = A2wbark;
+                obj.gradf2_A2xk = gradf2_A2wbark;
+                obj.f2_A2xk = f2_A2wbark;
+            end
             break;
         end
         if lsit == 1
-            A1xbark = obj.A1*obj.xbark;
-            A2xbark = obj.A2*obj.xbark;
-            [gradf1_A1xbark, ~] = obj.f1.gradient(A1xbark);
+            if ~obj.adaptive % otherwise we have already computed this stuff
+                A1xbark = obj.A1*obj.xbark;
+                A2xbark = obj.A2*obj.xbark;
+                [gradf1_A1xbark, ~] = obj.f1.gradient(A1xbark);
+            end
             A1t_gradf1_A1xbark = obj.A1'*gradf1_A1xbark;
             temp1 = A1xbark - A1xkdk;
             lin_coeff = gradf1_A1xkdk(:)'*temp1(:);
@@ -148,6 +163,14 @@ function stop = iterate(obj)
         if lsit == obj.opt.maxbacktrack
             xk_backup = obj.xk;
             obj.xk = obj.xbark;
+            if obj.adaptive
+                obj.A1xk = A1xbark;
+                obj.gradf1_A1xk = gradf1_A1xbark;
+                obj.f1_A1xk = f1_A1xbark;
+                obj.A2xk = A2xbark;
+                obj.gradf2_A2xk = gradf2_A2xbark;
+                obj.f2_A2xk = f2_A2xbark;
+            end
             obj.num_lsfails = obj.num_lsfails + 1;
         end
         tau = 0.5*tau;

@@ -3,6 +3,8 @@ classdef NAMA < forbes.solvers.AbstractIterativeSolver
         f1, A1, f2, A2, g, x0
         Lf, gam
         xk, xbark
+        A1xk, gradf1_A1xk, f1_A1xk % these are useful in the adaptive case
+        A2xk, gradf2_A2xk, f2_A2xk %
         FPR_xk, Hk
         opt, adaptive
         num_lsfails
