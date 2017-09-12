@@ -1,5 +1,5 @@
 #include "mex.h"
-#include "../libLBFGS.h"
+#include "libLBFGS.h"
 
 #define IS_REAL_SPARSE_MAT(P) (mxGetNumberOfDimensions(P) == 2 && \
     mxIsSparse(P) && mxIsDouble(P))
