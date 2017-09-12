@@ -1,5 +1,4 @@
 function stop = iterate(obj)
-    % TODO: optimize
     if obj.it == 0 || ~obj.adaptive
         obj.A1xk = obj.A1*obj.xk;
         [obj.gradf1_A1xk, obj.f1_A1xk] = obj.f1.gradient(obj.A1xk);
@@ -10,17 +9,15 @@ function stop = iterate(obj)
     f_Axk = obj.f1_A1xk + obj.f2_A2xk;
     [obj.xbark, g_xbark] = obj.g.prox(obj.xk - obj.gam*At_gradf_Axk, obj.gam);
 
-    obj.FPR_xk = obj.xk - obj.xbark;
-    normFPR_xk = norm(obj.FPR_xk, 'fro');
+    FPR_xk = obj.xk - obj.xbark;
+    normFPR_xk = norm(FPR_xk, 'fro');
 
-    uppbnd = f_Axk - At_gradf_Axk(:)'*obj.FPR_xk(:) + 0.5/obj.gam*normFPR_xk^2;
+    uppbnd = f_Axk - At_gradf_Axk(:)'*FPR_xk(:) + 0.5/obj.gam*normFPR_xk^2;
 
     reset = false;
 
     if obj.adaptive
-        f_Axbark = +inf;
-        % TODO: avoid infinite loops here
-        while f_Axbark > uppbnd
+        for it_gam = 1:100
             A1xbark = obj.A1*obj.xbark;
             A2xbark = obj.A2*obj.xbark;
             [gradf1_A1xbark, f1_A1xbark] = obj.f1.gradient(A1xbark);
@@ -31,9 +28,11 @@ function stop = iterate(obj)
                 obj.Lf = 2*obj.Lf;
                 obj.gam = (1-obj.opt.bet)/obj.Lf;
                 [obj.xbark, g_xbark] = obj.g.prox(obj.xk - obj.gam*At_gradf_Axk, obj.gam);
-                obj.FPR_xk = obj.xk - obj.xbark;
-                normFPR_xk = norm(obj.FPR_xk, 'fro');
-                uppbnd = f_Axk - At_gradf_Axk(:)'*obj.FPR_xk(:) + 0.5/obj.gam*normFPR_xk^2;
+                FPR_xk = obj.xk - obj.xbark;
+                normFPR_xk = norm(FPR_xk, 'fro');
+                uppbnd = f_Axk - At_gradf_Axk(:)'*FPR_xk(:) + 0.5/obj.gam*normFPR_xk^2;
+            else
+                break;
             end
         end
     else
@@ -41,7 +40,7 @@ function stop = iterate(obj)
         A2xbark = 0.0;
     end
 
-    if obj.stop()
+    if norm(FPR_xk, inf)/obj.gam <= obj.opt.tol
         stop = true;
         return;
     else
@@ -56,7 +55,7 @@ function stop = iterate(obj)
         obj.Hk.reset();
     end
 
-    dk = -(obj.Hk*obj.FPR_xk);
+    dk = -(obj.Hk*FPR_xk);
 
     % Perform backtracking: this looks messy, but it's really simple
     % The mess comes from optimizing the calls to A1, A2 and f1.gradient,
@@ -113,9 +112,7 @@ function stop = iterate(obj)
 
         reset = false;
         if obj.adaptive
-            f_Awbark = +inf;
-            % TODO: avoid infinite loops here
-            while f_Awbark > uppbnd
+            for it_gam = 1:100
                 A1wbark = obj.A1*wbark;
                 A2wbark = obj.A2*wbark;
                 [gradf1_A1wbark, f1_A1wbark] = obj.f1.gradient(A1wbark);
@@ -129,6 +126,8 @@ function stop = iterate(obj)
                     FPR_wk = obj.wk - obj.wbark;
                     normFPR_wk = norm(FPR_wk, 'fro');
                     uppbnd = f_Awk - At_gradf_Awk(:)'*FPR_wk(:) + 0.5/obj.gam*normFPR_wk^2;
+                else
+                    break;
                 end
             end
         end
@@ -179,6 +178,6 @@ function stop = iterate(obj)
     if reset == true
         obj.Hk.reset();
     else
-        obj.Hk.push(wk - xk_backup, FPR_wk - obj.FPR_xk);
+        obj.Hk.push(wk - xk_backup, FPR_wk - FPR_xk);
     end
 end

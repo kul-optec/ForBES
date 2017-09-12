@@ -5,7 +5,7 @@ classdef NAMA < forbes.solvers.AbstractIterativeSolver
         xk, xbark
         A1xk, gradf1_A1xk, f1_A1xk % these are useful in the adaptive case
         A2xk, gradf2_A2xk, f2_A2xk %
-        FPR_xk, Hk
+        Hk
         opt, adaptive
         num_lsfails
     end
@@ -19,10 +19,10 @@ classdef NAMA < forbes.solvers.AbstractIterativeSolver
             obj.num_lsfails = 0;
         end
         function display_header(obj)
-            fprintf('%8s | %8s\n', 'iter', 'fpr');
+            fprintf('%8s | %11s | %11s\n', 'iter', 'gam', 'fpr');
         end
         function display_progress(obj)
-            fprintf('%8d | %8.5e\n', obj.it, norm(obj.FPR_xk, inf));
+            fprintf('%8d | %8.5e | %8.5e\n', obj.it, obj.gam, norm(obj.xk - obj.xbark, inf));
         end
     end
     methods (Static)

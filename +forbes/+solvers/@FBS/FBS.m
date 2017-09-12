@@ -1,9 +1,11 @@
 classdef FBS < forbes.solvers.AbstractIterativeSolver
     properties
-        f, A, g, x0
+        f1, A1, f2, A2, g, x0
         Lf, gam
-        x, v, y, z
-        FPR_y
+        x, z, z_prev
+        A1x, gradf1_A1x, f1_A1x
+        A2x, gradf2_A2x, f2_A2x
+        A1z_prev, gradf1_A1z_prev, A2z_prev
         opt, adaptive
     end
     methods
@@ -14,10 +16,10 @@ classdef FBS < forbes.solvers.AbstractIterativeSolver
             obj.opt = opt;
         end
         function display_header(obj)
-            fprintf('%8s | %8s\n', 'iter', 'fpr');
+            fprintf('%8s | %11s | %11s\n', 'iter', 'gam', 'fpr');
         end
         function display_progress(obj)
-            fprintf('%8d | %8.5e\n', obj.it, norm(obj.FPR_y, inf));
+            fprintf('%8d | %8.5e | %8.5e\n', obj.it, obj.gam, norm(obj.x - obj.z, inf));
         end
     end
     methods (Static)

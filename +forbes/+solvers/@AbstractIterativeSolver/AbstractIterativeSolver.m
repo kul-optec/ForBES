@@ -7,8 +7,7 @@ classdef AbstractIterativeSolver < handle
     methods (Abstract)
         initialize(obj, varargin)
         iterate(obj)
-        stop(obj)
-        get_solution(obj)
+        solution(obj)
     end
     methods
         function obj = AbstractIterativeSolver(varargin)
