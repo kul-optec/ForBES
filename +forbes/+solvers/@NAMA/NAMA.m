@@ -32,7 +32,7 @@ classdef NAMA < forbes.solvers.AbstractIterativeSolver
             default_opt.tol = 1e-5;
             default_opt.bet = 0.05;
             default_opt.Lf = inf;
-            default_opt.method = forbes.directions.LBFGS(10);
+            default_opt.method = forbes.operators.LBFGS(10);
             default_opt.maxbacktrack = 10;
             default_fields = fieldnames(default_opt);
             for i = 1:length(default_fields)
