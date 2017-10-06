@@ -18,9 +18,9 @@ fprintf('%.2f nnz per row\n', nnz(A)/numel(A)*n);
 lam_max = norm(A'*b,'inf');
 lam = 0.05*lam_max;
 
-f = quadLoss(1, zeros(m,1));
+f = forbes.functions.SqrNormL2();
 aff = {A, -b};
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
 opt.tol = 1e-9;

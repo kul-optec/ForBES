@@ -17,9 +17,9 @@ lam = 0.1*lam_max;
 % since we know what small/large noise means, would do cross-validation otherwise I guess
 del = 1;
 
-f = huberLoss(del);
+f = forbes.functions.HuberLoss(del);
 aff = {A, -b};
-g = l1Norm(lam);
+g = forbes.functions.NormL1(lam);
 x0 = zeros(n, 1);
 opt.maxit = 10000;
 opt.tol = 1e-6;
