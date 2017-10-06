@@ -22,10 +22,16 @@ function initialize(obj, f1, A1, f2, A2, g, x0)
         else
             obj.adaptive = ~f2.is_null();
         end
-        if ~f2.is_null() || obj.adaptive
-            f = forbes.functions.SeparableSum({f1, f2}, {size(A1, 1), size(A2, 1)});
-            A = [A1; A2];
-            obj.Lf = forbes.utils.lipschitz_lowbnd(f, A, x0);
+        if ~f2.is_null()
+            if ~f1.is_null()
+                f = forbes.functions.SeparableSum({f1, f2}, {size(A1, 1), size(A2, 1)});
+                A = [A1; A2];
+                obj.Lf = forbes.utils.lipschitz_lowbnd(f, A, x0);
+            else
+                obj.Lf = forbes.utils.lipschitz_lowbnd(f2, A2, x0);
+            end
+        elseif obj.adaptive
+            obj.Lf = forbes.utils.lipschitz_lowbnd(f1, A1, x0);
         else
             obj.Lf = forbes.utils.lipschitz_quadratic(f1, A1, x0);
         end

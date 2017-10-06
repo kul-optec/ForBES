@@ -1,4 +1,4 @@
-% FORBES Solver for nonsmooth, nonconvex optimization problems.
+% FORBES Solvers for nonsmooth, nonconvex optimization problems.
 %
 %   Composite problems
 %   ------------------
@@ -8,13 +8,13 @@
 %   We assume that f is continuously differentiable, and that g is closed
 %   and proper. C is a linear mapping and can be a MATLAB matrix, or any
 %   other matrix-like object, which essentially supports matrix-vector
-%   products, transposition and 'size'. For example operators from the Spot
-%   toolbox [1] can be used to form C.
+%   products, transposition and 'size'. For example, the SPOT toolbox
+%   (http://www.cs.ubc.ca/labs/scl/spot/) can be used to define C.
 %
-%   out = FORBES(f, g, init, aff, [], opt) solves the problem with the
+%   out = FORBES(f, g, init, aff, [], sol) solves the problem with the
 %   specified f and g. init is the initial value for x, aff is a cell array
-%   containing {C, d} (in this order). opt is a structure defining the
-%   options for the solver (more on this later).
+%   containing {C, d} (in this order). Last argument sol (optional) is a solver
+%   object (more on this later).
 %
 %   Separable problems
 %   ------------------
@@ -28,8 +28,8 @@
 %
 %   out = FORBES(f, g, init, [], constr, opt) solves the specified problem.
 %   init is the initial *dual* variable, constr is a cell array defining
-%   the constraint, i.e., constr = {A, B, b}. the options are specified in
-%   the opt structure (more on this later).
+%   the constraint, i.e., constr = {A, B, b}. Last argument sol (optional) is a
+%   solver object (more on this later).
 %
 %   General forms of problems
 %   -------------------------
@@ -63,98 +63,128 @@
 %   Functions and linear mappings
 %   -----------------------------
 %
-%   Functions f and g in the cost can be selected in a library of functions
-%   available in the "library" directory inside of FORBES directory. Linear
-%   mappings (C in problem (1) and A, B in problem (2) above) can either be
-%   MATLAB's matrices or can themselves be picked from a library of
-%   standard linear operators.
+%   TODO
 %
-%   For example, to define f and g:
-%
-%       f = logLoss() % logistic loss function
-%       g = l1Norm() % l1 regularization term
-%
-%   Consider looking into the "library" directory for specific information
-%   on any of the functions.
-%
-%   Options
+%   Solvers
 %   -------
 %
-%   In opt the user can specify the behaviour of the algorithm to be used.
-%   The following options can be set:
-%
-%       opt.tol: Tolerance on the optimality condition.
-%
-%       opt.maxit: Maximum number of iterations.
-%
-%       opt.solver: Internal solver to use. Can select between:
-%           * 'minfbe' (only for problems where g is convex)
-%           * 'zerofpr' (default, can handle also nonconvex g)
-%
-%       opt.method: Algorithm to use. Can select between:
-%           * 'bfgs' (BFGS quasi-Newton method)
-%           * 'lbfgs' (default, limited memory BFGS).
-%
-%       opt.linesearch: Line search strategy to use. Can select between:
-%           * 'backtracking' (default, simple backtracking),
-%           * 'backtracking-armijo' (backtracking satisfying Armijo condition),
-%           * 'backtracking-nm' (nonmonotone backtracking),
-%           * 'lemarechal' (line search for the Wolfe conditions).
+%   TODO
 %
 %   References
 %   ----------
 %
-%   [1] Spot linear operators toolbox: http://www.cs.ubc.ca/labs/scl/spot/
+%   TODO
 %
-% Authors: Lorenzo Stella (lorenzo.stella -at- imtlucca.it)
-%          Panagiotis Patrinos (panos.patrinos -at- esat.kuleuven.be)
+% Authors: Lorenzo Stella, Panagiotis Patrinos
 
-% Copyright (C) 2015-2016, Lorenzo Stella and Panagiotis Patrinos
-%
-% This file is part of ForBES.
-%
-% ForBES is free software: you can redistribute it and/or modify
-% it under the terms of the GNU Lesser General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-%
-% ForBES is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-% GNU Lesser General Public License for more details.
-%
-% You should have received a copy of the GNU Lesser General Public License
-% along with ForBES. If not, see <http://www.gnu.org/licenses/>.
+function out = forbes(fs, gs, init, aff, constr, solver)
 
-function out = forbes(fs, gs, init, aff, constr, opt)
+    % Fill-in defaults
 
-    t0 = tic();
+    if nargin < 4, aff = {}; end
+    if nargin < 5, constr = {}; end
+    if nargin < 6, solver = forbes.solvers.NAMA(); end
 
-    if nargin < 3, error('you must provide at least 3 arguments'); end
-    if nargin < 4, aff = []; end
-    if nargin < 5, constr = []; end
-    if nargin < 6, opt = []; end
+    % Convert single functions to cell arrays
 
-    [prob, id] = Process_Problem(fs, gs, init, aff, constr);
-    opt = Process_Options(opt);
-    lsopt = Process_LineSearchOptions(opt);
+    if ~iscell(fs), fs = {fs}; end
+    if ~iscell(gs), gs = {gs}; end
 
-    preprocess = toc(t0);
+    % Detect problem type (primal or dual)
 
-    out_solver = opt.solverfun(prob, opt, lsopt);
-
-    out.message = out_solver.message;
-    out.flag = out_solver.flag;
-    if id == 1
-        out.x = out_solver.x;
-    else
-        [out.x1, out.x2, out.z] = prob.Get_DualPoints(out_solver.x, out_solver.gam);
-        out.y = out_solver.x;
+    ptype = 0;
+    if ~isempty(aff)
+        ptype = ptype + 1;
     end
-    out.solver = out_solver;
-    out.prob = prob;
-    out.opt = opt;
-    out.lsopt = lsopt;
-    out.preprocess = preprocess;
-    out.time = toc(t0);
+    if ~isempty(constr)
+        ptype = ptype + 2;
+    end
+
+    % Prepare problem
+
+    switch ptype
+
+        case 0
+
+            error('must have either aff or constr');
+
+        case 1 % Solve primal
+
+            n_vars = size(aff, 2)-1;
+            [idx_q, idx_n] = split_quadratic(fs);
+
+            [f_q, C_q] = aggregate_terms(fs, aff, idx_q);
+            [f_n, C_n] = aggregate_terms(fs, aff, idx_n);
+
+            dims_g = {};
+            for i = 1:n_vars
+                dims_g{end+1} = size(aff{1, i}, 2);
+            end
+            if n_vars > 1
+                g = forbes.functions.SeparableSum(gs, dims_g);
+            elseif n_vars == 1
+                g = gs{1};
+            else
+                error('must have at least one nonsmooth term g');
+            end
+
+        case 2 % Solve dual
+
+            error('dual solvers not implemented');
+
+        case 3
+
+            error('cannot have both aff and constr');
+
+        otherwise
+
+            error('unknown problem type');
+
+    end
+
+    % Call solver
+
+    solver.run(f_q, C_q, f_n, C_n, g, init);
+
+    % TODO: should we produce the output differently? probably yes
+    % For example, in case we solve the dual, we want the primal solution
+
+    out = solver;
+
+end
+
+function [idx_q, idx_nq] = split_quadratic(fs)
+    idx_q = [];
+    idx_nq = [];
+    for i = 1:length(fs)
+        if fs{i}.is_quadratic()
+            idx_q = [idx_q, i];
+        else
+            idx_nq = [idx_nq, i];
+        end
+    end
+end
+
+function [f, C] = aggregate_terms(fs, aff, idx)
+    dims = {};
+    C = [];
+    d = [];
+    for i = idx
+        dims{end+1} = size(aff{i, 1}, 1);
+        C = [C; [aff{i, 1:end-1}]];
+        d = [d; aff{i, end}];
+    end
+    if length(idx) > 1
+        s = forbes.functions.SeparableSum(fs(idx), dims);
+    elseif length(idx) == 1
+        s = fs{idx};
+    else
+        C = 1.0;
+        s = forbes.functions.Zero();
+    end
+    if norm(d, 'fro') > 0
+        f = forbes.functions.ScaleTranslate(s, 1.0, d);
+    else
+        f = s;
+    end
 end
