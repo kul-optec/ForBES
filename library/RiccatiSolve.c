@@ -139,7 +139,7 @@ void RICCATI_SOLVE(int n, int m, int N, double * x, double * w, double * x0_n,
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-    int n, m, N, x_dims[2];
+    int n, m, N;
     double * x, * w, * x0, * A, * B, * LRs, * Ks, * Ms, * Ls;
     double * es, * temp_n;
 
@@ -207,8 +207,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     n = mxGetScalar(prhs[8]);
     m = mxGetScalar(prhs[9]);
     N = mxGetScalar(prhs[10]);
-    x_dims[0] = (N+1)*n+N*m;
-    x_dims[1] = 1;
+    const mwSize x_dims[2] = { n ,1};
     plhs[0] = mxCreateDoubleScalar(0);
     plhs[1] = mxCreateNumericArray(2, x_dims, mxDOUBLE_CLASS, mxREAL);
     x = mxGetPr(plhs[1]);
