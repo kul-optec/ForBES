@@ -18,6 +18,7 @@
 */
 
 #include "mex.h"
+#include "blas.h"
 
 #define IS_REAL_SPARSE_MAT(P) (mxGetNumberOfDimensions(P) == 2 && \
     mxIsSparse(P) && mxIsDouble(P))
@@ -31,44 +32,37 @@
     !mxIsSparse(P) && mxIsInt32(P))
 #define IS_REAL_SCALAR(P) (IS_REAL_DENSE_VEC(P) && mxGetNumberOfElements(P) == 1)
 #define IS_INT32_SCALAR(P) (IS_INT32_DENSE_VEC(P) && mxGetNumberOfElements(P) == 1)
-
+// compile with mex -V lbfgs.c -lmwblas
 void LBFGS_MATVEC_TWOLOOP(int n, int mem, double * dir_n, double * s_n_m, double * y_n_m,
     double * ys_m, double H, double * g_n, int curridx, int currmem, double * alpha_m)
 {
     double beta;
     int i, j, k;
+    ptrdiff_t product_length = n; /* used with blas routines */
+    ptrdiff_t one = 1; /* used with blas routines */
 
-    for (j=0; j<n; j++) dir_n[j] = g_n[j];
+    dcopy(&product_length,g_n,&one,dir_n,&one);
 
     i = curridx;
     for (k=0; k<currmem; k++) {
-        alpha_m[i] = 0;
-        for (j=0; j<n; j++) {
-            alpha_m[i] += s_n_m[i*n+j]*dir_n[j];
-        }
-        alpha_m[i] /= ys_m[i];
-        for (j=0; j<n; j++) {
-            dir_n[j] = dir_n[j] - alpha_m[i]*y_n_m[i*n+j];
-        }
+		alpha_m[i] = ddot(&product_length, &(s_n_m[i*n]), &one, dir_n, &one)/ys_m[i];
+        
+        double minus_alpha = -alpha_m[i];
+        daxpy(&product_length,&minus_alpha,&(y_n_m[i*n]),&one,dir_n,&one);
         i = i-1;
         if (i<0) i = mem-1;
     }
 
-    for (j=0; j<n; j++) {
-        dir_n[j] = H*dir_n[j];
-    }
+    dscal(&product_length,&H,dir_n,&one);
 
     i = i+1;
     if (i>=mem) i = 0;
     for (k=0; k<currmem; k++) {
-        beta = 0;
-        for (j=0; j<n; j++) {
-            beta += y_n_m[i*n+j]*dir_n[j];
-        }
-        beta /= ys_m[i];
-        for (j=0; j<n; j++) {
-            dir_n[j] = dir_n[j] + (alpha_m[i]-beta)*s_n_m[i*n+j];
-        }
+        beta = ddot(&product_length,&(y_n_m[i*n]),&one,dir_n,&one)/ys_m[i];
+        
+        double alpha_minus_beta =alpha_m[i]-beta;
+        daxpy(&product_length,&alpha_minus_beta,&(s_n_m[i*n]),&one,dir_n,&one);
+        
         i = i+1;
         if (i>=mem) i = 0;
     }
