@@ -21,7 +21,7 @@ function [ out ] = solve_panoc( f, g ,opt , intial_solution )
         
         % convert the function into the right format and set gamma=0
         g_function = g.makeprox();
-        constraint = @(x) g_function(x,0);
+        constraint = @(x,gamma) g_function(x,gamma);
         problem.constraint = constraint;
     end
 
