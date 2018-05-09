@@ -8,11 +8,11 @@ f=@rosen;
 g=indBox(-4,4);
 x0=[0;0];
 aff=0; % not supported with panoc
-opts.solver="panoc";
+opts.solver='panoc';
 opts.tol=1e-12;
 opts.maxit=200;
 
-% g.name="blah"; % uncomment this line if you want to use the Matlab function constraint
+% g.name='blah'; % uncomment this line if you want to use the Matlab function constraint
 tic
 out = forbes(f, g, x0, aff, [], opts) % this problem should take 20 iterations
 toc
@@ -27,14 +27,4 @@ theoretical_solution = [1;1];
 if(norm(out.x-theoretical_solution)>opts.tol)
     disp(['Error: solution not [1;1] as expected but[' ...
         num2str(out.x(1)) ';' num2str(out.x(2)) ']' ]);
-end
-%%
-function [function_value,gradient] = rosen(initial_point)
-    a=1;
-    b=100;
-    function_value =(a-initial_point(1))^2 + b*(initial_point(2)-initial_point(1))^2;
-
-    if nargout > 1
-       gradient = [-2*(a-(b+1)*initial_point(1)+b*initial_point(2)); 2*b*(initial_point(2)-initial_point(1)) ];
-    end
 end

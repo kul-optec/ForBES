@@ -8,7 +8,7 @@ function [ out ] = solve_panoc( f, g ,opt , intial_solution )
     % parse the options into the panoc format
     problem.dimension = length(intial_solution);
     
-    if(g.name=="box")
+    if(strcmp(g.name,'box'))
         problem.constraint_type = 'box';
         
         problem.upper_bound=g.upper_bound;

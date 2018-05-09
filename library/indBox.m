@@ -29,7 +29,7 @@
 function obj = indBox(lower, upper)
     obj.isConvex = 1;
     obj.makeprox = @() @(x, gam) call_indBox_prox(x, lower, upper);
-    obj.name="box";
+    obj.name='box';
     obj.upper_bound=upper;
     obj.lower_bound=lower;
 end

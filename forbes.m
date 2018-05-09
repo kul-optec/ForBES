@@ -106,7 +106,7 @@ function out = forbes(fs, gs, init, aff, constr, opt)
     if nargin < 5, constr = []; end
     if nargin < 6, opt = []; end
     
-    if(opt.solver=="panoc")
+    if(strcmp(opt.solver,'panoc'))
         disp('WARNING: Using external lib, not all options are supported here.');
         % constr is not supported by panoc, ignore it
         out=solve_panoc( fs, gs ,opt , init );

@@ -3,13 +3,15 @@ lib_path = pwd;
 
 %% install panoc
 
-mex_file_destination = fullfile(lib_path,'forbes_panoc','bin','panoc.mexw64');
+
 if ismac
     disp('Using mex interface Mac os');
     mex_file_location=fullfile(lib_path,'forbes_panoc','bin','panoc_Mac64LLVM.mexw64');
+    mex_file_destination = fullfile(lib_path,'forbes_panoc','bin','panoc.mexw64');
 elseif isunix
     disp('Using mex interface Linux');
-    mex_file_location=fullfile(lib_path,'forbes_panoc','bin','panoc_Linux64Gcc.mexw64');
+    mex_file_location=fullfile(lib_path,'forbes_panoc','bin','PANOC_linux64_gcc.mexa64');
+    mex_file_destination = fullfile(lib_path,'forbes_panoc','bin','panoc.mexa64');
 elseif ispc
     disp('Using mex interface Windows');
     mex_file_location=fullfile(lib_path,'forbes_panoc','bin','panoc_Windows64VStudio.mexw64');
