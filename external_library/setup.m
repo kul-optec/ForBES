@@ -6,8 +6,8 @@ lib_path = pwd;
 
 if ismac
     disp('Using mex interface Mac os');
-    mex_file_location=fullfile(lib_path,'forbes_panoc','bin','panoc_Mac64LLVM.mexw64');
-    mex_file_destination = fullfile(lib_path,'forbes_panoc','bin','panoc.mexw64');
+    mex_file_location=fullfile(lib_path,'forbes_panoc','bin','PANOC_Mac64_clang.mexmaci64');
+    mex_file_destination = fullfile(lib_path,'forbes_panoc','bin','panoc.mexmaci64');
 elseif isunix
     disp('Using mex interface Linux');
     mex_file_location=fullfile(lib_path,'forbes_panoc','bin','PANOC_linux64_gcc.mexa64');
