@@ -105,27 +105,33 @@ function out = forbes(fs, gs, init, aff, constr, opt)
     if nargin < 4, aff = []; end
     if nargin < 5, constr = []; end
     if nargin < 6, opt = []; end
-
-    [prob, id] = Process_Problem(fs, gs, init, aff, constr);
-    opt = Process_Options(opt);
-    lsopt = Process_LineSearchOptions(opt);
-
-    preprocess = toc(t0);
-
-    out_solver = opt.solverfun(prob, opt, lsopt);
-
-    out.message = out_solver.message;
-    out.flag = out_solver.flag;
-    if id == 1
-        out.x = out_solver.x;
+    
+    if(strcmp(opt.solver,'panoc'))
+        disp('WARNING: Using external lib, not all options are supported here.');
+        % constr is not supported by panoc, ignore it
+        out=solve_panoc( fs, gs ,opt , init );
     else
-        [out.x1, out.x2, out.z] = prob.Get_DualPoints(out_solver.x, out_solver.gam);
-        out.y = out_solver.x;
+        [prob, id] = Process_Problem(fs, gs, init, aff, constr);
+        opt = Process_Options(opt);
+        lsopt = Process_LineSearchOptions(opt);
+
+        preprocess = toc(t0);
+
+        out_solver = opt.solverfun(prob, opt, lsopt);
+
+        out.message = out_solver.message;
+        out.flag = out_solver.flag;
+        if id == 1
+            out.x = out_solver.x;
+        else
+            [out.x1, out.x2, out.z] = prob.Get_DualPoints(out_solver.x, out_solver.gam);
+            out.y = out_solver.x;
+        end
+        out.solver = out_solver;
+        out.prob = prob;
+        out.opt = opt;
+        out.lsopt = lsopt;
+        out.preprocess = preprocess;
+        out.time = toc(t0);
     end
-    out.solver = out_solver;
-    out.prob = prob;
-    out.opt = opt;
-    out.lsopt = lsopt;
-    out.preprocess = preprocess;
-    out.time = toc(t0);
 end
