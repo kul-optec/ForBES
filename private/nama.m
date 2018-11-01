@@ -166,8 +166,6 @@ elseif opt.display >= 2
     obj_curr = cache_x.Get_FBE();
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end
-[cache_x.actual_x, ~, cache_x.actual_z] = Get_DualPoints(prob, cache_x.Get_Point(), gam);
-% pack up results
 
 out.name = opt.name;
 out.message = msgTerm;

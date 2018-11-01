@@ -1,7 +1,7 @@
 close all;
 clear;
 
- myFolder = 'maros_meszaros_data1';
+ myFolder = 'maros_meszaros_data';
 
 if ~isdir(myFolder)
   errorMessage = sprintf('Error: The following folder does not exist:\n%s', myFolder);
@@ -27,7 +27,7 @@ for k = 1:ll
     dim = matData{k}.n;
     
     p = sparse(dim,dim,pi);
-    I = eye(dim,'like',p);%1e-1*speye(n)
+    I = eye(dim,'like',p);
     P = matData{k}.P + dim*I;
     
     q  = matData{k}.q;
