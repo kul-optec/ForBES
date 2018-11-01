@@ -63,7 +63,7 @@ for it = 1:opt.maxit
     end
 
     % check for termination
-
+    % osqp termination criteria  
     if ~(restart1 || restart2)
         if ~opt.customTerm
             if cache_x.Check_StoppingCriterion(opt.tol)
@@ -72,7 +72,7 @@ for it = 1:opt.maxit
                 break;
             end
         else
-            flagStop = opt.term(prob, it, cache_0, cache_x);
+            flagStop = opt.term(prob, it, cache_0, cache_x, opt.hack);
             if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;
@@ -166,14 +166,15 @@ elseif opt.display >= 2
     obj_curr = cache_x.Get_FBE();
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end
-
+[cache_x.actual_x, ~, cache_x.actual_z] = Get_DualPoints(prob, cache_x.Get_Point(), gam);
 % pack up results
 
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
 if it == opt.maxit
-    out.x = cache_x.Get_Point();
+    out.x = cache_x.Get_Point();%actual_y
+    
 else
     out.x = cache_x.Get_ProxGradStep();
 end

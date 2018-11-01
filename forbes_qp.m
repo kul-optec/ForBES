@@ -134,6 +134,7 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
             if opt.prescale
                 % Scale inequality constraints
                 scale = 1./sqrt(diag(A_ext*(H\A_ext')));
+                opt.hack = inv(diag(sparse(scale)));
                 A_ext = diag(sparse(scale))*A_ext;
                 lb_ext = scale.*lb_ext;
                 ub_ext = scale.*ub_ext;
@@ -175,15 +176,17 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     
     ttot = toc(t0);
     
+    
+    
     out.status = out_forbes.flag;
     out.msg = out_forbes.message;
-    out.x = out_forbes.x1;
+    out.x = out_forbes.x1;%y
     out.y_ineq = out_forbes.y(1:m);
     out.y_bnd = out_forbes.y(m+1:end);
     out.pobj = (out.x'*(H*out.x))/2 + q'*out.x;
-    out.dobj = -out_forbes.dual.objective(end); % dual is solved as minimization
-    out.iterations = out_forbes.iterations;
-    out.preprocess = tprep;
-    out.time = ttot;
+%    out.dobj = -out_forbes.dual.objective(end); % dual is solved as minimization
+%     out.iterations = out_forbes.iterations;
+%     out.preprocess = tprep;
+%     out.time = ttot;
     out.solver = out_forbes;
 end
