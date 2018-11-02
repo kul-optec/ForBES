@@ -96,83 +96,50 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     end
     
     % Problem setup and solution
+    A_ext = A;
+    lb_ext = lb;
+    ub_ext = ub;
+    m_ext = m;
     
-    if flag_ineq == 0 && flag_eq == 0
-        f = quadratic(H, q);
-        g = indBox(lx, ux);
-        if isempty(out1)
-            x0 = zeros(n, 1);
-        else
-            opt.Lf = out1.solver.prob.Lf;
-            x0 = out1.x;
-        end
-        tprep = toc(t0);
-        out = forbes(f, g, x0, [], [], opt);
-    else
-        A_ext = A;
-        lb_ext = lb;
-        ub_ext = ub;
-        m_ext = m;
-        % Extend inequality constraints so as to include bounds on x
-        % (if necessary)
-        if flag_lx || flag_ux
-            A_ext = [A_ext; speye(n)];
-            lb_ext = [lb_ext; lx];
-            ub_ext = [ub_ext; ux];
-            m_ext = m_ext + n;
-        end
-        if flag_eq == 0 % NO equality constraints
-            f = quadratic(H, q);
-            opt_eigs.issym = 1;
-            opt_eigs.tol = 1e-3;
-            if (n <= 500 && min(eig(H)) <= 1e-16) || ...
-               (n >  500 && eigs(H, 1, 'SM', opt_eigs) <= 1e-16)
-                out.status = 2;
-                out.msg = 'not strongly convex';
-                return;
-            end
-            if opt.prescale
-                % Scale inequality constraints
-                scale = 1./sqrt(diag(A_ext*(H\A_ext')));
-                opt.hack = inv(diag(sparse(scale)));
-                A_ext = diag(sparse(scale))*A_ext;
-                lb_ext = scale.*lb_ext;
-                ub_ext = scale.*ub_ext;
-            end
-        else % YES equality constraints
-            f = quadraticOverAffine(Aeq, beq, H, q);
-            if opt.prescale
-                scale = zeros(size(A_ext, 1), 1);
-                callfconj = f.makefconj();
-                [~, p] = callfconj(zeros(size(A_ext, 2),1));
-                for i = 1:size(A_ext, 1)
-                    [~, dgradi] = callfconj(A_ext(i, :)');
-                    w = A_ext(i, :)*(dgradi-p);
-                    if w >= 1e-14
-                        scale(i) = 1/sqrt(w);
-                    else
-                        scale(i) = 1;
-                    end
-                end
-                % Scale inequality constraints
-                A_ext = diag(sparse(scale))*A_ext;
-                lb_ext = scale.*lb_ext;
-                ub_ext = scale.*ub_ext;
-            end
-        end
-        g = indBox(lb_ext, ub_ext);
-        constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
-        if isempty(out1)
-            % cold start
-            y0 = zeros(m_ext, 1);
-        else
-            % warm start
-            opt.Lf = out1.solver.dual.prob.Lf;
-            y0 = [out1.y_ineq; out1.y_bnd];
-        end
-        tprep = toc(t0);
-        out_forbes = forbes(f, g, y0, [], constr, opt);
+    opt_eigs.issym = 1;
+    opt_eigs.tol = 1e-3;
+    if (n <= 500 && min(eig(H)) <= 1e-16) || ...
+       (n >  500 && eigs(H, 1, 'SM', opt_eigs) <= 1e-16)
+        out.status = 2;
+        out.msg = 'not strongly convex';
+        return;
     end
+    if opt.prescale
+%          [~,c,Pbar,qbar,E,D,Abar,lbar,ubar] = ruiz_equilibration(H,q,A_ext,lb_ext,lb_ext);
+%          opt.hack = diag(diag(E).^-1);
+%          A_ext  = Abar;
+%          lb_ext = lbar;
+%          ub_ext = ubar;
+%          H_ext  = c*Pbar;
+%          q_ext  = c*qbar;
+
+        % Scale inequality constraints
+                S = 1./sqrt(diag(A_ext*(H\(A_ext'))));
+                opt.hack = inv(diag(sparse(S)));
+                A_ext = diag(sparse(S))*A_ext;
+                lb_ext = S.*lb_ext;
+                ub_ext = S.*ub_ext;
+                H_ext = H;
+                q_ext = q;
+    end
+    f = quadratic(H_ext, q_ext);
+    g = indBox(lb_ext, ub_ext);
+    constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
+    if isempty(out1)
+        % cold start
+        y0 = zeros(m_ext, 1);
+    else
+        % warm start
+        opt.Lf = out1.solver.dual.prob.Lf;
+        y0 = [out1.y_ineq; out1.y_bnd];
+    end
+    tprep = toc(t0);
+    out_forbes = forbes(f, g, y0, [], constr, opt);
     
     ttot = toc(t0);
     
@@ -180,10 +147,10 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     
     out.status = out_forbes.flag;
     out.msg = out_forbes.message;
-    out.x = out_forbes.x1;%y
+    out.x = out_forbes.x1 ;%./ diag(D)
     out.y_ineq = out_forbes.y(1:m);
     out.y_bnd = out_forbes.y(m+1:end);
-    out.pobj = (out.x'*(H*out.x))/2 + q'*out.x;
+    out.pobj = ( (out.x'*(H_ext*out.x))/2 + q_ext'*out.x ) ;%/ c
 %    out.dobj = -out_forbes.dual.objective(end); % dual is solved as minimization
 %     out.iterations = out_forbes.iterations;
 %     out.preprocess = tprep;
