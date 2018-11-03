@@ -92,8 +92,11 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     if nargin < 11, out1 = []; end
     
     if ~isfield(opt, 'prescale') || isempty(opt.prescale)
-        opt.prescale = true;
+        opt.prescale = true;%prescale = jacobi default scaling
     end
+    
+  
+    
     
     % Problem setup and solution
     A_ext = A;
@@ -109,24 +112,27 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         out.msg = 'not strongly convex';
         return;
     end
+    flag_jac = 1;
     if opt.prescale
-%          [~,c,Pbar,qbar,E,D,Abar,lbar,ubar] = ruiz_equilibration(H,q,A_ext,lb_ext,lb_ext);
-%          opt.hack = diag(diag(E).^-1);
-%          A_ext  = Abar;
-%          lb_ext = lbar;
-%          ub_ext = ubar;
-%          H_ext  = c*Pbar;
-%          q_ext  = c*qbar;
-
-        % Scale inequality constraints
-                S = 1./sqrt(diag(A_ext*(H\(A_ext'))));
-                opt.hack = inv(diag(sparse(S)));
-                A_ext = diag(sparse(S))*A_ext;
-                lb_ext = S.*lb_ext;
-                ub_ext = S.*ub_ext;
-                H_ext = H;
-                q_ext = q;
+        if opt.flag_jac
+            S = 1./sqrt(diag(A_ext*(H\(A_ext'))));
+            opt.hack = inv(diag(sparse(S)));
+            A_ext = diag(sparse(S))*A_ext;
+            lb_ext = S.*lb_ext;
+            ub_ext = S.*ub_ext;
+            H_ext = H;
+            q_ext = q;
+        else
+            [~,c,Pbar,qbar,E,D,Abar,lbar,ubar] = ruiz_equilibration(H,q,A_ext,lb_ext,lb_ext);
+            opt.hack = diag(diag(E).^-1);
+            A_ext  = Abar;
+            lb_ext = lbar;
+            ub_ext = ubar;
+            H_ext  = c*Pbar;
+            q_ext  = c*qbar;
+        end
     end
+    
     f = quadratic(H_ext, q_ext);
     g = indBox(lb_ext, ub_ext);
     constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
@@ -143,17 +149,23 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
     
     ttot = toc(t0);
     
-    
-    
-    out.status = out_forbes.flag;
-    out.msg = out_forbes.message;
-    out.x = out_forbes.x1 ;%./ diag(D)
-    out.y_ineq = out_forbes.y(1:m);
-    out.y_bnd = out_forbes.y(m+1:end);
-    out.pobj = ( (out.x'*(H_ext*out.x))/2 + q_ext'*out.x ) ;%/ c
-%    out.dobj = -out_forbes.dual.objective(end); % dual is solved as minimization
-%     out.iterations = out_forbes.iterations;
-%     out.preprocess = tprep;
-%     out.time = ttot;
-    out.solver = out_forbes;
+    if opt.flag_jac
+        out.status = out_forbes.flag;
+        out.msg = out_forbes.message;
+        out.x = out_forbes.x1 ;
+        out.y_ineq = out_forbes.y(1:m);
+        out.y_bnd = out_forbes.y(m+1:end);
+        out.pobj = ((out.x'*(H_ext*out.x))/2 + q_ext'*out.x) ;%/ c
+        out.solver = out_forbes;
+    else
+        out.status = out_forbes.flag;
+        out.msg = out_forbes.message;
+        out.x = out_forbes.x1./ diag(D) ;
+        out.y_ineq = out_forbes.y(1:m);
+        out.y_bnd = out_forbes.y(m+1:end);
+        out.pobj = ( (out.x'*(H_ext*out.x))/2 + q_ext'*out.x )/ c ;
+        out.solver = out_forbes;
+    end
+        
+        
 end
