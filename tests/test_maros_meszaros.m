@@ -33,7 +33,7 @@ for k = 1:ll
     opt.solver   = 'fbs';
     opt.varinat  = 'fast';
     opt.method   = '';
-    opt.adaptive = 1;
+  %  opt.adaptive = 1;
     opt.flag_jac = 1;
     opt.term     = @(prob, it, cache_0, cache_x, scale) custom_termination(prob, it, cache_0, cache_x, scale);
     out_maha{k} = forbes_qp(P, q, A, lb, ub,[],[], [], [], opt);
@@ -41,6 +41,7 @@ for k = 1:ll
     fprintf("-----Jacobi Scaling NAMA------\n");
     opt.solver   = 'nama';
     opt.flag_jac = 1;
+    %opt.adaptive = 1;
     opt.term     = @(prob, it, cache_0, cache_x, scale) custom_termination(prob, it, cache_0, cache_x, scale);
     out_maha1{k} = forbes_qp(P, q, A, lb, ub,[],[], [], [], opt);
     %     err1         = norm(min(A*out_maha{k}.x-lb,0),'inf');
@@ -66,7 +67,7 @@ for k = 1:ll
 %     results(k,5)  = out_osqp{k}.info.pri_res;
 %     results(k,6)  = -out_maha1{k}.solver.solver.objective(end);
 %     results(k,7) =  out_osqp{k}.info.obj_val;
-    
+    %% results
     results(k,1)  = out_maha1{k}.solver.solver.gam;
     results(k,2)  = out_maha2{k}.solver.solver.gam;
     results(k,3)  = out_maha1{k}.solver.solver.iterations;
@@ -75,16 +76,16 @@ for k = 1:ll
     results(k,6)  = out_maha1{k}.solver.solver.residual(end);
     results(k,7)  = out_maha2{k}.solver.solver.residual(end);
     results(k,8)  = out_osqp{k}.info.pri_res;
-    results(k,9)  = -out_maha1{k}.solver.solver.objective(end);
-    results(k,10) = -out_maha2{k}.solver.solver.objective(end);
+    results(k,9)  = out_maha1{k}.solver.solver.objective(end);
+    results(k,10) = out_maha2{k}.solver.solver.objective(end);
     results(k,11) =  out_osqp{k}.info.obj_val;
     
     % %     results(k,12) = err_nama;
     % %     results(k,13) = err_osqp;
     
     
-    Names = {'gam_j','iter_j','iter_o','res_j', 'res_o','obj_j','obj_o'};
-    %Names = {'gam_j','gam_r','iter_j','iter_r','iter_o','res_j', 'res_r','res_o','obj_j','obj_r','obj_o'};
+    %Names = {'gam_j','iter_j','iter_o','res_j', 'res_o','obj_j','obj_o'};
+    Names = {'gam_j','gam_r','iter_j','iter_r','iter_o','res_j', 'res_r','res_o','obj_j','obj_r','obj_o'};
     T = cell2table(num2cell(results),'RowNames',new,'VariableNames',Names);
     writetable(T,'results.csv','WriteRowNames',true);
     
@@ -94,13 +95,13 @@ for k = 1:ll
     
     
     S(k,1).value  = out_maha{k}.solver.solver.residual;
-    S(k,2).value  = -out_maha{k}.solver.solver.objective;
+    S(k,2).value  = out_maha{k}.solver.solver.objective;
     
     S(k,1).value1 =  out_maha1{k}.solver.solver.residual;
-    S(k,2).value1 = -out_maha1{k}.solver.solver.objective;
+    S(k,2).value1 = out_maha1{k}.solver.solver.objective;
     
     S(k,1).value2 =  out_maha2{k}.solver.solver.residual;
-    S(k,2).value2 = -out_maha2{k}.solver.solver.objective;
+    S(k,2).value2 = out_maha2{k}.solver.solver.objective;
     
 
     row = 2;
@@ -113,6 +114,7 @@ for k = 1:ll
         hold on
         loglog(S(kk).value2);
         hold off
+        legend('FA-AMA','J-NAMA','R-NAMA')
         title(S(kk).site_name)
     end
     

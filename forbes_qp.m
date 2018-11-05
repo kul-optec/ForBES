@@ -14,126 +14,168 @@
 
 function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
 
-    t0 = tic();
+t0 = tic();
 
-    % Arguments parsing
+% Arguments parsing
 
-    if nargin < 1 || isempty(H)
-        error('first parameter H is mandatory');
-    end
-    
-    n = size(H, 2);
-    
-    if nargin < 2 || isempty(q)
-        q = zeros(n, 1);
-    end
-    
-    if nargin < 3 || isempty(A)
-        flag_ineq = 0;
-    else
-        flag_ineq = 1;
-        if size(A, 2) ~= n
-            error('argument A is incompatible with H and q');
-        end
-    end
-    
-    m = size(A, 1);
-    
-    if nargin < 4 || isempty(lb)
-        lb = -inf(m, 1);
-    end
-    
-    if any(size(lb) ~= [m, 1])
-        error('argument lb is incompatible with A');
-    end
-    
-    if nargin < 5 || isempty(ub)
-        ub = +inf(m, 1);
-    end
-    
-    if any(size(ub) ~= [m, 1])
-        error('argument ub is incompatible with A');
-    end
-    
-    if nargin < 6 || isempty(Aeq)
-        flag_eq = 0;
-    else
-        flag_eq = 1;
-        if size(Aeq, 2) ~= n
-            error('size of Aeq is incompatible with H and q');
-        end
-    end
-    
-    if flag_eq == 1 && (nargin < 7 || isempty(beq) || any(size(beq) ~= [size(Aeq,1), 1]))
-        error('argument beq is incompatible with Aeq');
-    end
+if nargin < 1 || isempty(H)
+    error('first parameter H is mandatory');
+end
 
-    if nargin < 8 || isempty(lx)
-        flag_lx = 0;
-        lx = -inf(n, 1);
+n = size(H, 2);
+
+if nargin < 2 || isempty(q)
+    q = zeros(n, 1);
+end
+
+if nargin < 3 || isempty(A)
+    flag_ineq = 0;
+else
+    flag_ineq = 1;
+    if size(A, 2) ~= n
+        error('argument A is incompatible with H and q');
+    end
+end
+
+m = size(A, 1);
+
+if nargin < 4 || isempty(lb)
+    lb = -inf(m, 1);
+end
+
+if any(size(lb) ~= [m, 1])
+    error('argument lb is incompatible with A');
+end
+
+if nargin < 5 || isempty(ub)
+    ub = +inf(m, 1);
+end
+
+if any(size(ub) ~= [m, 1])
+    error('argument ub is incompatible with A');
+end
+
+if nargin < 6 || isempty(Aeq)
+    flag_eq = 0;
+else
+    flag_eq = 1;
+    if size(Aeq, 2) ~= n
+        error('size of Aeq is incompatible with H and q');
+    end
+end
+
+if flag_eq == 1 && (nargin < 7 || isempty(beq) || any(size(beq) ~= [size(Aeq,1), 1]))
+    error('argument beq is incompatible with Aeq');
+end
+
+if nargin < 8 || isempty(lx)
+    flag_lx = 0;
+    lx = -inf(n, 1);
+else
+    flag_lx = 1;
+    if isscalar(lx)
+        lx = lx*ones(n, 1);
+    end
+end
+
+if nargin < 9 || isempty(ux)
+    flag_ux = 0;
+    ux = +inf(n, 1);
+else
+    flag_ux = 1;
+    if isscalar(ux)
+        ux = ux*ones(n, 1);
+    end
+end
+
+if nargin < 10, opt = []; end
+if nargin < 11, out1 = []; end
+
+if ~isfield(opt, 'prescale') || isempty(opt.prescale)
+    opt.prescale = true;%prescale = jacobi default scaling
+end
+
+% Problem setup and solution
+
+if flag_ineq == 0 && flag_eq == 0
+    f = quadratic(H, q);
+    g = indBox(lx, ux);
+    if isempty(out1)
+        x0 = zeros(n, 1);
     else
-        flag_lx = 1;
-        if isscalar(lx)
-            lx = lx*ones(n, 1);
-        end
+        opt.Lf = out1.solver.prob.Lf;
+        x0 = out1.x;
     end
-    
-    if nargin < 9 || isempty(ux)
-        flag_ux = 0;
-        ux = +inf(n, 1);
-    else
-        flag_ux = 1;
-        if isscalar(ux)
-            ux = ux*ones(n, 1);
-        end
-    end
-    
-    if nargin < 10, opt = []; end
-    if nargin < 11, out1 = []; end
-    
-    if ~isfield(opt, 'prescale') || isempty(opt.prescale)
-        opt.prescale = true;%prescale = jacobi default scaling
-    end
-    
-  
-    
-    
-    % Problem setup and solution
+    tprep = toc(t0);
+    out = forbes(f, g, x0, [], [], opt);
+else
     A_ext = A;
     lb_ext = lb;
     ub_ext = ub;
     m_ext = m;
-    
-    opt_eigs.issym = 1;
-    opt_eigs.tol = 1e-3;
-    if (n <= 500 && min(eig(H)) <= 1e-16) || ...
-       (n >  500 && eigs(H, 1, 'SM', opt_eigs) <= 1e-16)
-        out.status = 2;
-        out.msg = 'not strongly convex';
-        return;
+    % Extend inequality constraints so as to include bounds on x
+    % (if necessary)
+    if flag_lx || flag_ux
+        A_ext = [A_ext; speye(n)];
+        lb_ext = [lb_ext; lx];
+        ub_ext = [ub_ext; ux];
+        m_ext = m_ext + n;
     end
-    flag_jac = 1;
-    if opt.prescale
-        if opt.flag_jac
-            S = 1./sqrt(diag(A_ext*(H\(A_ext'))));
-            opt.hack = inv(diag(sparse(S)));
-            A_ext = diag(sparse(S))*A_ext;
-            lb_ext = S.*lb_ext;
-            ub_ext = S.*ub_ext;
-            H_ext = H;
-            q_ext = q;
-        else
-            [~,c,Pbar,qbar,E,D,Abar,lbar,ubar] = ruiz_equilibration(H,q,A_ext,lb_ext,lb_ext);
-            opt.hack = diag(diag(E).^-1);
-            A_ext  = Abar;
-            lb_ext = lbar;
-            ub_ext = ubar;
-            H_ext  = c*Pbar;
-            q_ext  = c*qbar;
+    if flag_eq == 0 % NO equality constraints
+        f = quadratic(H, q);
+        opt_eigs.issym = 1;
+        opt_eigs.tol = 1e-3;
+        if (n <= 500 && min(eig(H)) <= 1e-16) || ...
+                (n >  500 && eigs(H, 1, 'SM', opt_eigs) <= 1e-16)
+            out.status = 2;
+            out.msg = 'not strongly convex';
+            return;
+        end
+        flag_jac = 1;
+        if opt.prescale
+            if opt.flag_jac
+                scale = 1./sqrt(diag(A_ext*(H\(A_ext'))));
+                opt.hack = inv(diag(sparse(scale)));
+                A_ext = diag(sparse(scale))*A_ext;
+                lb_ext = scale.*lb_ext;
+                ub_ext = scale.*ub_ext;
+                H_ext = H;
+                q_ext = q;
+               opt.Lf = normest(diag(sparse(scale))*A_ext*(H\(A_ext'))*diag(sparse(scale')));
+            else
+                [~,c,Pbar,qbar,scale,D,Abar,lbar,ubar] = ruiz_equilibration(H,q,A_ext,lb_ext,lb_ext);
+                opt.hack = diag(diag(scale).^-1);
+                A_ext  = Abar;
+                lb_ext = lbar;
+                ub_ext = ubar;
+                H_ext  = c*Pbar;
+                q_ext  = c*qbar;
+                opt.Lf = normest(diag(scale)'*A_ext*(H_ext\(A_ext'))*diag(scale));
+            end
+        end
+        
+    else % YES equality constraints
+        f = quadraticOverAffine(Aeq, beq, H, q);
+        if opt.prescale
+            scale = zeros(size(A_ext, 1), 1);
+            callfconj = f.makefconj();
+            [~, p] = callfconj(zeros(size(A_ext, 2),1));
+            for i = 1:size(A_ext, 1)
+                [~, dgradi] = callfconj(A_ext(i, :)');
+                w = A_ext(i, :)*(dgradi-p);
+                if w >= 1e-14
+                    scale(i) = 1/sqrt(w);
+                else
+                    scale(i) = 1;
+                end
+            end
+            % Scale inequality constraints
+            A_ext = diag(sparse(scale))*A_ext;
+            lb_ext = scale.*lb_ext;
+            ub_ext = scale.*ub_ext;
         end
     end
-    
-    f = quadratic(H_ext, q_ext);
+    %f = quadratic(H_ext, q_ext);
     g = indBox(lb_ext, ub_ext);
     constr = {A_ext, -speye(m_ext), zeros(m_ext, 1)};
     if isempty(out1)
@@ -141,7 +183,8 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         y0 = zeros(m_ext, 1);
     else
         % warm start
-        opt.Lf = out1.solver.dual.prob.Lf;
+        %opt.Lf = out1.solver.dual.prob.Lf;
+         %opt.Lf = normest(opt.scale*out1.solver.prob.Lf*opt.scale');
         y0 = [out1.y_ineq; out1.y_bnd];
     end
     tprep = toc(t0);
@@ -166,6 +209,6 @@ function out = forbes_qp(H, q, A, lb, ub, Aeq, beq, lx, ux, opt, out1)
         out.pobj = ( (out.x'*(H_ext*out.x))/2 + q_ext'*out.x )/ c ;
         out.solver = out_forbes;
     end
-        
-        
+    
+    
 end
