@@ -6,24 +6,27 @@ if prob.flagLipschitzConstant
   return;
 end
 
-if prob.istheref1 && ~prob.istheref2 && prob.f1.isConvex
-  % if the smooth term is purely quadratic
-  % then compute L 'exactly'
-  eigsOpt.issym = 1;
-  eigsOpt.tol = 1e-3;
-  if prob.isthereC1
-    funHessian = @(x) vec(prob.C1'*(prob.Q(prob.C1*reshape(x, prob.n))));
-    L = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
-  else
-    funHessian = @(x) vec(prob.Q(reshape(x, prob.n)));
-    L = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
-  end
-  exact = true;
-  prob.Lf = L;
-  prob.exactLf = exact;
-  prob.flagLipschitzConstant = true;
-  return;
-end
+
+% if prob.istheref1 && ~prob.istheref2 && prob.f1.isConvex
+%   % if the smooth term is purely quadratic
+%   % then compute L 'exactly'
+%   eigsOpt.issym = 1;
+%   eigsOpt.tol = 1e-3;
+%   
+%   if prob.isthereC1
+%     funHessian = @(x) vec(prob.C1'*(prob.Q(prob.C1*reshape(x, prob.n))));
+%     L          = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
+%   else
+%     funHessian = @(x) vec(prob.Q(reshape(x, prob.n)));
+%     L          = eigs(funHessian, prod(prob.n), 1, 'LM', eigsOpt);
+%   end
+%   
+%   exact        = true;
+%   prob.Lf      = L;
+%   prob.exactLf = exact;
+%   prob.flagLipschitzConstant = true;
+%   return;
+% end
 
 delta = max(1e-12, prob.x0*1e-6);
 
@@ -61,8 +64,8 @@ else
   grad2x1 = 0;
 end
 
-exact = false;
-L = norm(grad1x1 + grad2x1 - grad1x0 - grad2x0)/norm(delta);
+exact   = true;
+L       = norm(grad1x1 + grad2x1 - grad1x0 - grad2x0)/norm(delta);
 prob.Lf = L;
 prob.exactLf = exact;
 prob.flagLipschitzConstant = true;

@@ -112,20 +112,21 @@ function out = forbes(fs, gs, init, aff, constr, opt)
 
     preprocess = toc(t0);
 
-    out_solver = opt.solverfun(prob, opt, lsopt);
-
+    out_solver  = opt.solverfun(prob, opt, lsopt);
+    
     out.message = out_solver.message;
-    out.flag = out_solver.flag;
+    out.flag    = out_solver.flag;
     if id == 1
         out.x = out_solver.x;
     else
         [out.x1, out.x2, out.z] = prob.Get_DualPoints(out_solver.x, out_solver.gam);
         out.y = out_solver.x;
     end
-    out.solver = out_solver;
-    out.prob = prob;
-    out.opt = opt;
-    out.lsopt = lsopt;
+    out.solver     = out_solver;
+    out.iterations = out_solver.iterations;
+    out.prob       = prob;
+    out.opt        = opt;
+    out.lsopt      = lsopt;
     out.preprocess = preprocess;
-    out.time = toc(t0);
+    out.time       = toc(t0);
 end

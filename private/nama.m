@@ -40,7 +40,7 @@ t0 = tic();
 
 for it = 1:opt.maxit
 
-    % backtracking on gamma
+%    backtracking on gamma
 
     if adaptive
         [restart1, ~] = cache_x.Backtrack_Gamma(opt.beta);
@@ -63,7 +63,7 @@ for it = 1:opt.maxit
     end
 
     % check for termination
-    % osqp termination criteria  
+
     if ~(restart1 || restart2)
         if ~opt.customTerm
             if cache_x.Check_StoppingCriterion(opt.tol)
@@ -72,7 +72,7 @@ for it = 1:opt.maxit
                 break;
             end
         else
-            flagStop = opt.term(prob, it, cache_0, cache_x, opt.hack);
+            flagStop = opt.term(prob, it, cache_0, cache_x,opt.hack,opt.H);
             if (adaptive == 0 || it > 1) && flagStop
                 msgTerm = 'reached optimum (custom criterion)';
                 flagTerm = 0;
@@ -95,6 +95,7 @@ for it = 1:opt.maxit
     % perform line search
 
     tau = 1.0; % this *must* be 1.0 for this line-search to work
+    new_varaible = tau;
     cache_x.Set_Directions(dir_QN);
     cache_w = cache_x.Get_CacheLine(tau, 1);
     if adaptive
@@ -107,10 +108,12 @@ for it = 1:opt.maxit
         cache_x.Set_Gamma(gam);
         continue;
     end
+ cache_wbar = [];
     if cache_w.Get_FBE() > cache_x.Get_FBE()
         cache_x.Set_Directions([], dir_FB);
-    end
+    end%just for pre-computation
     while cache_w.Get_FBE() > cache_x.Get_FBE()
+        new_varaible = tau;  % <-- save current value of x
         if tau <= 1e-3
             % simply do forward-backward step if line-search fails
             cache_w = FBCache(prob, cache_x.Get_ProxGradStep(), gam, ops);
@@ -120,24 +123,25 @@ for it = 1:opt.maxit
         end
         tau = tau/2;
         cache_w = cache_x.Get_CacheSegment(tau);
-        if adaptive
+        if adaptive 
             [restart2, cache_wbar] = cache_w.Backtrack_Gamma(opt.beta);
             gam = cache_w.Get_Gamma();
             if restart2, break; end
         end
     end
+    %disp(new_varaible);
     if restart2
         cache_x.Set_Gamma(gam);
         continue;
     end
     restart2 = 0;
-
-    % store pair (s, y) to compute next direction
+    
+    %% store pair (s, y) to compute next direction
 
     sk = cache_w.Get_Point() - cache_x.Get_Point();
-    yk = cache_w.Get_FPR() - cache_x.Get_FPR();
+    yk = cache_w.Get_FPR()   - cache_x.Get_FPR();
 
-    % update iterate
+    %% update iterate
 
     if ~isempty(cache_wbar)
         cache_x = cache_wbar;
@@ -145,7 +149,7 @@ for it = 1:opt.maxit
         cache_x = FBCache(prob, cache_w.Get_ProxGradStep(), gam, ops);
     end
 
-    % display stuff
+    %% display stuff
 
     if opt.display == 1
         Util_PrintProgress(it);
@@ -154,7 +158,7 @@ for it = 1:opt.maxit
         obj_curr = cache_x.Get_FBE();
         fprintf('%6d %7.4e %7.4e %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr, norm(dir_QN), tau);
     end
-
+   
 end
 
 time = toc(t0);
@@ -167,12 +171,13 @@ elseif opt.display >= 2
     fprintf('%6d %7.4e %7.4e %7.4e\n', it, gam, res_curr, obj_curr);
 end
 
+% pack up results
+
 out.name = opt.name;
 out.message = msgTerm;
 out.flag = flagTerm;
 if it == opt.maxit
-    out.x = cache_x.Get_Point();%actual_y
-    
+    out.x = cache_x.Get_Point();
 else
     out.x = cache_x.Get_ProxGradStep();
 end
@@ -186,6 +191,7 @@ end
 if opt.toRecord, out.record = record; end
 out.gam = gam;
 out.time = time;
+out.adaptive = adaptive;
 out.cacheDir = cacheDir;
 
 end
